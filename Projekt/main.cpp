@@ -1,9 +1,7 @@
-#include <iostream>
+#include "C:\Users\wczap\OneDrive\Pulpit\Github\Projekt_Zaliczeniowy_TD\Projekt\scr\Game.h"
 
-using namespace std;
-
-int main()
-{
-    cout << "Hello World!" << endl;
+int main() {
+    Game game;
+    game.run();
     return 0;
 }
