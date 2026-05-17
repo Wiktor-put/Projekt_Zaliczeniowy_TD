@@ -8,13 +8,14 @@
 class GameObject
 {
 protected:
-    sf::Vector2f position;      // pozycja w pikselach
-    sf::Vector2f velocity;      // prędkość w px/s
-    float rotation;             // aktualny obrót w stopniach
-    float rotationSpeed;        // prędkość obrotu w deg/s
-    bool alive;                 // czy obiekt jeszcze istnieje
+    sf::Vector2f position{0.f, 0.f};
+    sf::Vector2f velocity{0.f, 0.f};
+    float rotation = 0.f;
+    float rotationSpeed = 0.f;
+    bool alive = true;
 public:
-    GameObject();
+    GameObject() = default;
+    ~GameObject() = default;
     bool isAlive() const { return alive; }
     void destroy() { alive = false; }
     sf::Vector2f getPosition() const { return position; }

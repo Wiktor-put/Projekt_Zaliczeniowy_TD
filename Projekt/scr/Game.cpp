@@ -14,10 +14,18 @@ void Game::processEvents(){
             window.close();
     }
 }
-void Game::update(float dt){}
+void Game::update(float dt){
+    for(auto& o:objects){
+        o->update(dt);
+    }
+}
 
 void Game::render() {
     window.clear(sf::Color::Black);
+
+    for(auto& o:objects){
+        o->render(window);
+    }
     // tu potem dojdzie rysowanie obiektów
     window.display();
 }
