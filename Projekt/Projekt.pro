@@ -5,22 +5,24 @@ CONFIG -= qt
 
 SOURCES += \
         main.cpp \
-        scr/Game.cpp \
-        scr/Gameobject.cpp \
-        scr/map.cpp \
-        scr/player.cpp \
-        scr/projectile.cpp \
-        scr/tower.cpp \
-        scr/zombie.cpp
+        src/Game.cpp \
+        src/Gameobject.cpp \
+        src/map.cpp \
+        src/player.cpp \
+        src/projectile.cpp \
+        src/tower.cpp \
+        src/zombie.cpp
 
 HEADERS += \
-    scr/Game.h \
-    scr/Gameobject.h \
-    scr/map.h \
-    scr/player.h \
-    scr/projectile.h \
-    scr/tower.h \
-    scr/zombie.h
+    src/Config.h \
+    src/Config.h \
+    src/Game.h \
+    src/Gameobject.h \
+    src/map.h \
+    src/player.h \
+    src/projectile.h \
+    src/tower.h \
+    src/zombie.h
     # Ścieżka do folderu 'include' pobranego SFML
     INCLUDEPATH += "C:/SFML/SFML-2.6.1/include"
 

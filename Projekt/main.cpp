@@ -1,4 +1,4 @@
-#include "C:\Github\Projekt_Zaliczeniowy_TD\Projekt\scr\Game.h"
+#include "C:\Github\Projekt_Zaliczeniowy_TD\Projekt\src\Game.h"
 
 int main() {
     Game game;
