@@ -1,52 +1,79 @@
-# This file is used to ignore files which are generated
-# ----------------------------------------------------------------------------
-
-*~
-*.autosave
-*.a
-*.core
-*.moc
-*.o
-*.obj
-*.orig
-*.rej
+# --- Pliki wykonywalne i biblioteki dynamiczne ---
+*.exe
+*.out
+*.app
+*.dll
 *.so
 *.so.*
-*_pch.h.cpp
-*_resource.rc
-*.qm
-.#*
-*.*#
+*.dylib
+
+# --- Skompilowane pliki obiektowe i biblioteki statyczne ---
+*.o
+*.obj
+*.slo
+*.lo
+*.a
+*.lib
+*.lai
+*.la
+*.core
 core
 !core/
-tags
-.DS_Store
-.directory
-*.debug
-Makefile*
-*.prl
-*.app
+
+# --- Prekompilowane nagłówki i zależności ---
+*.d
+*.gch
+*.pch
+*_pch.h.cpp
+
+# --- Pliki generowane przez Qt i QMake ---
+*.moc
 moc_*.cpp
 ui_*.h
 qrc_*.cpp
-Thumbs.db
-*.res
-*.rc
+*.qm
+*.prl
+Makefile*
 /.qmake.cache
 /.qmake.stash
+*_resource.rc
+*.res
+*.rc
 
-# qtcreator generated files
+# --- Pliki konfiguracyjne Qt Creatora i IDE ---
 *.pro.user*
 *.qbs.user*
 CMakeLists.txt.user*
+*.autosave
+*~
+*.orig
+*.rej
+.#*
+*.*#
 
-# xemacs temporary files
-*.flc
+# --- Pliki generowane przez MinGW ---
+*.Debug
+*.Release
+*.debug
 
-# Vim temporary files
+# --- Foldery (Katalogi budowania) ---
+.moc/
+.obj/
+.pch/
+.rcc/
+.uic/
+/build*/
+
+# --- Pliki systemowe (Windows/Mac/Linux) i tymczasowe ---
+.DS_Store
+.directory
+Thumbs.db
+*.swp
 .*.swp
+*.flc
+tags
 
-# Visual Studio generated files
+# --- Pliki Visual Studio (gdybyś kiedyś odpalił projekt w VS) ---
 *.ib_pdb_index
 *.idb
 *.ilk
@@ -61,22 +88,7 @@ CMakeLists.txt.user*
 *.vcxproj
 *vcxproj.*
 
-# MinGW generated files
-*.Debug
-*.Release
-
-# Python byte code
+# --- Inne (Python/Fortran) ---
 *.pyc
-
-# Binaries
-# --------
-*.dll
-*.exe
-
-# Directories with generated files
-.moc/
-.obj/
-.pch/
-.rcc/
-.uic/
-/build*/
+*.mod
+*.smod
