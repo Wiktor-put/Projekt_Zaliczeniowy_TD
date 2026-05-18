@@ -5,7 +5,7 @@
 #include <vector>
 #include <string>
 #include <fstream>
-#include <regex>
+#include <sstream>
 #include <SFML/Window.hpp>
 #include <SFML/Graphics.hpp>
 
@@ -18,15 +18,18 @@ class Map
 {
 private:
     int ID;
-    std::vector<sf::Vector2f> waypoint;
+    std::vector<sf::Vector2f> waypoints;
     std::vector<TowerSlot> towerSlots;
 public:
-    Map();
+    Map() = default;
     void loadFromFile(const std::string& path);
-    void draw(sf::RenderWindow& window);
+    void draw(sf::RenderWindow& window) const;
 
     void occupiedSlot(TowerSlot& Slot);
     void freeSlot(TowerSlot& Slot);
+
+    const std::vector<sf::Vector2f>& getWaypoints() const { return waypoints; }
+    const std::vector<TowerSlot>& getSlots() const { return towerSlots; }
 };
 
 #endif // MAP_H

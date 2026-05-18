@@ -7,6 +7,7 @@
 #include <SFML/Graphics.hpp>
 
 #include "Gameobject.h"
+#include "map.h"
 
 class Game
 {
@@ -14,6 +15,7 @@ private:
     sf::RenderWindow window;
     sf::Clock clock;
     std::vector<std::unique_ptr<GameObject>> objects;
+    Map map;
 
 public:
     Game();
