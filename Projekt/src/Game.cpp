@@ -15,10 +15,24 @@ void Game::processEvents(){
             window.close();
     }
 }
+
+void Game::checkCollisions(){
+
+}
+
 void Game::update(float dt){
+    checkCollisions();
+
     for(auto& o:objects){
-        o->update(dt);
+        o->update(dt, objects);
     }
+
+    // 3. Usuń martwe
+    objects.erase(
+        std::remove_if(objects.begin(), objects.end(),
+                       [](const std::unique_ptr<GameObject>& o) { return !o->isAlive(); }),
+        objects.end()
+        );
 }
 
 void Game::render() {
@@ -30,8 +44,6 @@ void Game::render() {
     // tu potem dojdzie rysowanie obiektów
     window.display();
 }
-
-void Game::checkCollisions(){}
 
 void Game::run(){
     while(window.isOpen()){

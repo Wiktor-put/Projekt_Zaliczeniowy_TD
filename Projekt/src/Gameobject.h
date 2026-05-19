@@ -2,6 +2,7 @@
 #define GAMEOBJECT_H
 
 #include <iostream>
+#include <memory>
 #include <SFML/Window.hpp>
 #include <SFML/Graphics.hpp>
 
@@ -20,7 +21,7 @@ public:
     void destroy() { alive = false; }
     sf::Vector2f getPosition() const { return position; }
 
-    virtual void update(float dt) = 0;
+    virtual void update(float dt, std::vector<std::unique_ptr<GameObject>>& objects) = 0;
     virtual void render(sf::RenderWindow& window) = 0;
 };
 
