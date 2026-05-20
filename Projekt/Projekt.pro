@@ -19,6 +19,7 @@ HEADERS += \
     src/Config.h \
     src/Game.h \
     src/Gameobject.h \
+    src/Random.h \
     src/machineguntower.h \
     src/map.h \
     src/player.h \
