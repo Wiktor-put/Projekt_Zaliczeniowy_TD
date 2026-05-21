@@ -50,7 +50,7 @@ void Map::draw(sf::RenderWindow& window) const {
     }
     window.draw(path);
 
-    // opcjonalnie - rysowanie slotów jako szare kwadraty
+    // rysowanie slotów jako szare kwadraty
     for (const auto& slot : towerSlots) {
         sf::RectangleShape shape(sf::Vector2f(30.f, 30.f));
         shape.setPosition(slot.position - sf::Vector2f(15.f, 15.f));

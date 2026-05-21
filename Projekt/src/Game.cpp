@@ -3,7 +3,8 @@
 
 Game::Game() : window(sf::VideoMode(1280, 720), "DEAD ZONE") {
     window.setFramerateLimit(60);
-    map.loadFromFile("C:/Github/Projekt_Zaliczeniowy_TD/Projekt/build/Desktop_Qt_6_10_2_MinGW_64_bit-Debug/assets/maps/map1.txt");
+    //map.loadFromFile("C:/Github/Projekt_Zaliczeniowy_TD/Projekt/assets/maps/map1.txt");
+    map.loadFromFile("C:/Users/natal/OneDrive/Dokumenty/GitHub/Projekt_Zaliczeniowy_TD/Projekt/assets/maps/map1.txt");
 }
 
 void Game::processEvents(){
