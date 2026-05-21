@@ -16,6 +16,7 @@ private:
     sf::Clock clock;
     std::vector<std::unique_ptr<GameObject>> objects;
     Map map;
+    float spawnTimer = 0.f;
 
 public:
     Game();
@@ -28,3 +29,5 @@ public:
 };
 
 #endif // GAME_H
+
+

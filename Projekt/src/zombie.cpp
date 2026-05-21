@@ -1,12 +1,36 @@
 #include "zombie.h"
 #include "Config.h"
+#include <cmath>
 
-Zombie::Zombie() {}
+
+//   KLASA BAZOWA ZOMBIE
+Zombie::Zombie(const std::vector<sf::Vector2f>& waypoints) {
+    path = waypoints;
+    currentWaypointIndex = 1; // Zaczynamy wędrówkę do punktu 1 (na punkcie 0 się spawnujemy)
+}
 
 void Zombie::update(float dt, std::vector<std::unique_ptr<GameObject>>& objects) {
-    // Tutaj w przyszłości będzie logika poruszania się po Waypointach.
-    // Na razie zombie może po prostu przesuwać się w prawo.
-    position.x += speed * dt;
+    if (currentWaypointIndex < path.size()) {
+
+        sf::Vector2f target = path[currentWaypointIndex];
+        sf::Vector2f direction = target - position;
+
+        // Obliczamy dystans (twierdzenie Pitagorasa)
+        float distance = std::sqrt(direction.x * direction.x + direction.y * direction.y);
+
+        if (distance > 2.f) {
+            // Idziemy w stronę celu
+            sf::Vector2f normalizedDir = direction / distance;
+            position += normalizedDir * speed * dt;
+        } else {
+            // Jesteśmy blisko punktu, przełączamy cel na następny
+            currentWaypointIndex++;
+        }
+    } else {
+        // Zombie dotarł do końca mapy!
+        destroy();
+    }
+
     shape.setPosition(position);
 }
 
@@ -15,19 +39,19 @@ void Zombie::render(sf::RenderWindow& window) {
 }
 
 
-Walker::Walker(sf::Vector2f startPosition) {
-    // 1. Ustawienie pozycji początkowej (zmienna z GameObject)
-    position = startPosition;
+Walker::Walker(const std::vector<sf::Vector2f>& waypoints) : Zombie(waypoints) {
+    // Ustawienie punktu startowego
+    position = waypoints[0];
     alive = true;
 
-    // 2. Pobranie statystyk z przestrzeni Config::Walker
+    // Przypisanie statystyk z pliku Config.h
     hp = Config::Walker::HP;
     speed = Config::Walker::SPEED;
     value = Config::Walker::REWARD;
 
-    // 3. Ustawienie testowego wyglądu dla Walkera (np. zielony kwadrat)
+    // Ustawienie wyglądu
     shape.setSize(sf::Vector2f(30.f, 30.f));
     shape.setFillColor(sf::Color::Green);
-    shape.setOrigin(15.f, 15.f); // Ustawiamy środek kwadratu
+    shape.setOrigin(15.f, 15.f);
     shape.setPosition(position);
 }

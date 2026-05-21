@@ -1,4 +1,6 @@
 #include "Game.h"
+#include "Config.h"
+#include "zombie.h"
 
 
 Game::Game() : window(sf::VideoMode(1280, 720), "DEAD ZONE") {
@@ -24,8 +26,23 @@ void Game::checkCollisions(){
 void Game::update(float dt){
     checkCollisions();
 
-    for(auto& o:objects){
-        o->update(dt, objects);
+    // === SYSTEM SPAWNOWANIA ZOMBIE ===
+    spawnTimer += dt; // Zwiększamy licznik o czas, jaki minął od ostatniej klatki
+
+    if (spawnTimer >= Config::SPAWN_INTERVAL) { //
+        // Zabezpieczenie: Sprawdzamy, czy mapa w ogóle wczytała jakieś waypointy
+        if (!map.getWaypoints().empty()) { //
+
+            // Przekazujemy od razu całą listę punktów (waypointów) pobraną z mapy
+            objects.push_back(std::make_unique<Walker>(map.getWaypoints()));
+        }
+
+        spawnTimer = 0.f; // Resetujemy licznik, żeby odliczał kolejne 1.5 sekundy
+    }
+
+    // Aktualizacja wszystkich obiektów w grze (wież, pocisków i zombie)
+    for(auto& o:objects){ //
+        o->update(dt, objects); //
     }
 
     // 3. Usuń martwe
