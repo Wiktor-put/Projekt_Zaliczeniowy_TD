@@ -1,6 +1,8 @@
 #ifndef RANDOM_H
 #define RANDOM_H
 
+// Random.h — helper do generowania liczb losowych (Mersenne Twister, jeden generator)
+
 #include <random>
 
 namespace Random {

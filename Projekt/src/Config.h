@@ -1,6 +1,8 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
+// Config.h — centralne stałe konfiguracyjne gry (okno, zombie, wieże, pociski, fale)
+
 namespace Config {
 
 // ===== OKNO I PĘTLA GRY =====
