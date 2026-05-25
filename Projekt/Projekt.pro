@@ -12,10 +12,10 @@ SOURCES += \
         src/player.cpp \
         src/projectile.cpp \
         src/tower.cpp \
-        src/zombie.cpp
+        src/zombie.cpp \
+        src/walker.cpp
 
 HEADERS += \
-    src/Config.h \
     src/Config.h \
     src/Game.h \
     src/Gameobject.h \
@@ -25,14 +25,19 @@ HEADERS += \
     src/player.h \
     src/projectile.h \
     src/tower.h \
-    src/zombie.h
-    # Ścieżka do folderu 'include' pobranego SFML
-    INCLUDEPATH += "C:/SFML/SFML-2.6.1/include"
+    src/zombie.h \
+    src/walker.h
 
-    # Ścieżka do folderu 'lib' oraz dołączenie modułów SFML
-    LIBS += -L"C:/SFML/SFML-2.6.1/lib" \
-            -lsfml-graphics \
-            -lsfml-window \
-            -lsfml-system \
-            -lsfml-audio \
-            -lsfml-network
+# Ścieżka do folderu 'include' pobranego SFML
+INCLUDEPATH += "C:/SFML/SFML-2.6.1/include"
+
+# Ścieżka do folderu 'lib' oraz dołączenie modułów SFML
+LIBS += -L"C:/SFML/SFML-2.6.1/lib" \
+        -lsfml-graphics \
+        -lsfml-window \
+        -lsfml-system \
+        -lsfml-audio \
+        -lsfml-network
+
+# Ścieżka do katalogu projektu przekazywana jako makro do kodu (używana przez map.loadFromFile)
+DEFINES += ASSETS_DIR=\\\"$$PWD\\\"

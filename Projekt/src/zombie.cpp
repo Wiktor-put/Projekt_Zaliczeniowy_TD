@@ -1,33 +1,24 @@
 #include "zombie.h"
-#include "Config.h"
 #include <cmath>
 
-
-//   KLASA BAZOWA ZOMBIE
-Zombie::Zombie(const std::vector<sf::Vector2f>& waypoints) {
-    path = waypoints;
-    currentWaypointIndex = 1; // Zaczynamy wędrówkę do punktu 1 (na punkcie 0 się spawnujemy)
+Zombie::Zombie(const std::vector<sf::Vector2f>& waypoints)
+    : path(waypoints), currentWaypointIndex(1)
+{
 }
 
 void Zombie::update(float dt, std::vector<std::unique_ptr<GameObject>>& objects) {
-    if (currentWaypointIndex < path.size()) {
-
+    if (currentWaypointIndex < static_cast<int>(path.size())) {
         sf::Vector2f target = path[currentWaypointIndex];
         sf::Vector2f direction = target - position;
-
-        // Obliczamy dystans (twierdzenie Pitagorasa)
         float distance = std::sqrt(direction.x * direction.x + direction.y * direction.y);
 
         if (distance > 2.f) {
-            // Idziemy w stronę celu
             sf::Vector2f normalizedDir = direction / distance;
-            position += normalizedDir * speed * dt;
+            position += normalizedDir * currentSpeed * dt;
         } else {
-            // Jesteśmy blisko punktu, przełączamy cel na następny
             currentWaypointIndex++;
         }
     } else {
-        // Zombie dotarł do końca mapy!
         destroy();
     }
 
@@ -36,19 +27,30 @@ void Zombie::update(float dt, std::vector<std::unique_ptr<GameObject>>& objects)
 
 void Zombie::render(sf::RenderWindow& window) {
     window.draw(shape);
+
+    // Pasek HP
+    float ratio = (maxHp > 0) ? static_cast<float>(hp) / static_cast<float>(maxHp) : 0.f;
+    sf::RectangleShape bgBar(sf::Vector2f(30.f, 4.f));
+    bgBar.setFillColor(sf::Color::Red);
+    bgBar.setPosition(position - sf::Vector2f(15.f, 20.f));
+    window.draw(bgBar);
+
+    sf::RectangleShape hpBar(sf::Vector2f(30.f * ratio, 4.f));
+    hpBar.setFillColor(sf::Color::Green);
+    hpBar.setPosition(position - sf::Vector2f(15.f, 20.f));
+    window.draw(hpBar);
 }
 
 void Zombie::takeDamage(int dmg, DamageType type) {
-    (void)type;  // typ ignorowany w klasie bazowej, Armored nadpisze
+    (void)type;
     hp -= dmg;
-    if (hp <= 0) {
-        destroy();  // ustawia alive = false
-    }
+    if (hp <= 0)
+        destroy();
 }
 
 void Zombie::applySlow(float duration) {
     slowTimer = duration;
-    currentSpeed = baseSpeed * 0.5f;  // 50% prędkości - w MS3 wartość z Config
+    currentSpeed = baseSpeed * 0.5f;
 }
 
 void Zombie::applyBurn(int dps, float duration) {
@@ -57,22 +59,5 @@ void Zombie::applyBurn(int dps, float duration) {
 }
 
 bool Zombie::reachedEnd() const {
-    return currentWaypointIndex >= static_cast<int>(waypoints.size());
-}
-
-Walker::Walker(const std::vector<sf::Vector2f>& waypoints) : Zombie(waypoints) {
-    // Ustawienie punktu startowego
-    position = waypoints[0];
-    alive = true;
-
-    // Przypisanie statystyk z pliku Config.h
-    hp = Config::Walker::HP;
-    speed = Config::Walker::SPEED;
-    value = Config::Walker::REWARD;
-
-    // Ustawienie wyglądu
-    shape.setSize(sf::Vector2f(30.f, 30.f));
-    shape.setFillColor(sf::Color::Green);
-    shape.setOrigin(15.f, 15.f);
-    shape.setPosition(position);
+    return currentWaypointIndex >= static_cast<int>(path.size());
 }
