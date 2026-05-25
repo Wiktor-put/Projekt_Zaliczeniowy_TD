@@ -1,0 +1,26 @@
+# Przykładowa Mapa, rozdzielczość okna docelowego: 1280x720
+
+# === WAYPOINTY (ŚCIEŻKA ZOMBIE) ===
+# Zombie zaczynają po lewej stronie ekranu na środku wysokości
+W 0 360
+# Idą w prawo
+W 300 360
+# Skręcają w dół
+W 300 600
+# Idą długą prostą w prawo
+W 900 600
+# Skręcają w górę
+W 900 200
+# Idą do wyjścia po prawej stronie ekranu (baza)
+W 1280 200
+
+# === SLOTY NA WIEŻE (MIEJSCA BUDOWY) ===
+# Sloty ustawione strategicznie blisko ścieżki, ale nie na niej
+S 150 250
+S 150 450
+S 450 450
+S 600 450
+S 750 450
+S 1050 350
+S 750 250
+S 1050 100

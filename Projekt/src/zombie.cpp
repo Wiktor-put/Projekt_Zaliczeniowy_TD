@@ -1,72 +1,36 @@
-#include "Zombie.h"
+#include "zombie.h"
+#include "Config.h"
 #include <cmath>
 
-Zombie::Zombie(const std::vector<sf::Vector2f>& path)
-    : waypoints(path),
-    hp(100), maxHp(100), reward(10),
-    baseSpeed(50.f), currentSpeed(50.f),
-    currentWaypointIndex(0),
-    slowTimer(0.f), burnTimer(0.f), burnDamage(0)
-{
-    // Pozycja startowa - pierwszy waypoint
-    if (!waypoints.empty()) {
-        position = waypoints[0];
-        currentWaypointIndex = 1;  // celuj w drugi waypoint
-    }
 
-    // Placeholder grafika - kółko o promieniu 12
-    shape.setRadius(12.f);
-    shape.setOrigin(12.f, 12.f);
-    shape.setFillColor(sf::Color::Green);
+//   KLASA BAZOWA ZOMBIE
+Zombie::Zombie(const std::vector<sf::Vector2f>& waypoints) {
+    path = waypoints;
+    currentWaypointIndex = 1; // Zaczynamy wędrówkę do punktu 1 (na punkcie 0 się spawnujemy)
 }
 
 void Zombie::update(float dt, std::vector<std::unique_ptr<GameObject>>& objects) {
-    (void)objects;  // nieużywane w Zombie - ignore parameter warning
+    if (currentWaypointIndex < path.size()) {
 
-    // Tickanie efektu spowolnienia
-    if (slowTimer > 0.f) {
-        slowTimer -= dt;
-        if (slowTimer <= 0.f) {
-            currentSpeed = baseSpeed;  // powrót do normalnej prędkości
+        sf::Vector2f target = path[currentWaypointIndex];
+        sf::Vector2f direction = target - position;
+
+        // Obliczamy dystans (twierdzenie Pitagorasa)
+        float distance = std::sqrt(direction.x * direction.x + direction.y * direction.y);
+
+        if (distance > 2.f) {
+            // Idziemy w stronę celu
+            sf::Vector2f normalizedDir = direction / distance;
+            position += normalizedDir * speed * dt;
+        } else {
+            // Jesteśmy blisko punktu, przełączamy cel na następny
+            currentWaypointIndex++;
         }
+    } else {
+        // Zombie dotarł do końca mapy!
+        destroy();
     }
 
-    // Tickanie efektu podpalenia
-    if (burnTimer > 0.f) {
-        burnTimer -= dt;
-        takeDamage(static_cast<int>(burnDamage * dt), DamageType::FIRE);
-    }
-
-    // Czy są jeszcze waypointy?
-    if (currentWaypointIndex >= static_cast<int>(waypoints.size())) {
-        return;  // dotarłem do końca
-    }
-
-    // Wektor do następnego waypointa
-    sf::Vector2f target = waypoints[currentWaypointIndex];
-    sf::Vector2f diff = target - position;
-    float dist = std::sqrt(diff.x * diff.x + diff.y * diff.y);
-
-    // Czy dotarłem do waypointa?
-    if (dist < 5.f) {  // 5px tolerancji
-        position = target;
-        currentWaypointIndex++;
-        return;
-    }
-
-    // Normalizacja - kierunek ruchu (jednostkowy wektor)
-    sf::Vector2f direction = diff / dist;
-
-    // Aktualizacja prędkości (do polimorficznej animacji w przyszłości)
-    velocity = direction * currentSpeed;
-
-    // Ruch o velocity * dt
-    position += velocity * dt;
-
-    // Obrót w kierunku ruchu (do wizualizacji, w MS5 sprite)
-    rotation = std::atan2(direction.y, direction.x) * 180.f / 3.14159f;
-
-    // Aktualizacja pozycji shape
     shape.setPosition(position);
 }
 
@@ -94,4 +58,21 @@ void Zombie::applyBurn(int dps, float duration) {
 
 bool Zombie::reachedEnd() const {
     return currentWaypointIndex >= static_cast<int>(waypoints.size());
+}
+
+Walker::Walker(const std::vector<sf::Vector2f>& waypoints) : Zombie(waypoints) {
+    // Ustawienie punktu startowego
+    position = waypoints[0];
+    alive = true;
+
+    // Przypisanie statystyk z pliku Config.h
+    hp = Config::Walker::HP;
+    speed = Config::Walker::SPEED;
+    value = Config::Walker::REWARD;
+
+    // Ustawienie wyglądu
+    shape.setSize(sf::Vector2f(30.f, 30.f));
+    shape.setFillColor(sf::Color::Green);
+    shape.setOrigin(15.f, 15.f);
+    shape.setPosition(position);
 }

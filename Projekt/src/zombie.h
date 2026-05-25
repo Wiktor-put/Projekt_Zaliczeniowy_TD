@@ -4,6 +4,8 @@
 // zombie.h — deklaracja abstrakcyjnej klasy bazowej dla wszystkich typów zombie
 
 #include "Gameobject.h"
+#include "Config.h"
+#include <vector>
 
 enum class DamageType {
     BULLET,
@@ -57,5 +59,16 @@ public:
     bool reachedEnd() const;   // czy zombie dotarł do bazy
 
 };
+
+//=== WALKER ===
+class Walker : public Zombie
+{
+public:
+    // Konstruktor przyjmujący pozycję startową
+    //Walker(sf::Vector2f startPosition);
+    // droga
+    Walker(const std::vector<sf::Vector2f>& waypoints);
+};
+
 
 #endif // ZOMBIE_H

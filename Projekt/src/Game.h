@@ -21,6 +21,7 @@ private:
     sf::Clock clock;                                  // mierzy czas między klatkami
     std::vector<std::unique_ptr<GameObject>> objects; // wszystkie aktywne obiekty sceny
     Map map;                                          // wczytana mapa z waypointami i slotami
+    float spawnTimer = 0.f;
 
 public:
     Game();
@@ -43,3 +44,5 @@ public:
 };
 
 #endif // GAME_H
+
+
