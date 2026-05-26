@@ -10,7 +10,8 @@
 enum class DamageType {
     BULLET,
     EXPLOSION,
-    FIRE
+    FIRE,
+    SNOWBALL
 };
 
 // Klasa bazowa zombie: porusza się po wyznaczonej ścieżce (waypoints), przyjmuje
@@ -18,16 +19,17 @@ enum class DamageType {
 class Zombie : public GameObject
 {
 protected:
-    int hp = 0;
-    int maxHp = 0;
-    int reward = 0;
-    float baseSpeed = 0.f;
-    float currentSpeed = 0.f;
+    int hp;
+    int maxHp;
+    int reward;
+    float baseSpeed;
+    float currentSpeed;
     const std::vector<sf::Vector2f>& path;
     int currentWaypointIndex = 1;
 
-    // Efekty — przydadzą się w MS3
+    // Efekty
     float slowTimer = 0.f;
+    int snowDamage = 0;
     float burnTimer = 0.f;
     int burnDamage = 0;
 
@@ -39,7 +41,7 @@ public:
     void update(float dt, std::vector<std::unique_ptr<GameObject>>& objects) override;
     void render(sf::RenderWindow& window) override;
 
-    // Typ ignorowany w klasie bazowej; klasy pochodne (np. ArmoredZombie) mogą nadpisać.
+    // klasy pochodne (np. ArmoredZombie) mogą nadpisać.
     virtual void takeDamage(int dmg, DamageType type);
 
     // Spowalnia zombie na podany czas; nie stackuje się — resetuje timer.
