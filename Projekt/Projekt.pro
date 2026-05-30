@@ -4,6 +4,7 @@ CONFIG -= app_bundle
 CONFIG -= qt
 
 SOURCES += \
+        src/bullet.cpp \
         src/machineguntower.cpp \
         src/main.cpp \
         src/Game.cpp \
@@ -20,6 +21,7 @@ HEADERS += \
     src/Game.h \
     src/Gameobject.h \
     src/Random.h \
+    src/bullet.h \
     src/machineguntower.h \
     src/map.h \
     src/player.h \

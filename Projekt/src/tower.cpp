@@ -2,14 +2,19 @@
 
 Tower::Tower(sf::Vector2f pos) {
     position = pos;
+    // === KORPUS WIEŻY (kwadrat 40x40) ===
+    shape.setSize(sf::Vector2f(40.f, 40.f));
+    shape.setOrigin(20.f, 20.f);           // środek w pozycji wieży (nie róg)
+    shape.setFillColor(sf::Color(80, 80, 100));  // szaroniebieski
+    shape.setOutlineColor(sf::Color::White);
+    shape.setOutlineThickness(2.f);
+    shape.setPosition(position);
+
 }
 
-void Tower::shoot(std::vector<std::unique_ptr<GameObject>>& objects){
-
-}
 
 void Tower::render(sf::RenderWindow& window){
-
+    window.draw(shape);
 }
 
 void Tower::rotateToward(sf::Vector2f targetPos, float dt){

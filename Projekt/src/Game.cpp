@@ -1,6 +1,7 @@
 #include "Game.h"
 #include "Config.h"
 #include "walker.h"
+#include "machineguntower.h"
 
 // ASSETS_DIR definiowane przez qmake jako $$PWD (katalog projektu).
 // Fallback na "." gdy kompilowane bez qmake.
@@ -11,6 +12,7 @@
 Game::Game() : window(sf::VideoMode(Config::WINDOW_WIDTH, Config::WINDOW_HEIGHT), "DEAD ZONE") {
     window.setFramerateLimit(Config::FPS_LIMIT);
     map.loadFromFile(std::string(ASSETS_DIR) + "/assets/maps/map1.txt");
+    objects.push_back(std::make_unique<MachineGunTower>(sf::Vector2f(400.f, 300.f)));
 }
 
 void Game::processEvents(){

@@ -4,7 +4,6 @@
 // machineguntower.h — szybkostrzelna wieża z karabinem maszynowym
 
 #include "tower.h"
-#include "Config.h"
 
 // Najtańsza wieża ofensywna: wysoki fire rate, niskie obrażenia jednostkowe.
 // Nadpisuje shoot() by tworzyć pociski wg parametrów z Config::MachineGunTower.

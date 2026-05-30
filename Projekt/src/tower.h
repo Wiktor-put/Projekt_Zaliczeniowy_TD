@@ -21,6 +21,8 @@ protected:
     int level;            // poziom ulepszenia (1 = bazowy)
     Zombie* currentTarget; // aktualnie śledzony cel (nullptr = brak)
 
+    sf::RectangleShape shape;   // placeholder graficzny
+
 public:
     // Ustawia pozycję wieży; wartości zasięgu/damage inicjalizuje klasa pochodna.
     Tower(sf::Vector2f pos);
@@ -29,7 +31,7 @@ public:
     void update(float dt, std::vector<std::unique_ptr<GameObject>>& objects) override;
 
     // Tworzy pocisk i dodaje go do listy obiektów; nadpisywany przez podklasy.
-    virtual void shoot(std::vector<std::unique_ptr<GameObject>>& objects);
+    virtual void shoot(std::vector<std::unique_ptr<GameObject>>& objects) = 0;
 
     // Rysuje kształt wieży i wskaźnik zasięgu.
     void render(sf::RenderWindow& window) override;
