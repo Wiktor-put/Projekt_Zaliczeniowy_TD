@@ -32,15 +32,14 @@ void Projectile::update(float dt, std::vector<std::unique_ptr<GameObject>>& obje
         return;
     }
 
-    // Doleciał do pozycji celu - znika nawet jeśli nie trafił w nic
-    // (tolerancja 15px na wypadek "przeskoczenia" punktu w jednej klatce)
+}
+
+bool Projectile::hasReachedTarget() const {
     sf::Vector2f diff = target - position;
-    float distSq = diff.x * diff.x + diff.y * diff.y;
-    if (distSq < 225.f) {  // 15px tolerancji
-        destroy();
-    }
+    return (diff.x * diff.x + diff.y * diff.y) < 225.f;  // 15px tolerancji
 }
 
 void Projectile::render(sf::RenderWindow& window) {
     window.draw(shape);
 }
+

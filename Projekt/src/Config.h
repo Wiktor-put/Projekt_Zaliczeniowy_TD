@@ -84,7 +84,7 @@ constexpr float SLOW_DURATION = 1.f;
 // ===== POCISKI =====
 constexpr float BULLET_SPEED = 600.f;
 constexpr float ROCKET_SPEED = 400.f;
-constexpr float HIT_RADIUS = 15.f;              // promień kolizji
+constexpr float HIT_RADIUS = 25.f;              // promień kolizji
 
 // ===== BONUSY =====
 constexpr float BONUS_DROP_CHANCE = 0.08f;      // 8%

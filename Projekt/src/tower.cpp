@@ -63,6 +63,11 @@ bool Tower::isTargetValid() const{
 
 
 
+void Tower::clearDeadTarget() {
+    if (currentTarget && !currentTarget->isAlive())
+        currentTarget = nullptr;
+}
+
 void Tower::update(float dt, std::vector<std::unique_ptr<GameObject>>& objects){
     if(!isTargetValid()){
         findTarget(objects);

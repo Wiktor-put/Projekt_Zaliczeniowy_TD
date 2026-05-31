@@ -35,6 +35,10 @@ public:
                        std::vector<std::unique_ptr<GameObject>>& objects) = 0;
 
     int getDamage() const { return damage; }
+
+    // Zwraca true jeśli pocisk dotarł do zapamiętanej pozycji celu (tolerancja 15px).
+    // Używane przez Game::checkCollisions po sprawdzeniu kolizji z zombi.
+    bool hasReachedTarget() const;
 };
 
 #endif // PROJECTILE_H

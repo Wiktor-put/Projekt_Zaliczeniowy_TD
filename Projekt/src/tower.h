@@ -47,6 +47,10 @@ public:
 
     // Obraca wieżę płynnie w kierunku targetPos z ograniczoną prędkością kątową.
     void rotateToward(sf::Vector2f targetPos, float dt);
+
+    // Zeruje currentTarget jeśli cel już nie żyje — wywołać przed usunięciem martwych obiektów.
+    // Zapobiega dangling pointer gdy unique_ptr zombi zostaje zwolniony.
+    void clearDeadTarget();
 };
 
 #endif // TOWER_H
