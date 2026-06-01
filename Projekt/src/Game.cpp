@@ -121,8 +121,8 @@ void Game::update(float dt){
 
     if (spawnTimer >= Config::SPAWN_INTERVAL) {
         if (!map.getWaypoints().empty()) {
-            //objects.push_back(std::make_unique<Walker>(map.getWaypoints()));
-            objects.push_back(std::make_unique<Tank>(map.getWaypoints())); //teraz beda chodzic tanki
+            objects.push_back(std::make_unique<Walker>(map.getWaypoints()));
+            //objects.push_back(std::make_unique<Tank>(map.getWaypoints())); //teraz beda chodzic tanki
         }
         spawnTimer = 0.f;
     }
@@ -204,6 +204,47 @@ void Game::renderGameOver() {
     window.draw(restartText);
 }
 
+
+void Game::renderUI() {
+    // Zabezpieczenie: jeśli czcionka się nie wczytała, nie rysujemy napisów
+    if (font.getInfo().family.empty()) return;
+
+    // 1. Wyświetlanie pieniędzy
+    sf::Text moneyText("Kasa: $" + std::to_string(player.getMoney()), font, 24);
+    moneyText.setPosition(20.f, 20.f);
+    moneyText.setFillColor(sf::Color::Yellow);
+
+    // 2. Wyświetlanie żyć
+    sf::Text livesText("Zycia: " + std::to_string(player.getLives()), font, 24);
+    livesText.setPosition(20.f, 50.f);
+    livesText.setFillColor(sf::Color::Red);
+
+    // 3. Wyświetlanie wyniku punktowego
+    sf::Text scoreText("Punkty: " + std::to_string(player.getScore()), font, 24);
+    scoreText.setPosition(20.f, 80.f);
+    scoreText.setFillColor(sf::Color::White);
+
+    // Rysujemy bazowe statystyki
+    window.draw(moneyText);
+    window.draw(livesText);
+    window.draw(scoreText);
+
+    // 4. Wyświetlanie menu budowania TYLKO gdy zaznaczono slot
+    if (selectedSlotIndex >= 0) {
+        sf::Text buildText(
+            "Wybierz wieze:\n"
+            "[1] Karabin ($50)\n"
+            "[2] Snajper ($100)\n"
+            "[3] Wyrzutnia ($150)\n"
+            "[ESC] Anuluj", font, 20);
+
+        buildText.setPosition(20.f, 130.f);
+        buildText.setFillColor(sf::Color::Cyan);
+        window.draw(buildText);
+    }
+}
+
+
 void Game::render() {
     window.clear(sf::Color::Black);
     map.draw(window);
@@ -221,6 +262,10 @@ void Game::render() {
         highlight.setOutlineColor(sf::Color::Yellow);
         highlight.setOutlineThickness(2.f);
         window.draw(highlight);
+    }
+
+    if (state == GameState::PLAYING) {
+        renderUI();
     }
 
     if (state == GameState::GAME_OVER) {

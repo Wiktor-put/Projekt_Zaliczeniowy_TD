@@ -64,6 +64,9 @@ public:
 
     void renderGameOver();
 
+    // Rysuje główny interfejs gracza (UI)
+    void renderUI();
+
 };
 
 #endif // GAME_H
