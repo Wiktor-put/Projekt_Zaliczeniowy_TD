@@ -1,5 +1,6 @@
 #include "Game.h"
 #include "Config.h"
+#include "zombie.h"
 #include "walker.h"
 #include "machineguntower.h"
 #include "projectile.h"
@@ -100,6 +101,21 @@ void Game::update(float dt){
     }
 
     checkCollisions();
+
+    // W Game::update, po checkCollisions, przed usunięciem martwych
+    for (auto& obj : objects) {
+        if (obj->isAlive()) continue;  // tylko martwe
+
+        Zombie* zombie = dynamic_cast<Zombie*>(obj.get());
+        if (zombie && !zombie->reachedEnd()) {  // zginął OD pocisku, nie doszedł do bazy
+            player.addMoney(zombie->getReward());
+            player.addScore(zombie->getReward());
+        }
+        else if(zombie && zombie->reachedEnd()){
+            player.lostLives(zombie->getLifeCost());
+        }
+    }
+
     removeDeadObjects();
 }
 
@@ -157,10 +173,12 @@ void Game::removeDeadObjects() {
 }
 
 void Game::run(){
-    while (window.isOpen()) {
+    while (window.isOpen() && player.isAlive()) {
         processEvents();
         sf::Time dt = clock.restart();
         update(dt.asSeconds());
         render();
     }
+    window.close();
+    std::cout<<"Game Over";
 }

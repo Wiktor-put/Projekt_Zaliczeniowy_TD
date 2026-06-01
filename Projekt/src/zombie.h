@@ -26,6 +26,7 @@ protected:
     float currentSpeed;
     const std::vector<sf::Vector2f>& path;
     int currentWaypointIndex = 1;
+    int lifeCost;
 
     // Efekty
     float slowTimer = 0.f;
@@ -51,6 +52,7 @@ public:
     void applyBurn(int dps, float duration);
 
     int getReward() const { return reward; }
+    int getLifeCost() const {return lifeCost;}
     bool reachedEnd() const;
 };
 

@@ -19,12 +19,13 @@ namespace Walker {
 constexpr int HP = 60;
 constexpr float SPEED = 50.f;       // piksele/sekundę
 constexpr int REWARD = 10;
+constexpr int LIFECOST = 1;
 }
-
 namespace Runner {
 constexpr int HP = 40;
 constexpr float SPEED = 200.f;
 constexpr int REWARD = 15;
+//constexpr int LIFECOST = 1;
 }
 
 namespace Armored {
@@ -32,12 +33,14 @@ constexpr int HP = 180;
 constexpr float SPEED = 50.f;
 constexpr int REWARD = 25;
 constexpr float BULLET_RESISTANCE = 0.5f;   // 50% redukcja
+//constexpr int LIFECOST = 2;
 }
 
 namespace Tank {
 constexpr int HP = 600;
 constexpr float SPEED = 25.f;
 constexpr int REWARD = 60;
+constexpr int LIFECOST = 5;
 }
 
 // ===== WIEŻE =====

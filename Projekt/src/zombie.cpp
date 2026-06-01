@@ -7,20 +7,21 @@ Zombie::Zombie(const std::vector<sf::Vector2f>& waypoints)
 }
 
 void Zombie::update(float dt, std::vector<std::unique_ptr<GameObject>>& objects) {
-    if (currentWaypointIndex < static_cast<int>(path.size())) {
+    (void)objects;  // Zombie nie potrzebuje kontenera w update
+
+    if (!reachedEnd()) {
         sf::Vector2f target = path[currentWaypointIndex];
         sf::Vector2f direction = target - position;
         float distance = std::sqrt(direction.x * direction.x + direction.y * direction.y);
-
         if (distance > 2.f) {
             sf::Vector2f normalizedDir = direction / distance;
-            position += normalizedDir * currentSpeed * dt;
+            velocity = normalizedDir * currentSpeed;
+            position += velocity * dt;
         } else {
             currentWaypointIndex++;
         }
-    } else {
-        destroy();
     }
+    else destroy();
 
     shape.setPosition(position);
 }

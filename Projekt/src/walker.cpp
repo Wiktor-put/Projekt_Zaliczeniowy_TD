@@ -11,6 +11,7 @@ Walker::Walker(const std::vector<sf::Vector2f>& waypoints) : Zombie(waypoints)
     baseSpeed    = Config::Walker::SPEED;
     currentSpeed = Config::Walker::SPEED;
     reward   = Config::Walker::REWARD;
+    lifeCost = Config::Walker::LIFECOST;
 
     shape.setSize(sf::Vector2f(30.f, 30.f));
     shape.setFillColor(sf::Color::Green);
