@@ -13,9 +13,22 @@
 #define ASSETS_DIR "."
 #endif
 
-Game::Game() : window(sf::VideoMode(Config::WINDOW_WIDTH, Config::WINDOW_HEIGHT), "DEAD ZONE") {
+Game::Game() : window(sf::VideoMode(Config::WINDOW_WIDTH, Config::WINDOW_HEIGHT), "DEAD ZONE"), state(GameState::PLAYING) {
     window.setFramerateLimit(Config::FPS_LIMIT);
-    map.loadFromFile(std::string(ASSETS_DIR) + "/assets/maps/map1.txt");
+    if (!font.loadFromFile(std::string(ASSETS_DIR) + "/assets/fonts/arial.ttf")) {
+        std::cerr << "Nie udalo sie zaladowac fontu!" << std::endl;
+    }
+
+    startNewGame();
+}
+
+void Game::startNewGame() {
+    objects.clear();           // usuń wszystkie zombi, wieże, pociski
+    player.reset();            // reset gracza do startowych wartości
+    map.loadFromFile(std::string(ASSETS_DIR) + "/assets/maps/map1.txt");  // przeładuj mapę (zwalnia sloty)
+    spawnTimer = 0.f;
+    selectedSlotIndex = -1;    // anuluj wybór slotu jeśli był
+    state = GameState::PLAYING;
 }
 
 void Game::processEvents(){
@@ -23,6 +36,16 @@ void Game::processEvents(){
     while (window.pollEvent(event)) {
         if (event.type == sf::Event::Closed)
             window.close();
+
+        if (event.type == sf::Event::KeyPressed) {
+            // R restartuje grę po przegranej
+            if (state == GameState::GAME_OVER && event.key.code == sf::Keyboard::R) {
+                startNewGame();
+                continue;
+            }
+
+            if (state != GameState::PLAYING) continue;
+        }
 
         // Kliknięcie LPM — zaznacz wolny slot pod kursorem
         if (event.type == sf::Event::MouseButtonPressed &&
@@ -83,6 +106,7 @@ void Game::checkCollisions() {
 }
 
 void Game::update(float dt){
+    if (state != GameState::PLAYING) return;
     spawnTimer += dt;
 
     if (spawnTimer >= Config::SPAWN_INTERVAL) {
@@ -116,7 +140,57 @@ void Game::update(float dt){
         }
     }
 
+    if (!player.isAlive()) {
+        state = GameState::GAME_OVER;
+        std::cout << "GAME OVER! Wynik: " << player.getScore() << std::endl;
+    }
+
     removeDeadObjects();
+}
+
+void Game::renderGameOver() {
+    // Półprzezroczyste czarne tło zaciemniające grę
+    sf::RectangleShape overlay(sf::Vector2f(
+        static_cast<float>(Config::WINDOW_WIDTH),
+        static_cast<float>(Config::WINDOW_HEIGHT)
+        ));
+    overlay.setFillColor(sf::Color(0, 0, 0, 180));  // czarny, 70% widoczność
+    window.draw(overlay);
+
+    if (font.getInfo().family.empty()) return;  // brak fontu - tylko czarne tło
+
+    // Napis "GAME OVER"
+    sf::Text gameOverText("GAME OVER", font, 80);
+    gameOverText.setFillColor(sf::Color::Red);
+    sf::FloatRect bounds = gameOverText.getLocalBounds();
+    gameOverText.setOrigin(bounds.width / 2.f, bounds.height / 2.f);
+    gameOverText.setPosition(
+        Config::WINDOW_WIDTH / 2.f,
+        Config::WINDOW_HEIGHT / 2.f - 60.f
+        );
+    window.draw(gameOverText);
+
+    // Wynik
+    sf::Text scoreText("Wynik: " + std::to_string(player.getScore()), font, 30);
+    scoreText.setFillColor(sf::Color::White);
+    bounds = scoreText.getLocalBounds();
+    scoreText.setOrigin(bounds.width / 2.f, bounds.height / 2.f);
+    scoreText.setPosition(
+        Config::WINDOW_WIDTH / 2.f,
+        Config::WINDOW_HEIGHT / 2.f + 20.f
+        );
+    window.draw(scoreText);
+
+    // Instrukcja
+    sf::Text restartText("Wcisnij R aby zagrac ponownie", font, 24);
+    restartText.setFillColor(sf::Color::White);
+    bounds = restartText.getLocalBounds();
+    restartText.setOrigin(bounds.width / 2.f, bounds.height / 2.f);
+    restartText.setPosition(
+        Config::WINDOW_WIDTH / 2.f,
+        Config::WINDOW_HEIGHT / 2.f + 80.f
+        );
+    window.draw(restartText);
 }
 
 void Game::render() {
@@ -136,6 +210,10 @@ void Game::render() {
         highlight.setOutlineColor(sf::Color::Yellow);
         highlight.setOutlineThickness(2.f);
         window.draw(highlight);
+    }
+
+    if (state == GameState::GAME_OVER) {
+        renderGameOver();
     }
 
     window.display();
@@ -172,13 +250,11 @@ void Game::removeDeadObjects() {
     );
 }
 
-void Game::run(){
-    while (window.isOpen() && player.isAlive()) {
+void Game::run() {
+    while (window.isOpen()) {           // ← zawsze chodzi
         processEvents();
         sf::Time dt = clock.restart();
         update(dt.asSeconds());
         render();
     }
-    window.close();
-    std::cout<<"Game Over";
 }

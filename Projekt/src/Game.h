@@ -13,6 +13,11 @@
 #include "map.h"
 #include "player.h"
 
+enum class GameState {
+    PLAYING,
+    GAME_OVER
+};
+
 // Odpowiada za okno, pętlę gry oraz integrację wszystkich podsystemów
 // (mapa, obiekty, kolizje). Jeden egzemplarz na całą aplikację.
 class Game
@@ -25,9 +30,13 @@ private:
     Player player;                                    // stan gracza (życia, waluta, wynik)
     float spawnTimer = 0.f;
     int selectedSlotIndex = -1;                       // indeks klikniętego slotu, -1 = brak wyboru
+    GameState state;                                  // stan gry
+    sf::Font font;                                    // potrzebny do napisu GAME OVER
 
 public:
     Game();
+    // Tworzenie nowej rozgrywki
+    void startNewGame();
 
     // Uruchamia główną pętlę gry — blokuje do zamknięcia okna.
     void run();
@@ -52,6 +61,8 @@ public:
     // Zeruje martwe targety wież i usuwa martwe obiekty z kontenera.
     // Wywoływane na końcu update() — po update i kolizjach.
     void removeDeadObjects();
+
+    void renderGameOver();
 
 };
 
