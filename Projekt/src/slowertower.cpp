@@ -5,7 +5,7 @@
 SlowerTower::SlowerTower(sf::Vector2f pos) : Tower(pos) {
     cost = Config::SlowerTower::COST;
     range = Config::SlowerTower::RANGE;
-    fireRate = 1.5f; // Szybkostrzelność dodana ręcznie (brak w Config.h)
+    fireRate = Config::SlowerTower::FIRE_RATE;
     slowDuration = Config::SlowerTower::SLOW_DURATION;
     shape.setFillColor(sf::Color(100, 200, 255)); // Jasnoniebieska wieża
 }

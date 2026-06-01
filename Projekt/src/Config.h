@@ -82,11 +82,14 @@ constexpr int COST = 60;
 constexpr float RANGE = 120.f;
 constexpr float SLOW_FACTOR = 0.5f;         // mnożnik prędkości
 constexpr float SLOW_DURATION = 1.f;
+constexpr float FIRE_RATE = 1.5f;
 }
 
 // ===== POCISKI =====
 constexpr float BULLET_SPEED = 600.f;
 constexpr float ROCKET_SPEED = 400.f;
+constexpr float FLAME_SPEED = 400.f;
+constexpr float SNOWBALL_SPEED = 500.f;
 constexpr float HIT_RADIUS = 25.f;              // promień kolizji
 
 // ===== BONUSY =====

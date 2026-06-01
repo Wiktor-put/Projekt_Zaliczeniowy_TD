@@ -1,8 +1,9 @@
 #include "snowball.h"
+#include "Config.h"
 
 Snowball::Snowball(sf::Vector2f startPos, sf::Vector2f targetPos, float duration)
     : Projectile(startPos, targetPos, 0), duration(duration) {
-    speed = 500.f;
+    speed = Config::SNOWBALL_SPEED;
     velocity *= speed;
     shape.setRadius(5.f);
     shape.setFillColor(sf::Color(100, 200, 255)); // Lodowy, błękitny
