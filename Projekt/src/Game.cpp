@@ -7,6 +7,8 @@
 #include "tower.h"
 #include "snipertower.h"
 #include "rockettower.h"
+#include "flamethrowertower.h"
+#include "slowertower.h"
 #include <cmath>
 
 // ASSETS_DIR definiowane przez qmake jako $$PWD (katalog projektu).
@@ -76,6 +78,11 @@ void Game::processEvents(){
 
             if (event.key.code == sf::Keyboard::Num3)
                 tryBuyTower(3);
+
+            if (event.key.code == sf::Keyboard::Num4)
+                tryBuyTower(4);
+            if (event.key.code == sf::Keyboard::Num5)
+                tryBuyTower(5);
 
             // Escape — odznacz slot bez kupowania
             if (event.key.code == sf::Keyboard::Escape)
@@ -236,6 +243,8 @@ void Game::renderUI() {
             "[1] Karabin ($50)\n"
             "[2] Snajper ($100)\n"
             "[3] Wyrzutnia ($150)\n"
+            "[4] Miotacz Ognia ($80)\n"
+            "[5] Wieza Spowalniajaca ($60)\n"
             "[ESC] Anuluj", font, 20);
 
         buildText.setPosition(20.f, 130.f);
@@ -284,6 +293,8 @@ void Game::tryBuyTower(int type) {
     if (type == 1) cost = Config::MachineGunTower::COST;
     else if (type == 2) cost = Config::SniperTower::COST; // Koszt snajpera
     else if (type == 3) cost = Config::RocketTower::COST; // Koszt rakiet
+    else if (type == 4) cost = Config::FlamethrowerTower::COST;
+    else if (type == 5) cost = Config::SlowerTower::COST;
 
     if (!player.spendMoney(cost)) return;
 
@@ -298,6 +309,8 @@ void Game::tryBuyTower(int type) {
     else if (type == 3) {
         objects.push_back(std::make_unique<RocketTower>(slot.position));
     }
+    else if (type == 4) objects.push_back(std::make_unique<FlamethrowerTower>(slot.position));
+    else if (type == 5) objects.push_back(std::make_unique<SlowerTower>(slot.position));
 
     selectedSlotIndex = -1;
 }

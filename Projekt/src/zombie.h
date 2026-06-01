@@ -33,6 +33,7 @@ protected:
     int snowDamage = 0;
     float burnTimer = 0.f;
     int burnDamage = 0;
+    float burnAccumulator = 0.f;
 
     sf::RectangleShape shape;
 

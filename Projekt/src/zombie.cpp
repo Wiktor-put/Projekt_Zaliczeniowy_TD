@@ -9,6 +9,26 @@ Zombie::Zombie(const std::vector<sf::Vector2f>& waypoints)
 void Zombie::update(float dt, std::vector<std::unique_ptr<GameObject>>& objects) {
     (void)objects;  // Zombie nie potrzebuje kontenera w update
 
+    // Obsługa spowolnienia
+    if (slowTimer > 0.f) {
+        slowTimer -= dt;
+        if (slowTimer <= 0.f) {
+            currentSpeed = baseSpeed; // Koniec spowolnienia, powrót do normy
+        }
+    }
+
+    // Obsługa podpalenia (otrzymywanie obrażeń w czasie)
+    if (burnTimer > 0.f) {
+        burnTimer -= dt;
+        burnAccumulator += burnDamage * dt; // Zbieramy ułamkowe obrażenia (np. 15 HP na sekundę)
+
+        if (burnAccumulator >= 1.f) {
+            int dmgToTake = static_cast<int>(burnAccumulator);
+            takeDamage(dmgToTake, DamageType::FIRE); // Odbieramy punkty życia
+            burnAccumulator -= dmgToTake;
+        }
+    }
+
     if (!reachedEnd()) {
         sf::Vector2f target = path[currentWaypointIndex];
         sf::Vector2f direction = target - position;

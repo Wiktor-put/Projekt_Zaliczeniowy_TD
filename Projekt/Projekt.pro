@@ -5,6 +5,8 @@ CONFIG -= qt
 
 SOURCES += \
         src/bullet.cpp \
+        src/flame.cpp \
+        src/flamethrowertower.cpp \
         src/machineguntower.cpp \
         src/main.cpp \
         src/Game.cpp \
@@ -15,7 +17,9 @@ SOURCES += \
         src/rocket.cpp \
         src/rockettower.cpp \
         src/runner.cpp \
+        src/slowertower.cpp \
         src/snipertower.cpp \
+        src/snowball.cpp \
         src/tower.cpp \
         src/zombie.cpp \
         src/walker.cpp
@@ -26,6 +30,8 @@ HEADERS += \
     src/Gameobject.h \
     src/Random.h \
     src/bullet.h \
+    src/flame.h \
+    src/flamethrowertower.h \
     src/machineguntower.h \
     src/map.h \
     src/player.h \
@@ -33,7 +39,9 @@ HEADERS += \
     src/rocket.h \
     src/rockettower.h \
     src/runner.h \
+    src/slowertower.h \
     src/snipertower.h \
+    src/snowball.h \
     src/tower.h \
     src/zombie.h \
     src/walker.h
