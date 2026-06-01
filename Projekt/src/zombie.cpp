@@ -29,6 +29,11 @@ void Zombie::update(float dt, std::vector<std::unique_ptr<GameObject>>& objects)
         }
     }
 
+    if (stunTimer > 0.f) {
+        stunTimer -= dt;
+        return; // Zombiak jest rażony prądem EMP - NIE ROBI NIC, nie porusza się
+    }
+
     if (!reachedEnd()) {
         sf::Vector2f target = path[currentWaypointIndex];
         sf::Vector2f direction = target - position;

@@ -34,6 +34,7 @@ protected:
     float burnTimer = 0.f;
     int burnDamage = 0;
     float burnAccumulator = 0.f;
+    float stunTimer = 0.f;
 
     sf::RectangleShape shape;
 
@@ -51,6 +52,8 @@ public:
 
     // Podpala zombie: zadaje dps obrażeń na sekundę przez duration sekund.
     void applyBurn(int dps, float duration);
+
+    void applyStun(float duration) { stunTimer = duration; }
 
     int getReward() const { return reward; }
     int getLifeCost() const {return lifeCost;}

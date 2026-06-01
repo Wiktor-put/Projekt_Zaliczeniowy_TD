@@ -9,6 +9,7 @@
 #include "rockettower.h"
 #include "flamethrowertower.h"
 #include "slowertower.h"
+#include "Random.h"
 #include <cmath>
 
 // ASSETS_DIR definiowane przez qmake jako $$PWD (katalog projektu).
@@ -51,13 +52,29 @@ void Game::processEvents(){
             if (state != GameState::PLAYING) continue;
         }
 
-        // Kliknięcie LPM — zaznacz wolny slot pod kursorem
+        // Kliknięcie LPM
         if (event.type == sf::Event::MouseButtonPressed &&
             event.mouseButton.button == sf::Mouse::Left) {
             sf::Vector2f mouse(static_cast<float>(event.mouseButton.x),
                                static_cast<float>(event.mouseButton.y));
-            int idx = map.getSlotAt(mouse);
-            selectedSlotIndex = (idx >= 0 && !map.getSlots()[idx].occupied) ? idx : -1;
+
+            // 1. Sprawdzamy, czy gracz nie kliknął w bonus
+            bool clickedBonus = false;
+            for (auto& obj : objects) {
+                Bonus* bonus = dynamic_cast<Bonus*>(obj.get());
+                if (bonus && bonus->isAlive() && bonus->contains(mouse)) {
+                    applyBonus(bonus->getType()); // Nakładamy efekt (kasa/życie/EMP)
+                    bonus->destroy(); // Zbieramy pudełko
+                    clickedBonus = true;
+                    break;
+                }
+            }
+
+            // 2. Jeśli nie kliknął w bonus, zaznaczamy slot budowlany
+            if (!clickedBonus) {
+                int idx = map.getSlotAt(mouse);
+                selectedSlotIndex = (idx >= 0 && !map.getSlots()[idx].occupied) ? idx : -1;
+            }
         }
 
         // PPM — odznacz slot
@@ -144,6 +161,8 @@ void Game::update(float dt){
 
     checkCollisions();
 
+    std::vector<std::unique_ptr<GameObject>> newBonuses; // Tymczasowa lista chroniąca pamięć
+
     // W Game::update, po checkCollisions, przed usunięciem martwych
     for (auto& obj : objects) {
         if (obj->isAlive()) continue;  // tylko martwe
@@ -152,10 +171,21 @@ void Game::update(float dt){
         if (zombie && !zombie->reachedEnd()) {  // zginął OD pocisku, nie doszedł do bazy
             player.addMoney(zombie->getReward());
             player.addScore(zombie->getReward());
+
+            // SZANSA NA DROP BONUSU
+            if (Random::chance(Config::BONUS_DROP_CHANCE)) {
+                BonusType randomType = static_cast<BonusType>(Random::intInRange(0, 2));
+                newBonuses.push_back(std::make_unique<Bonus>(zombie->getPosition(), randomType));
+            }
         }
         else if(zombie && zombie->reachedEnd()){
             player.lostLives(zombie->getLifeCost());
         }
+    }
+
+    // Fizyczne wrzucenie pudełek na mapę
+    for (auto& b : newBonuses) {
+        objects.push_back(std::move(b));
     }
 
     if (!player.isAlive()) {
@@ -335,5 +365,21 @@ void Game::run() {
         sf::Time dt = clock.restart();
         update(dt.asSeconds());
         render();
+    }
+}
+
+void Game::applyBonus(BonusType type) {
+    if (type == BonusType::AMMO) {
+        player.addMoney(Config::AMMO_BONUS_VALUE); // +30 dolarów
+    } else if (type == BonusType::MEDKIT) {
+        player.addLives(Config::MEDKIT_BONUS_VALUE); // +1 życie
+    } else if (type == BonusType::EMP) {
+        // Granat EMP ogłusza KAŻDEGO zombiaka na całej mapie!
+        for (auto& obj : objects) {
+            Zombie* z = dynamic_cast<Zombie*>(obj.get());
+            if (z && z->isAlive()) {
+                z->applyStun(Config::EMP_STUN_DURATION);
+            }
+        }
     }
 }

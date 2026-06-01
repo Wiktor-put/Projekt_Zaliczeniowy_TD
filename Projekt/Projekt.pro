@@ -4,6 +4,7 @@ CONFIG -= app_bundle
 CONFIG -= qt
 
 SOURCES += \
+        src/bonus.cpp \
         src/bullet.cpp \
         src/flame.cpp \
         src/flamethrowertower.cpp \
@@ -29,6 +30,7 @@ HEADERS += \
     src/Game.h \
     src/Gameobject.h \
     src/Random.h \
+    src/bonus.h \
     src/bullet.h \
     src/flame.h \
     src/flamethrowertower.h \

@@ -12,6 +12,7 @@
 #include "Gameobject.h"
 #include "map.h"
 #include "player.h"
+#include "bonus.h"
 
 enum class GameState {
     PLAYING,
@@ -66,6 +67,8 @@ public:
 
     // Rysuje główny interfejs gracza (UI)
     void renderUI();
+
+    void applyBonus(BonusType type);
 
 };
 
