@@ -98,6 +98,10 @@ constexpr float BONUS_LIFETIME = 6.f;           // sekund
 constexpr int AMMO_BONUS_VALUE = 30;            // dodatkowa waluta
 constexpr int MEDKIT_BONUS_VALUE = 1;           // dodatkowe życie
 constexpr float EMP_STUN_DURATION = 3.f;        // sekund
+// nowe zmienne do zrzutów
+constexpr float DROP_ZONE_X = 1150.f;    // Pozycja X strefy (blisko prawej krawędzi)
+constexpr float DROP_ZONE_Y = 600.f;     // Pozycja Y strefy (dolna część ekranu)
+constexpr float BONUS_FALL_SPEED = 250.f; // Prędkość spadania paczki
 
 // ===== FALE =====
 constexpr float SPAWN_INTERVAL = 1.5f;          // sekund między zombi

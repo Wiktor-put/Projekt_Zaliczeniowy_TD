@@ -12,9 +12,14 @@ private:
     BonusType type;
     float lifetime;
     sf::RectangleShape shape;
+    // Zmienne do spadania
+    float targetY;
+    bool isFalling;
 
 public:
-    Bonus(sf::Vector2f pos, BonusType type);
+    // Zmieniony konstruktor (przyjmuje pozycję startową u góry ekranu i docelową na ziemi)
+    Bonus(sf::Vector2f startPos, float targetY, BonusType type);
+
     void update(float dt, std::vector<std::unique_ptr<GameObject>>& objects) override;
     void render(sf::RenderWindow& window) override;
 

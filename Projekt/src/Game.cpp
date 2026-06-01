@@ -175,7 +175,18 @@ void Game::update(float dt){
             // SZANSA NA DROP BONUSU
             if (Random::chance(Config::BONUS_DROP_CHANCE)) {
                 BonusType randomType = static_cast<BonusType>(Random::intInRange(0, 2));
-                newBonuses.push_back(std::make_unique<Bonus>(zombie->getPosition(), randomType));
+
+                // Dodajemy mały losowy "rozrzut" na osi X, żeby paczki nie lądowały idealnie jedna na drugiej
+                float randomOffsetX = Random::floatInRange(-60.f, 60.f);
+                float randomOffsetY = Random::floatInRange(-60.f, 60.f);
+
+                // Paczka startuje poza ekranem na górze (Y = -50)
+                sf::Vector2f startPos(Config::DROP_ZONE_X + randomOffsetX, -50.f);
+
+                // Docelowa pozycja to Y strefy zrzutu z małym przesunięciem
+                float targetY = Config::DROP_ZONE_Y + randomOffsetY;
+
+                newBonuses.push_back(std::make_unique<Bonus>(startPos, targetY, randomType));
             }
         }
         else if(zombie && zombie->reachedEnd()){
@@ -280,6 +291,19 @@ void Game::renderUI() {
         buildText.setPosition(20.f, 130.f);
         buildText.setFillColor(sf::Color::Cyan);
         window.draw(buildText);
+
+
+        // --- NAPIS NA DROP ZONE ---
+        sf::Text dzText("DROP ZONE", font, 16);
+        dzText.setFillColor(sf::Color(0, 255, 0, 150));
+
+        // Zgrabny trik: Pobieramy wymiary tekstu, by ustawić jego środek (Origin)
+        // Dzięki temu tekst będzie idealnie na środku kwadratu niezależnie od długości słowa
+        sf::FloatRect bounds = dzText.getLocalBounds();
+        dzText.setOrigin(bounds.width / 2.f, bounds.height / 2.f);
+        dzText.setPosition(Config::DROP_ZONE_X, Config::DROP_ZONE_Y);
+
+        window.draw(dzText);
     }
 }
 
@@ -287,6 +311,24 @@ void Game::renderUI() {
 void Game::render() {
     window.clear(sf::Color::Black);
     map.draw(window);
+
+    // Rysowanie strefy zrzutu (Drop Zone)
+    sf::RectangleShape dropZone(sf::Vector2f(100.f, 100.f));
+    dropZone.setOrigin(50.f, 50.f);
+    dropZone.setPosition(Config::DROP_ZONE_X, Config::DROP_ZONE_Y);
+    dropZone.setFillColor(sf::Color(0, 255, 0, 40)); // Półprzezroczysty zielony
+    dropZone.setOutlineColor(sf::Color::Green);
+    dropZone.setOutlineThickness(2.f);
+    window.draw(dropZone);
+
+    // napis na strefie
+    if (!font.getInfo().family.empty()) {
+        sf::Text dzText("DROP\nZONE", font, 14);
+        dzText.setFillColor(sf::Color(0, 255, 0, 150));
+        dzText.setPosition(Config::DROP_ZONE_X - 35.f, Config::DROP_ZONE_Y - 15.f);
+        window.draw(dzText);
+    }
+
     for (auto& o : objects) {
         o->render(window);
     }

@@ -1,4 +1,5 @@
 #include "map.h"
+#include "Config.h"
 
 void Map::loadFromFile(const std::string& path) {
     waypoints.clear();
@@ -59,7 +60,17 @@ void Map::draw(sf::RenderWindow& window) const {
         shape.setOutlineThickness(1.f);
         window.draw(shape);
     }
+
+    // --- RYSOWANIE DROP ZONE (Tylko grafika terenu) ---
+    sf::RectangleShape dropZone(sf::Vector2f(160.f, 160.f));
+    dropZone.setOrigin(80.f, 80.f); // Środek to połowa nowego wymiaru
+    dropZone.setPosition(Config::DROP_ZONE_X, Config::DROP_ZONE_Y);
+    dropZone.setFillColor(sf::Color(0, 255, 0, 40));
+    dropZone.setOutlineColor(sf::Color::Green);
+    dropZone.setOutlineThickness(2.f);
+    window.draw(dropZone);
 }
+
 
 int Map::getSlotAt(sf::Vector2f pos) const {
     constexpr float HALF_SIZE = 20.f;  // połowa rozmiaru slotu (40x40)

@@ -25,6 +25,7 @@ private:
     int ID;                              // identyfikator mapy (do rozróżniania plansz)
     std::vector<sf::Vector2f> waypoints; // kolejne punkty trasy zombie
     std::vector<TowerSlot> towerSlots;   // dostępne miejsca na wieże
+    sf::Vector2f dropZonePos{1150.f, 600.f}; // Domyślna pozycja drop zone
 public:
     Map() = default;
 
@@ -44,6 +45,8 @@ public:
     const std::vector<TowerSlot>& getSlots() const { return towerSlots; }
     std::vector<TowerSlot>& getSlots() { return towerSlots; }
     int getSlotAt(sf::Vector2f pos) const;
+
+    sf::Vector2f getDropZonePos() const { return dropZonePos; }
 };
 
 #endif // MAP_H
