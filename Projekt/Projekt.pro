@@ -12,6 +12,7 @@ SOURCES += \
         src/map.cpp \
         src/player.cpp \
         src/projectile.cpp \
+        src/runner.cpp \
         src/tower.cpp \
         src/zombie.cpp \
         src/walker.cpp
@@ -26,6 +27,7 @@ HEADERS += \
     src/map.h \
     src/player.h \
     src/projectile.h \
+    src/runner.h \
     src/tower.h \
     src/zombie.h \
     src/walker.h

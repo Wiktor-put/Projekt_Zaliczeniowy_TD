@@ -111,7 +111,8 @@ void Game::update(float dt){
 
     if (spawnTimer >= Config::SPAWN_INTERVAL) {
         if (!map.getWaypoints().empty()) {
-            objects.push_back(std::make_unique<Walker>(map.getWaypoints()));
+            //objects.push_back(std::make_unique<Walker>(map.getWaypoints()));
+            objects.push_back(std::make_unique<Tank>(map.getWaypoints())); //teraz beda chodzic tanki
         }
         spawnTimer = 0.f;
     }
