@@ -42,6 +42,8 @@ public:
 
     const std::vector<sf::Vector2f>& getWaypoints() const { return waypoints; }
     const std::vector<TowerSlot>& getSlots() const { return towerSlots; }
+    std::vector<TowerSlot>& getSlots() { return towerSlots; }
+    int getSlotAt(sf::Vector2f pos) const;
 };
 
 #endif // MAP_H

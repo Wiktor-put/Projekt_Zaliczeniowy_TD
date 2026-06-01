@@ -13,13 +13,13 @@
 class Tower: public GameObject
 {
 protected:
-    float range;          // zasięg wykrywania zombie (px)
-    float fireRate;       // liczba strzałów na sekundę
-    float cooldown;       // pozostały czas do następnego strzału (s)
-    int damage;           // obrażenia na strzał
-    int cost;             // koszt zakupu w walucie gry
-    int level;            // poziom ulepszenia (1 = bazowy)
-    Zombie* currentTarget; // aktualnie śledzony cel (nullptr = brak)
+    float range     = 0.f;         // zasięg wykrywania zombie (px)
+    float fireRate  = 1.f;         // liczba strzałów na sekundę
+    float cooldown  = 0.f;         // pozostały czas do następnego strzału (s)
+    int damage      = 0;           // obrażenia na strzał
+    int cost        = 0;           // koszt zakupu w walucie gry
+    int level       = 1;           // poziom ulepszenia (1 = bazowy)
+    Zombie* currentTarget = nullptr; // aktualnie śledzony cel (nullptr = brak)
 
     sf::RectangleShape shape;   // placeholder graficzny
 

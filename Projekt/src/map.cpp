@@ -60,3 +60,22 @@ void Map::draw(sf::RenderWindow& window) const {
         window.draw(shape);
     }
 }
+
+int Map::getSlotAt(sf::Vector2f pos) const {
+    constexpr float HALF_SIZE = 20.f;  // połowa rozmiaru slotu (40x40)
+
+    for (size_t i = 0; i < towerSlots.size(); ++i) {
+        sf::Vector2f slotPos = towerSlots[i].position;
+
+        // Sprawdź czy pos jest w prostokącie wokół środka slotu
+        if (pos.x >= slotPos.x - HALF_SIZE && pos.x <= slotPos.x + HALF_SIZE &&
+            pos.y >= slotPos.y - HALF_SIZE && pos.y <= slotPos.y + HALF_SIZE) {
+            return static_cast<int>(i);
+        }
+    }
+    return -1;
+}
+
+void Map::occupiedSlot(TowerSlot& Slot){
+    Slot.occupied = true;
+}

@@ -4,6 +4,7 @@
 #include "machineguntower.h"
 #include "projectile.h"
 #include "tower.h"
+#include <cmath>
 
 // ASSETS_DIR definiowane przez qmake jako $$PWD (katalog projektu).
 // Fallback na "." gdy kompilowane bez qmake.
@@ -14,7 +15,6 @@
 Game::Game() : window(sf::VideoMode(Config::WINDOW_WIDTH, Config::WINDOW_HEIGHT), "DEAD ZONE") {
     window.setFramerateLimit(Config::FPS_LIMIT);
     map.loadFromFile(std::string(ASSETS_DIR) + "/assets/maps/map1.txt");
-    objects.push_back(std::make_unique<MachineGunTower>(sf::Vector2f(400.f, 300.f)));
 }
 
 void Game::processEvents(){
@@ -22,6 +22,31 @@ void Game::processEvents(){
     while (window.pollEvent(event)) {
         if (event.type == sf::Event::Closed)
             window.close();
+
+        // Kliknięcie LPM — zaznacz wolny slot pod kursorem
+        if (event.type == sf::Event::MouseButtonPressed &&
+            event.mouseButton.button == sf::Mouse::Left) {
+            sf::Vector2f mouse(static_cast<float>(event.mouseButton.x),
+                               static_cast<float>(event.mouseButton.y));
+            int idx = map.getSlotAt(mouse);
+            selectedSlotIndex = (idx >= 0 && !map.getSlots()[idx].occupied) ? idx : -1;
+        }
+
+        // PPM — odznacz slot
+        if (event.type == sf::Event::MouseButtonPressed &&
+            event.mouseButton.button == sf::Mouse::Right) {
+            selectedSlotIndex = -1;
+        }
+
+        if (event.type == sf::Event::KeyPressed) {
+            // Klawisz 1 — kup MachineGunTower w zaznaczonym slocie
+            if (event.key.code == sf::Keyboard::Num1)
+                tryBuyTower(1);
+
+            // Escape — odznacz slot bez kupowania
+            if (event.key.code == sf::Keyboard::Escape)
+                selectedSlotIndex = -1;
+        }
     }
 }
 
@@ -75,19 +100,7 @@ void Game::update(float dt){
     }
 
     checkCollisions();
-
-    // Zeruj martwe targety wież zanim zwolnimy pamięć (dangling pointer fix).
-    // Tower::currentTarget to surowy wskaźnik — musi być nullptr zanim unique_ptr zombi zginie.
-    for (auto& obj : objects) {
-        Tower* tower = dynamic_cast<Tower*>(obj.get());
-        if (tower) tower->clearDeadTarget();
-    }
-
-    objects.erase(
-        std::remove_if(objects.begin(), objects.end(),
-                       [](const std::unique_ptr<GameObject>& o) { return !o->isAlive(); }),
-        objects.end()
-    );
+    removeDeadObjects();
 }
 
 void Game::render() {
@@ -96,7 +109,51 @@ void Game::render() {
     for (auto& o : objects) {
         o->render(window);
     }
+
+    // Podświetlenie zaznaczonego slotu (żółta ramka)
+    if (selectedSlotIndex >= 0) {
+        const TowerSlot& slot = map.getSlots()[selectedSlotIndex];
+        sf::RectangleShape highlight(sf::Vector2f(34.f, 34.f));
+        highlight.setOrigin(17.f, 17.f);
+        highlight.setPosition(slot.position);
+        highlight.setFillColor(sf::Color::Transparent);
+        highlight.setOutlineColor(sf::Color::Yellow);
+        highlight.setOutlineThickness(2.f);
+        window.draw(highlight);
+    }
+
     window.display();
+}
+
+void Game::tryBuyTower(int type) {
+    if (selectedSlotIndex < 0) return;
+    TowerSlot& slot = map.getSlots()[selectedSlotIndex];
+    if (slot.occupied) return;
+
+    int cost = 0;
+    if (type == 1) cost = Config::MachineGunTower::COST;
+
+    if (!player.spendMoney(cost)) return;
+
+    map.occupiedSlot(slot);
+    if (type == 1)
+        objects.push_back(std::make_unique<MachineGunTower>(slot.position));
+
+    selectedSlotIndex = -1;
+}
+
+void Game::removeDeadObjects() {
+    // Zeruj martwe targety wież zanim zwolnimy pamięć (dangling pointer fix).
+    // Tower::currentTarget to surowy wskaźnik — musi być nullptr zanim unique_ptr zombi zginie.
+    for (auto& obj : objects) {
+        Tower* tower = dynamic_cast<Tower*>(obj.get());
+        if (tower) tower->clearDeadTarget();
+    }
+    objects.erase(
+        std::remove_if(objects.begin(), objects.end(),
+                       [](const std::unique_ptr<GameObject>& o) { return !o->isAlive(); }),
+        objects.end()
+    );
 }
 
 void Game::run(){

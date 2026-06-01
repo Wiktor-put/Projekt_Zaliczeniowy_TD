@@ -11,6 +11,7 @@
 
 #include "Gameobject.h"
 #include "map.h"
+#include "player.h"
 
 // Odpowiada za okno, pętlę gry oraz integrację wszystkich podsystemów
 // (mapa, obiekty, kolizje). Jeden egzemplarz na całą aplikację.
@@ -21,7 +22,9 @@ private:
     sf::Clock clock;                                  // mierzy czas między klatkami
     std::vector<std::unique_ptr<GameObject>> objects; // wszystkie aktywne obiekty sceny
     Map map;                                          // wczytana mapa z waypointami i slotami
+    Player player;                                    // stan gracza (życia, waluta, wynik)
     float spawnTimer = 0.f;
+    int selectedSlotIndex = -1;                       // indeks klikniętego slotu, -1 = brak wyboru
 
 public:
     Game();
@@ -40,6 +43,15 @@ public:
 
     // Wykrywa i reaguje na kolizje pocisków z zombie.
     void checkCollisions();
+
+    // Próbuje kupić wieżę danego typu w zaznaczonym slocie.
+    // type: 1=MachineGun (kolejne typy dojdą w MS3).
+    // Odejmuje koszt od gracza i zajmuje slot. Czyści selectedSlotIndex po zakupie.
+    void tryBuyTower(int type);
+
+    // Zeruje martwe targety wież i usuwa martwe obiekty z kontenera.
+    // Wywoływane na końcu update() — po update i kolizjach.
+    void removeDeadObjects();
 
 };
 
