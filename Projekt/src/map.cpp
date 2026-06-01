@@ -28,11 +28,13 @@ void Map::loadFromFile(const std::string& path) {
                 waypoints.push_back(sf::Vector2f(x, y));
             } else if (type == 'S') {
                 towerSlots.push_back({sf::Vector2f(x, y), false});
-            } else {
-                std::cerr << "Nieznany typ '" << type << "' w linii " << lineNumber << std::endl;
             }
+        } else if (type == 'D') {
+            // zapisujemy pozycję strefy zrzutu
+            dropZonePos = sf::Vector2f(x, y);
+
         } else {
-            std::cerr << "Bledny format w linii " << lineNumber << ": " << line << std::endl;
+            std::cerr << "Nieznany typ '" << type << "' w linii " << lineNumber << std::endl;
         }
     }
 
@@ -64,7 +66,7 @@ void Map::draw(sf::RenderWindow& window) const {
     // --- RYSOWANIE DROP ZONE (Tylko grafika terenu) ---
     sf::RectangleShape dropZone(sf::Vector2f(160.f, 160.f));
     dropZone.setOrigin(80.f, 80.f); // Środek to połowa nowego wymiaru
-    dropZone.setPosition(Config::DROP_ZONE_X, Config::DROP_ZONE_Y);
+    dropZone.setPosition(dropZonePos); // Teraz bierze pozycję z konkretnej mapy
     dropZone.setFillColor(sf::Color(0, 255, 0, 40));
     dropZone.setOutlineColor(sf::Color::Green);
     dropZone.setOutlineThickness(2.f);
