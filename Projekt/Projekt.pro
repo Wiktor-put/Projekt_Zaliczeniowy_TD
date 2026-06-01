@@ -12,6 +12,8 @@ SOURCES += \
         src/map.cpp \
         src/player.cpp \
         src/projectile.cpp \
+        src/rocket.cpp \
+        src/rockettower.cpp \
         src/runner.cpp \
         src/snipertower.cpp \
         src/tower.cpp \
@@ -28,6 +30,8 @@ HEADERS += \
     src/map.h \
     src/player.h \
     src/projectile.h \
+    src/rocket.h \
+    src/rockettower.h \
     src/runner.h \
     src/snipertower.h \
     src/tower.h \

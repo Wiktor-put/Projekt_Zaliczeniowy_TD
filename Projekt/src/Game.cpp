@@ -6,6 +6,7 @@
 #include "projectile.h"
 #include "tower.h"
 #include "snipertower.h"
+#include "rockettower.h"
 #include <cmath>
 
 // ASSETS_DIR definiowane przez qmake jako $$PWD (katalog projektu).
@@ -72,6 +73,9 @@ void Game::processEvents(){
             // Klawisz 2 — kup SniperTower
             if (event.key.code == sf::Keyboard::Num2)
                 tryBuyTower(2);
+
+            if (event.key.code == sf::Keyboard::Num3)
+                tryBuyTower(3);
 
             // Escape — odznacz slot bez kupowania
             if (event.key.code == sf::Keyboard::Escape)
@@ -234,6 +238,7 @@ void Game::tryBuyTower(int type) {
     int cost = 0;
     if (type == 1) cost = Config::MachineGunTower::COST;
     else if (type == 2) cost = Config::SniperTower::COST; // Koszt snajpera
+    else if (type == 3) cost = Config::RocketTower::COST; // Koszt rakiet
 
     if (!player.spendMoney(cost)) return;
 
@@ -241,8 +246,12 @@ void Game::tryBuyTower(int type) {
 
     if (type == 1) {
         objects.push_back(std::make_unique<MachineGunTower>(slot.position)); //
-    } else if (type == 2) {
+    }
+    else if (type == 2) {
         objects.push_back(std::make_unique<SniperTower>(slot.position));
+    }
+    else if (type == 3) {
+        objects.push_back(std::make_unique<RocketTower>(slot.position));
     }
 
     selectedSlotIndex = -1;
