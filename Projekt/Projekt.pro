@@ -13,6 +13,7 @@ SOURCES += \
         src/player.cpp \
         src/projectile.cpp \
         src/runner.cpp \
+        src/snipertower.cpp \
         src/tower.cpp \
         src/zombie.cpp \
         src/walker.cpp
@@ -28,6 +29,7 @@ HEADERS += \
     src/player.h \
     src/projectile.h \
     src/runner.h \
+    src/snipertower.h \
     src/tower.h \
     src/zombie.h \
     src/walker.h
