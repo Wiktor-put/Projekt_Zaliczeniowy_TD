@@ -33,6 +33,7 @@ Runner::Runner(const std::vector<sf::Vector2f>& waypoints) : Zombie(waypoints) {
     baseSpeed    = Config::Runner::SPEED;
     currentSpeed = Config::Runner::SPEED;
     reward       = Config::Runner::REWARD;
+    lifeCost = Config::Runner::LIFECOST;
 
     // Czerwony, mniejszy kwadrat
     shape.setSize(sf::Vector2f(25.f, 25.f));
@@ -53,6 +54,7 @@ Armored::Armored(const std::vector<sf::Vector2f>& waypoints) : Zombie(waypoints)
     baseSpeed    = Config::Armored::SPEED;
     currentSpeed = Config::Armored::SPEED;
     reward       = Config::Armored::REWARD;
+    lifeCost = Config::Armored::LIFECOST;
 
     // Szary, nieco większy kwadrat
     shape.setSize(sf::Vector2f(35.f, 35.f));
@@ -87,6 +89,7 @@ Tank::Tank(const std::vector<sf::Vector2f>& waypoints) : Zombie(waypoints) {
     baseSpeed    = Config::Tank::SPEED;
     currentSpeed = Config::Tank::SPEED;
     reward       = Config::Tank::REWARD;
+    lifeCost = Config::Tank::LIFECOST;
 
     // Fioletowy (Magenta), wielki kwadrat reprezentujący bossa
     shape.setSize(sf::Vector2f(50.f, 50.f));

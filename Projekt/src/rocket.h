@@ -13,6 +13,8 @@ public:
     Rocket(sf::Vector2f startPos, sf::Vector2f targetPos, int damage, float aoeRadius);
 
     void onHit(Zombie* hitZombie, std::vector<std::unique_ptr<GameObject>>& objects) override;
+
+    void explosion(std::vector<std::unique_ptr<GameObject>>& objects);
 };
 
 #endif // ROCKET_H

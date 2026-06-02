@@ -22,6 +22,7 @@ SOURCES += \
         src/snipertower.cpp \
         src/snowball.cpp \
         src/tower.cpp \
+        src/wavemanager.cpp \
         src/zombie.cpp \
         src/walker.cpp
 
@@ -45,6 +46,7 @@ HEADERS += \
     src/snipertower.h \
     src/snowball.h \
     src/tower.h \
+    src/wavemanager.h \
     src/zombie.h \
     src/walker.h
 

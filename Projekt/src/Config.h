@@ -25,7 +25,7 @@ namespace Runner {
 constexpr int HP = 40;
 constexpr float SPEED = 200.f;
 constexpr int REWARD = 15;
-//constexpr int LIFECOST = 1;
+constexpr int LIFECOST = 1;
 }
 
 namespace Armored {
@@ -33,7 +33,7 @@ constexpr int HP = 180;
 constexpr float SPEED = 50.f;
 constexpr int REWARD = 25;
 constexpr float BULLET_RESISTANCE = 0.5f;   // 50% redukcja
-//constexpr int LIFECOST = 2;
+constexpr int LIFECOST = 2;
 }
 
 namespace Tank {
