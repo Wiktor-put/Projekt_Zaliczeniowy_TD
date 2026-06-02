@@ -13,6 +13,7 @@
 #include "map.h"
 #include "player.h"
 #include "bonus.h"
+#include "wavemanager.h"
 
 enum class GameState {
     PLAYING,
@@ -32,7 +33,8 @@ private:
     float spawnTimer = 0.f;
     int selectedSlotIndex = -1;                       // indeks klikniętego slotu, -1 = brak wyboru
     GameState state;                                  // stan gry
-    sf::Font font;                                    // potrzebny do napisu GAME OVER
+    sf::Font font;
+    WaveManager waveManager;    // potrzebny do napisu GAME OVER
 
 public:
     Game();

@@ -17,6 +17,12 @@ Rocket::Rocket(sf::Vector2f startPos, sf::Vector2f targetPos, int damage, float 
 }
 
 void Rocket::onHit(Zombie* hitZombie, std::vector<std::unique_ptr<GameObject>>& objects) {
+    explosion(objects);
+    // 3. Po wybuchu rakieta ulega zniszczeniu
+    destroy();
+}
+
+void Rocket::explosion(std::vector<std::unique_ptr<GameObject>>& objects){
     // 1. Ustalenie środka wybuchu (tam gdzie znajduje się rakieta w momencie trafienia)
     sf::Vector2f explosionCenter = position;
 
@@ -35,7 +41,4 @@ void Rocket::onHit(Zombie* hitZombie, std::vector<std::unique_ptr<GameObject>>& 
             }
         }
     }
-
-    // 3. Po wybuchu rakieta ulega zniszczeniu
-    destroy();
 }

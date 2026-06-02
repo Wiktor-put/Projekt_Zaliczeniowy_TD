@@ -8,6 +8,7 @@
 #include "machineguntower.h"
 #include "projectile.h"
 #include "tower.h"
+#include "rocket.h"
 #include "snipertower.h"
 #include "rockettower.h"
 #include "flamethrowertower.h"
@@ -37,6 +38,8 @@ void Game::startNewGame() {
     spawnTimer = 0.f;
     selectedSlotIndex = -1;    // anuluj wybór slotu jeśli był
     state = GameState::PLAYING;
+    waveManager.reset();
+    waveManager.loadFromFile(std::string(ASSETS_DIR) + "/assets/waves/waves.txt");
 }
 
 void Game::processEvents(){
@@ -108,6 +111,11 @@ void Game::processEvents(){
             if (event.key.code == sf::Keyboard::Escape)
                 selectedSlotIndex = -1;
         }
+        if (event.key.code == sf::Keyboard::Space) {
+            if (!waveManager.isWaveInProgress()) {
+                waveManager.startNextWave();
+            }
+        }
     }
 }
 
@@ -137,6 +145,9 @@ void Game::checkCollisions() {
         // Sprawdzamy TUTAJ (po pętli zombi), nie w Projectile::update,
         // żeby kolizja miała szansę być wykryta zanim pocisk zniknie.
         if (projectile->isAlive() && projectile->hasReachedTarget()) {
+            Rocket* roc = dynamic_cast<Rocket*>(projectile);
+            if(roc->isAlive() && roc)
+                roc->explosion(objects);
             projectile->destroy();
         }
     }
@@ -144,15 +155,7 @@ void Game::checkCollisions() {
 
 void Game::update(float dt){
     if (state != GameState::PLAYING) return;
-    spawnTimer += dt;
-
-    if (spawnTimer >= Config::SPAWN_INTERVAL) {
-        if (!map.getWaypoints().empty()) {
-            objects.push_back(std::make_unique<Walker>(map.getWaypoints()));
-            //objects.push_back(std::make_unique<Tank>(map.getWaypoints())); //teraz beda chodzic tanki
-        }
-        spawnTimer = 0.f;
-    }
+    waveManager.update(dt, objects, map.getWaypoints());
 
     // Ruch wszystkich obiektów PRZED sprawdzeniem kolizji.
     // Używamy indeksu (nie range-for) bo Tower::shoot() może dodać nowe obiekty

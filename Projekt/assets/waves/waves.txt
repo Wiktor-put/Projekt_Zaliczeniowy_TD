@@ -1,0 +1,13 @@
+# Konfiguracja fal - format: wave <numer>: <typ>:<ilosc> <typ>:<ilosc>...
+# Typy: walker, runner, armored, tank
+
+wave 1: walker:10
+wave 2: walker:15
+wave 3: walker:10 runner:5
+wave 4: walker:12 runner:8
+wave 5: walker:10 runner:5 armored:3
+wave 6: walker:15 runner:10 armored:5
+wave 7: walker:10 runner:10 armored:5 tank:1
+wave 8: runner:15 armored:8 tank:2
+wave 9: walker:20 runner:15 armored:10 tank:3
+wave 10: walker:30 runner:20 armored:15 tank:5
