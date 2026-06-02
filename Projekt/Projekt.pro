@@ -4,6 +4,7 @@ CONFIG -= app_bundle
 CONFIG -= qt
 
 SOURCES += \
+        src/armored.cpp \
         src/bonus.cpp \
         src/bullet.cpp \
         src/flame.cpp \
@@ -21,6 +22,7 @@ SOURCES += \
         src/slowertower.cpp \
         src/snipertower.cpp \
         src/snowball.cpp \
+        src/tank.cpp \
         src/tower.cpp \
         src/zombie.cpp \
         src/walker.cpp
@@ -30,6 +32,7 @@ HEADERS += \
     src/Game.h \
     src/Gameobject.h \
     src/Random.h \
+    src/armored.h \
     src/bonus.h \
     src/bullet.h \
     src/flame.h \
@@ -44,6 +47,7 @@ HEADERS += \
     src/slowertower.h \
     src/snipertower.h \
     src/snowball.h \
+    src/tank.h \
     src/tower.h \
     src/zombie.h \
     src/walker.h

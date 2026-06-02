@@ -18,7 +18,7 @@ Walker::Walker(const std::vector<sf::Vector2f>& waypoints) : Zombie(waypoints)
     shape.setOrigin(15.f, 15.f);
     shape.setPosition(position);
 }
-
+/*
 
 // ==========================================
 //    IMPLEMENTACJA KLASY RUNNER
@@ -94,3 +94,4 @@ Tank::Tank(const std::vector<sf::Vector2f>& waypoints) : Zombie(waypoints) {
     shape.setOrigin(25.f, 25.f);
     shape.setPosition(position);
 }
+*/

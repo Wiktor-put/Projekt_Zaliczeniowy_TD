@@ -13,7 +13,7 @@ public:
     Walker(const std::vector<sf::Vector2f>& waypoints);
 };
 
-
+/*
 // --- Klasa Runner (Szybki, mało HP) ---
 class Runner : public Zombie
 {
@@ -37,7 +37,7 @@ class Tank : public Zombie
 public:
     Tank(const std::vector<sf::Vector2f>& waypoints);
 };
-
+*/
 
 
 #endif // WALKER_H
