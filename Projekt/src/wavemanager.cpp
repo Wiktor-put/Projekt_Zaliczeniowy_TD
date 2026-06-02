@@ -4,8 +4,8 @@
 #include <sstream>
 #include "walker.h"
 #include "runner.h"
-//#include "armored.h"
-//#include "tank.h"
+#include "armored.h"
+#include "tank.h"
 #include "Config.h"
 
 

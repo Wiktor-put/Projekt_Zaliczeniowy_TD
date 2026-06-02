@@ -61,6 +61,9 @@ public:
     // Odejmuje koszt od gracza i zajmuje slot. Czyści selectedSlotIndex po zakupie.
     void tryBuyTower(int type);
 
+    void tryUpgradeTower();
+    void trySellTower();
+
     // Zeruje martwe targety wież i usuwa martwe obiekty z kontenera.
     // Wywoływane na końcu update() — po update i kolizjach.
     void removeDeadObjects();

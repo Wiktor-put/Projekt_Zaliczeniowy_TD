@@ -75,12 +75,10 @@ void Game::processEvents(){
                     break;
                 }
             }
+            int idx = map.getSlotAt(mouse);
 
-            // 2. Jeśli nie kliknął w bonus, zaznaczamy slot budowlany
-            if (!clickedBonus) {
-                int idx = map.getSlotAt(mouse);
-                selectedSlotIndex = (idx >= 0 && !map.getSlots()[idx].occupied) ? idx : -1;
-            }
+            // TERAZ ZAZNACZAMY KAŻDY SLOT, NIEWAŻNE CZY ZAJĘTY CZY NIE
+            selectedSlotIndex = (idx >= 0) ? idx : -1;
         }
 
         // PPM — odznacz slot
@@ -106,6 +104,14 @@ void Game::processEvents(){
                 tryBuyTower(4);
             if (event.key.code == sf::Keyboard::Num5)
                 tryBuyTower(5);
+
+            // Klawisz U - Ulepszenie
+            if (event.key.code == sf::Keyboard::U)
+                tryUpgradeTower();
+
+            // Klawisz S - Sprzedaż
+            if (event.key.code == sf::Keyboard::S)
+                trySellTower();
 
             // Escape — odznacz slot bez kupowania
             if (event.key.code == sf::Keyboard::Escape)
@@ -288,35 +294,54 @@ void Game::renderUI() {
 
     // 4. Wyświetlanie menu budowania TYLKO gdy zaznaczono slot
     if (selectedSlotIndex >= 0) {
-        sf::Text buildText(
-            "Wybierz wieze:\n"
-            "[1] Karabin ($50)\n"
-            "[2] Snajper ($100)\n"
-            "[3] Wyrzutnia ($150)\n"
-            "[4] Miotacz Ognia ($80)\n"
-            "[5] Wieza Spowalniajaca ($60)\n"
-            "[ESC] Anuluj", font, 20);
+        const TowerSlot& slot = map.getSlots()[selectedSlotIndex];
 
-        buildText.setPosition(20.f, 130.f);
-        buildText.setFillColor(sf::Color::Cyan);
-        window.draw(buildText);
+        if (!slot.occupied) {
+            // MENU BUDOWANIA
+            sf::Text buildText(
+                "Wybierz wieze:\n"
+                "[1] Karabin ($50)\n"
+                "[2] Snajper ($100)\n"
+                "[3] Wyrzutnia ($150)\n"
+                "[4] Miotacz Ognia ($80)\n"
+                "[5] Spowalniacz ($60)\n"
+                "[ESC] Anuluj", font, 20);
+            buildText.setPosition(20.f, 130.f);
+            buildText.setFillColor(sf::Color::Cyan);
+            window.draw(buildText);
+        } else {
+            // MENU ULEPSZEŃ / SPRZEDAŻY
+            // Musimy znaleźć wieżę, żeby pobrać jej statystyki
+            Tower* selectedTower = nullptr;
+            for (auto& obj : objects) {
+                Tower* t = dynamic_cast<Tower*>(obj.get());
+                if (t && t->isAlive() && t->getPosition() == slot.position) {
+                    selectedTower = t;
+                    break;
+                }
+            }
 
+            if (selectedTower) {
+                int upgCost = selectedTower->getUpgradeCost();
+                int refund = static_cast<int>(selectedTower->getCost() * Config::SELL_REFUND);
+                int lvl = selectedTower->getLevel();
 
-        // --- NAPIS NA DROP ZONE ---
-        sf::Text dzText("DROP ZONE", font, 16);
-        dzText.setFillColor(sf::Color(0, 255, 0, 150));
+                std::string upgradeStr = (lvl < 3) ?
+                                             "[U] Ulepsz ($" + std::to_string(upgCost) + ")\n" :
+                                             "[U] MAX POZIOM\n";
 
-        // Pobieramy wymiary tekstu, by ustawić jego środek (Origin)
-        // Dzięki temu tekst będzie idealnie na środku kwadratu niezależnie od długości słowa
-        sf::FloatRect bounds = dzText.getLocalBounds();
-        dzText.setOrigin(bounds.width / 2.f, bounds.height / 2.f);
-        sf::Vector2f dzPos = map.getDropZonePos();
-        dzText.setPosition(dzPos.x, dzPos.y); // Wyśrodkowany tekst w strefie konkretnej mapy
-
-        window.draw(dzText);
+                sf::Text upgradeText(
+                    "Wieza - Poziom " + std::to_string(lvl) + "\n" +
+                        upgradeStr +
+                        "[S] Sprzedaj ($" + std::to_string(refund) + ")\n" +
+                        "[ESC] Anuluj", font, 20);
+                upgradeText.setPosition(20.f, 130.f);
+                upgradeText.setFillColor(sf::Color::Magenta);
+                window.draw(upgradeText);
+            }
+        }
     }
 }
-
 
 void Game::render() {
     window.clear(sf::Color::Black);
@@ -432,6 +457,51 @@ void Game::applyBonus(BonusType type) {
             if (z && z->isAlive()) {
                 z->applyStun(Config::EMP_STUN_DURATION);
             }
+        }
+    }
+}
+
+
+void Game::tryUpgradeTower() {
+    if (selectedSlotIndex < 0) return;
+    TowerSlot& slot = map.getSlots()[selectedSlotIndex];
+    if (!slot.occupied) return; // Ulepszyć można tylko zajęty slot
+
+    // Szukamy wieży, która stoi na tym konkretnym slocie
+    for (auto& obj : objects) {
+        Tower* tower = dynamic_cast<Tower*>(obj.get());
+        if (tower && tower->isAlive() && tower->getPosition() == slot.position) {
+
+            if (tower->getLevel() >= 3) return; // Osiągnięto max poziom
+
+            int upgradeCost = tower->getUpgradeCost();
+            if (player.spendMoney(upgradeCost)) {
+                tower->upgrade();
+            }
+            break;
+        }
+    }
+}
+
+void Game::trySellTower() {
+    if (selectedSlotIndex < 0) return;
+    TowerSlot& slot = map.getSlots()[selectedSlotIndex];
+    if (!slot.occupied) return; // Sprzedać można tylko zajęty slot
+
+    // Szukamy wieży na slocie
+    for (auto& obj : objects) {
+        Tower* tower = dynamic_cast<Tower*>(obj.get());
+        if (tower && tower->isAlive() && tower->getPosition() == slot.position) {
+
+            // Zwracamy graczowi 70% całkowitej wartości wieży (bazowa + ulepszenia)
+            int refund = static_cast<int>(tower->getCost() * Config::SELL_REFUND);
+            player.addMoney(refund);
+
+            // Niszczymy wieżę i zwalniamy slot
+            tower->destroy();
+            slot.occupied = false;
+            selectedSlotIndex = -1; // Odznaczamy slot
+            break;
         }
     }
 }

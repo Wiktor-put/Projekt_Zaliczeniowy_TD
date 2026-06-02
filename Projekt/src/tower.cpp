@@ -83,3 +83,24 @@ void Tower::update(float dt, std::vector<std::unique_ptr<GameObject>>& objects){
     }
 
 }
+
+void Tower::upgrade() {
+    if (level >= 3) return; // Maksymalnie 3 poziom
+
+    level++;
+
+    // Mnożymy statystyki przez wartości z Configu
+    damage = static_cast<int>(damage * Config::UPGRADE_DAMAGE_MULTIPLIER);
+    range *= Config::UPGRADE_RANGE_MULTIPLIER;
+
+    // Aktualizujemy całkowitą wartość wieży (przyda się do zwrotu kasy przy sprzedaży)
+    cost = static_cast<int>(cost * Config::UPGRADE_COST_MULTIPLIER);
+
+    // Wizualny akcent - wieża robi się odrobinę ciemniejsza po ulepszeniu
+    sf::Color currentColor = shape.getFillColor();
+    shape.setFillColor(sf::Color(
+        std::max(0, currentColor.r - 20),
+        std::max(0, currentColor.g - 20),
+        std::max(0, currentColor.b - 20)
+        ));
+}

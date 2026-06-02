@@ -51,6 +51,14 @@ public:
     // Zeruje currentTarget jeśli cel już nie żyje — wywołać przed usunięciem martwych obiektów.
     // Zapobiega dangling pointer gdy unique_ptr zombi zostaje zwolniony.
     void clearDeadTarget();
+
+    int getLevel() const { return level; }
+    int getCost() const { return cost; }
+
+    // Oblicza koszt następnego ulepszenia
+    int getUpgradeCost() const {
+        return static_cast<int>(cost * Config::UPGRADE_COST_MULTIPLIER);
+    }
 };
 
 #endif // TOWER_H
