@@ -347,20 +347,17 @@ void Game::render() {
     window.clear(sf::Color::Black);
     map.draw(window);
 
-    // Rysowanie strefy zrzutu (Drop Zone)
-    sf::RectangleShape dropZone(sf::Vector2f(100.f, 100.f));
-    dropZone.setOrigin(50.f, 50.f);
-    //dropZone.setPosition(Config::DROP_ZONE_X, Config::DROP_ZONE_Y);
-    dropZone.setFillColor(sf::Color(0, 255, 0, 40)); // Półprzezroczysty zielony
-    dropZone.setOutlineColor(sf::Color::Green);
-    dropZone.setOutlineThickness(2.f);
-    window.draw(dropZone);
-
-    // napis na strefie
+    // Napis na strefie zrzutu (sam kwadrat rysuje już mapa!)
     if (!font.getInfo().family.empty()) {
-        sf::Text dzText("DROP\nZONE", font, 14);
+        sf::Text dzText("HELP\nZONE", font, 17);
         dzText.setFillColor(sf::Color(0, 255, 0, 150));
-        //dzText.setPosition(Config::DROP_ZONE_X - 35.f, Config::DROP_ZONE_Y - 15.f);
+
+        // Pobieramy pozycję strefy z naszej aktualnej mapy
+        sf::Vector2f dzPos = map.getDropZonePos();
+
+        // Ustawiamy pozycję tekstu delikatnie przesuniętą, żeby była na środku
+        dzText.setPosition(dzPos.x - 25.f, dzPos.y - 15.f);
+
         window.draw(dzText);
     }
 
