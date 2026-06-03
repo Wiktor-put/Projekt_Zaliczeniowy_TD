@@ -283,42 +283,76 @@ void Game::renderUI() {
     // Zabezpieczenie: jeśli czcionka się nie wczytała, nie rysujemy napisów
     if (font.getInfo().family.empty()) return;
 
-    // 1. Wyświetlanie pieniędzy
-    sf::Text moneyText("Kasa: $" + std::to_string(player.getMoney()), font, 24);
-    moneyText.setPosition(20.f, 20.f);
-    moneyText.setFillColor(sf::Color::Yellow);
+    // ==========================================
+    // 1. GÓRNY PASEK STATYSTYK (TOP BAR)
+    // ==========================================
 
-    // 2. Wyświetlanie żyć
-    sf::Text livesText("Zycia: " + std::to_string(player.getLives()), font, 24);
-    livesText.setPosition(20.f, 50.f);
-    livesText.setFillColor(sf::Color::Red);
+    // Tło paska
+    sf::RectangleShape topBar(sf::Vector2f(Config::WINDOW_WIDTH, 50.f));
+    topBar.setFillColor(sf::Color(20, 20, 20, 230)); // Ciemnoszary, lekko przezroczysty
+    topBar.setOutlineThickness(2.f);
+    topBar.setOutlineColor(sf::Color(80, 80, 80));
+    window.draw(topBar);
 
-    // 3. Wyświetlanie wyniku punktowego
-    sf::Text scoreText("Punkty: " + std::to_string(player.getScore()), font, 24);
-    scoreText.setPosition(20.f, 80.f);
+    // Życia (Po lewej)
+    sf::Text livesText("ZYCIA: " + std::to_string(player.getLives()), font, 24);
+    livesText.setPosition(20.f, 10.f);
+    livesText.setFillColor(sf::Color(255, 80, 80)); // Czerwony
+    livesText.setStyle(sf::Text::Bold);
+
+    // Kasa (Bliżej lewej)
+    sf::Text moneyText("KASA: $" + std::to_string(player.getMoney()), font, 24);
+    moneyText.setPosition(250.f, 10.f);
+    moneyText.setFillColor(sf::Color(255, 215, 0)); // Złoty
+    moneyText.setStyle(sf::Text::Bold);
+
+    // Punkty (Na środku)
+    sf::Text scoreText("PUNKTY: " + std::to_string(player.getScore()), font, 24);
+    scoreText.setPosition(500.f, 10.f);
     scoreText.setFillColor(sf::Color::White);
+    scoreText.setStyle(sf::Text::Bold);
 
-    // Rysujemy bazowe statystyki
+    // Fala (Po prawej)
+    std::string waveStr = waveManager.isWaveInProgress() ?
+                              "FALA: " + std::to_string(waveManager.getCurrentWaveNumber()) + " (W TOKU...)" :
+                              "FALA: " + std::to_string(waveManager.getCurrentWaveNumber()) + " [Wcisnij SPACJE]";
+
+    sf::Text waveText(waveStr, font, 24);
+    // Pozycjonujemy do prawej krawędzi (zakładając szerokość okna 1280)
+    waveText.setPosition(880.f, 10.f);
+    waveText.setFillColor(sf::Color::Cyan);
+    waveText.setStyle(sf::Text::Bold);
+
+    // Rysujemy statystyki
     window.draw(moneyText);
     window.draw(livesText);
     window.draw(scoreText);
+    window.draw(waveText);
 
     // 4. Wyświetlanie menu budowania TYLKO gdy zaznaczono slot
     if (selectedSlotIndex >= 0) {
         const TowerSlot& slot = map.getSlots()[selectedSlotIndex];
 
+        // Tło pod menu
+        sf::RectangleShape menuBg(sf::Vector2f(280.f, 210.f));
+        menuBg.setPosition(10.f, 70.f);
+        menuBg.setFillColor(sf::Color(30, 30, 50, 210)); // Ciemnogranatowe, przezroczyste tło
+        menuBg.setOutlineThickness(2.f);
+        menuBg.setOutlineColor(sf::Color(100, 150, 255));
+        window.draw(menuBg);
+
         if (!slot.occupied) {
             // MENU BUDOWANIA
             sf::Text buildText(
-                "Wybierz wieze:\n"
+                "WYBIERZ WIEZE:\n\n"
                 "[1] Karabin ($50)\n"
                 "[2] Snajper ($100)\n"
                 "[3] Wyrzutnia ($150)\n"
                 "[4] Miotacz Ognia ($80)\n"
                 "[5] Spowalniacz ($60)\n"
                 "[ESC] Anuluj", font, 20);
-            buildText.setPosition(20.f, 130.f);
-            buildText.setFillColor(sf::Color::Cyan);
+            buildText.setPosition(25.f, 80.f);
+            buildText.setFillColor(sf::Color::White);
             window.draw(buildText);
         } else {
             // MENU ULEPSZEŃ / SPRZEDAŻY
@@ -342,12 +376,12 @@ void Game::renderUI() {
                                              "[U] MAX POZIOM\n";
 
                 sf::Text upgradeText(
-                    "Wieza - Poziom " + std::to_string(lvl) + "\n" +
+                    "WIEZA - POZIOM " + std::to_string(lvl) + "\n\n" +
                         upgradeStr +
-                        "[S] Sprzedaj ($" + std::to_string(refund) + ")\n" +
+                        "[S] Sprzedaj ($" + std::to_string(refund) + ")\n\n" +
                         "[ESC] Anuluj", font, 20);
-                upgradeText.setPosition(20.f, 130.f);
-                upgradeText.setFillColor(sf::Color::Magenta);
+                upgradeText.setPosition(25.f, 80.f);
+                upgradeText.setFillColor(sf::Color(255, 150, 255)); // Różowawy kolor
                 window.draw(upgradeText);
             }
         }
@@ -355,7 +389,7 @@ void Game::renderUI() {
     // --- NAPISY NA MAPIE (BAZA i DROP ZONE) ---
     if (!font.getInfo().family.empty()) {
         // 1. Napis DROP ZONE
-        sf::Text dzText("HELP\nZONE", font, 17);
+        sf::Text dzText("DROP\nZONE", font, 17);
         dzText.setFillColor(sf::Color(0, 255, 0, 150));
         // Pobieramy pozycję strefy z naszej aktualnej mapy
         sf::Vector2f dzPos = map.getDropZonePos();

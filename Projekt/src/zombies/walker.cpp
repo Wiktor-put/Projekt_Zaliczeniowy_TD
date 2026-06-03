@@ -1,5 +1,6 @@
 #include "walker.h"
 #include "Config.h"
+#include <cmath>
 
 // Inicjalizacja statycznych zmiennych klasy
 sf::Texture Walker::texture;
@@ -20,10 +21,10 @@ Walker::Walker(const std::vector<sf::Vector2f>& waypoints) : Zombie(waypoints)
     // --- MAGIA TEKSTUR ---
     // 1. Ładujemy obrazek z dysku tylko dla pierwszego zombiaka
     if (!isTextureLoaded) {
-        if (texture.loadFromFile(std::string(ASSETS_DIR) + "/assets/textures/zombies.jpg")) {
+        if (texture.loadFromFile(std::string(ASSETS_DIR) + "/assets/textures/walker.png")) {
             isTextureLoaded = true;
         } else {
-            std::cerr << "Nie udalo sie zaladowac grafiki zombies.jpg!" << std::endl;
+            std::cerr << "Nie udalo sie zaladowac grafiki walker.png!" << std::endl;
         }
     }
 
@@ -33,13 +34,14 @@ Walker::Walker(const std::vector<sf::Vector2f>& waypoints) : Zombie(waypoints)
 
         // 2. Konfiguracja animacji z wyliczeniem rozmiarów
         frameWidth = texture.getSize().x / 8;
-        frameHeight = texture.getSize().y / 4;
+        frameHeight = texture.getSize().y / 6;
 
         sprite.setTextureRect(sf::IntRect(0, 0, frameWidth, frameHeight));
         sprite.setOrigin(frameWidth / 2.f, frameHeight / 2.f);
 
-
         sprite.setPosition(position);
+
+        sprite.setScale(0.3f, 0.3f);
     }
 
     // "Ukrywamy" stary zielony kwadrat, robiąc go przezroczystym reszte zostawiamy
@@ -55,37 +57,31 @@ void Walker::update(float dt, std::vector<std::unique_ptr<GameObject>>& objects)
 
     // --- LOGIKA ANIMACJI ---
     if (isTextureLoaded && !reachedEnd()) {
-        animationTimer += dt;
 
-        // Jeśli minął ułamek sekundy, przeskakujemy na kolejną klatkę
-        if (animationTimer >= frameDuration) {
-            animationTimer = 0.f;   // Resetujemy stoper
-            currentFrame++;         // Następna klatka
-
-            // Jeśli doszliśmy do końca rzędu, zapętlamy od zera
-            if (currentFrame >= totalFrames) {
-                currentFrame = 0;
-            }
-
-            // Przesuwamy "okienko" wycinania w prawo o (currentFrame * frameWidth)
-            // Używamy y = 0, czyli bierzemy pierwszy, górny rząd z obrazka
-            sprite.setTextureRect(sf::IntRect(currentFrame * frameWidth, 0, frameWidth, frameHeight));
+        // --- WYBÓR KIERUNKU (RZĘDU) ---
+        // Sprawdzamy, czy prędkość jest większa na osi X czy Y
+        if (std::abs(velocity.x) > std::abs(velocity.y)) {
+            // Ruch poziomy
+            if (velocity.x > 0) currentRow = 2;      // Prawo (Rząd 3 na obrazku)
+            else currentRow = 3;                     // Lewo (Rząd 4 na obrazku)
+        } else {
+            // Ruch pionowy
+            if (velocity.y > 0) currentRow = 0;      // Dół (Rząd 1 na obrazku)
+            else currentRow = 1;                     // Góra (Rząd 2 na obrazku)
         }
 
-        // --- SKALOWANIE I ODBICIE LUSTRZANE ---
-        // Skalowanie rozmiaru zombie
-        float scaleFactor = 0.4f;
+        // --- ANIMACJA (ZMIANA KLATEK) ---
+        animationTimer += dt;
+        if (animationTimer >= frameDuration) {
+            animationTimer = 0.f;
+            currentFrame++;
 
-        if (velocity.x < -0.1f) {
-            // Zombiak idzie w lewo -> odwracamy oś X (ujemna skala)
-            sprite.setScale(-scaleFactor, scaleFactor);
-        } else if (velocity.x > 0.1f) {
-            // Zombiak idzie w prawo -> normalna skala
-            sprite.setScale(scaleFactor, scaleFactor);
-        } else {
-            // Jeśli idzie pionowo, zachowujemy ostatni kierunek X, ale aplikujemy nowy rozmiar
-            float currentSign = (sprite.getScale().x < 0) ? -1.f : 1.f;
-            sprite.setScale(currentSign * scaleFactor, scaleFactor);
+            if (currentFrame >= totalFrames) {
+                currentFrame = 0; // Zapętlamy chodzenie
+            }
+
+            // Przesuwamy okienko wycinania w oparciu o wyliczony rząd i klatkę
+            sprite.setTextureRect(sf::IntRect(currentFrame * frameWidth, currentRow * frameHeight, frameWidth, frameHeight));
         }
     }
     // Obrazek musi podążać za pozycją zombiaka

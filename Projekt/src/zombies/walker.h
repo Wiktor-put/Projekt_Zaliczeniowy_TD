@@ -17,8 +17,10 @@ private:
     sf::Sprite sprite; // Obiekt, który "założy" na siebie teksturę
 
     // --- ZMIENNE DO ANIMACJI ---
-    int currentFrame = 0;       // Obecnie wyświetlana klatka (od 0 do 7)
+    int currentFrame = 0;       // Obecnie wyświetlana klatka w rzędzie (0-7)
+    int currentRow = 0;         // Obecny rząd (kierunek: 0=dół, 1=góra, 2=prawo, 3=lewo)
     int totalFrames = 8;        // Całkowita liczba klatek w jednym rzędzie
+
     float animationTimer = 0.f; // Stoper odmierzający czas
     float frameDuration = 0.1f; // Czas wyświetlania jednej klatki w sekundach (10 klatek na sekundę)
 
