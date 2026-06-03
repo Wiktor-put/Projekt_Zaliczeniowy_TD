@@ -71,6 +71,23 @@ void Map::draw(sf::RenderWindow& window) const {
     dropZone.setOutlineColor(sf::Color::Green);
     dropZone.setOutlineThickness(2.f);
     window.draw(dropZone);
+
+    // --- RYSOWANIE BAZY ---
+    if (!waypoints.empty()) {
+        // Baza zawsze znajduje się na OSTATNIM punkcie ścieżki (waypoint)
+        sf::Vector2f basePos = waypoints.back();
+
+        sf::RectangleShape baseShape(sf::Vector2f(140.f, 140.f));
+        baseShape.setOrigin(70.f, 70.f);
+        baseShape.setPosition(basePos);
+
+        // Ciemnoniebieski kolor bazy z jasną ramką
+        baseShape.setFillColor(sf::Color(40, 60, 120));
+        baseShape.setOutlineColor(sf::Color(100, 150, 255));
+        baseShape.setOutlineThickness(3.f);
+
+        window.draw(baseShape);
+    }
 }
 
 

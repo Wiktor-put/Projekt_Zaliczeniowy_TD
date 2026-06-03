@@ -341,25 +341,35 @@ void Game::renderUI() {
             }
         }
     }
+    // --- NAPISY NA MAPIE (BAZA i DROP ZONE) ---
+    if (!font.getInfo().family.empty()) {
+        // 1. Napis DROP ZONE
+        sf::Text dzText("HELP\nZONE", font, 17);
+        dzText.setFillColor(sf::Color(0, 255, 0, 150));
+        // Pobieramy pozycję strefy z naszej aktualnej mapy
+        sf::Vector2f dzPos = map.getDropZonePos();
+        // Ustawiamy pozycję tekstu delikatnie przesuniętą
+        dzText.setPosition(dzPos.x - 25.f, dzPos.y - 15.f);
+        window.draw(dzText);
+
+        // 2. Napis BAZA (Pionowo)
+        sf::Text baseText("G\nA\nT\nE", font, 22);
+        baseText.setFillColor(sf::Color::White);
+        baseText.setStyle(sf::Text::Bold);
+
+        sf::Vector2f basePos = map.getWaypoints().back(); // Ostatni waypoint to baza
+        sf::FloatRect baseBounds = baseText.getLocalBounds();
+        baseText.setOrigin(baseBounds.width / 0.5, baseBounds.height / 2.f);
+        baseText.setPosition(basePos.x, basePos.y);
+        window.draw(baseText);
+    }
 }
 
 void Game::render() {
     window.clear(sf::Color::Black);
+
     map.draw(window);
 
-    // Napis na strefie zrzutu (sam kwadrat rysuje już mapa!)
-    if (!font.getInfo().family.empty()) {
-        sf::Text dzText("HELP\nZONE", font, 17);
-        dzText.setFillColor(sf::Color(0, 255, 0, 150));
-
-        // Pobieramy pozycję strefy z naszej aktualnej mapy
-        sf::Vector2f dzPos = map.getDropZonePos();
-
-        // Ustawiamy pozycję tekstu delikatnie przesuniętą, żeby była na środku
-        dzText.setPosition(dzPos.x - 25.f, dzPos.y - 15.f);
-
-        window.draw(dzText);
-    }
 
     for (auto& o : objects) {
         o->render(window);
