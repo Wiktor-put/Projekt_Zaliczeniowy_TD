@@ -15,6 +15,7 @@
 #include "slowertower.h"
 #include "Random.h"
 #include <cmath>
+#include <fstream>
 
 // ASSETS_DIR definiowane przez qmake jako $$PWD (katalog projektu).
 // Fallback na "." gdy kompilowane bez qmake.
@@ -116,12 +117,22 @@ void Game::processEvents(){
             // Escape — odznacz slot bez kupowania
             if (event.key.code == sf::Keyboard::Escape)
                 selectedSlotIndex = -1;
-        }
-        if (event.key.code == sf::Keyboard::Space) {
-            if (!waveManager.isWaveInProgress()) {
-                waveManager.startNextWave();
+
+            // Klawisz F5 - Zapisz grę
+            if (event.key.code == sf::Keyboard::F5)
+                saveGame();
+
+            // Klawisz F9 - Wczytaj grę
+            if (event.key.code == sf::Keyboard::F9)
+                loadGame();
+            // spacja - nowa fala
+            if (event.key.code == sf::Keyboard::Space) {
+                if (!waveManager.isWaveInProgress()) {
+                    waveManager.startNextWave();
+                }
             }
         }
+
     }
 }
 
@@ -152,7 +163,7 @@ void Game::checkCollisions() {
         // żeby kolizja miała szansę być wykryta zanim pocisk zniknie.
         if (projectile->isAlive() && projectile->hasReachedTarget()) {
             Rocket* roc = dynamic_cast<Rocket*>(projectile);
-            if(roc->isAlive() && roc)
+            if(roc && roc->isAlive())
                 roc->explosion(objects);
             projectile->destroy();
         }
@@ -511,4 +522,100 @@ void Game::trySellTower() {
             break;
         }
     }
+}
+
+// ZAPIS I ODCZYT GRY
+void Game::saveGame() {
+    std::ofstream file("save.txt");
+    if (!file.is_open()) {
+        std::cerr << "Nie udalo sie otworzyc pliku do zapisu!" << std::endl;
+        return;
+    }
+
+    // 1. Zapisujemy Gracza i aktualną falę z WaveManager
+    file << player.getMoney() << " " << player.getLives() << " "
+         << player.getScore() << " " << waveManager.getCurrentWaveIndex() << "\n";
+
+    // 2. Szukamy wszystkich wież na mapie
+    std::vector<Tower*> towersToSave;
+    for (auto& obj : objects) {
+        if (Tower* t = dynamic_cast<Tower*>(obj.get())) {
+            towersToSave.push_back(t);
+        }
+    }
+
+    // 3. Zapisujemy liczbę wież, a potem ich dane (Typ, X, Y, Poziom)
+    file << towersToSave.size() << "\n";
+    for (Tower* t : towersToSave) {
+        int type = 0;
+        if (dynamic_cast<MachineGunTower*>(t)) type = 1;
+        else if (dynamic_cast<SniperTower*>(t)) type = 2;
+        else if (dynamic_cast<RocketTower*>(t)) type = 3;
+        else if (dynamic_cast<FlamethrowerTower*>(t)) type = 4;
+        else if (dynamic_cast<SlowerTower*>(t)) type = 5;
+
+        file << type << " " << t->getPosition().x << " " << t->getPosition().y << " " << t->getLevel() << "\n";
+    }
+
+    file.close();
+    std::cout << "Zapisano gre pomyslnie! (Klawisz F5)" << std::endl;
+}
+
+void Game::loadGame() {
+    std::ifstream file("save.txt");
+    if (!file.is_open()) {
+        std::cerr << "Brak pliku zapisu!" << std::endl;
+        return;
+    }
+
+    // 1. Czyścimy obecny stan gry
+    objects.clear();
+    map.loadFromFile(std::string(ASSETS_DIR) + "/assets/maps/map1.txt"); // Reset slotów do stanu "puste"
+    selectedSlotIndex = -1;
+    state = GameState::PLAYING;
+
+    // 2. Wczytujemy gracza i numer fali
+    int money, lives, score, waveIndex, towerCount;
+    file >> money >> lives >> score >> waveIndex;
+
+    player.setMoney(money);
+    player.setLives(lives);
+    player.setScore(score);
+    waveManager.setCurrentWaveIndex(waveIndex);
+
+    // 3. Wczytujemy wieże
+    file >> towerCount;
+    for (int i = 0; i < towerCount; ++i) {
+        int type, level;
+        float px, py;
+        file >> type >> px >> py >> level;
+
+        sf::Vector2f pos(px, py);
+        Tower* newTower = nullptr;
+
+        // Tworzymy odpowiedni obiekt
+        if (type == 1) { auto t = std::make_unique<MachineGunTower>(pos); newTower = t.get(); objects.push_back(std::move(t)); }
+        else if (type == 2) { auto t = std::make_unique<SniperTower>(pos); newTower = t.get(); objects.push_back(std::move(t)); }
+        else if (type == 3) { auto t = std::make_unique<RocketTower>(pos); newTower = t.get(); objects.push_back(std::move(t)); }
+        else if (type == 4) { auto t = std::make_unique<FlamethrowerTower>(pos); newTower = t.get(); objects.push_back(std::move(t)); }
+        else if (type == 5) { auto t = std::make_unique<SlowerTower>(pos); newTower = t.get(); objects.push_back(std::move(t)); }
+
+        // Zajmujemy odpowiedni slot na mapie
+        for (auto& slot : map.getSlots()) {
+            if (slot.position == pos) {
+                slot.occupied = true;
+                break;
+            }
+        }
+
+        // Ulepszamy wczytaną wieżę do odpowiedniego poziomu
+        if (newTower) {
+            for (int lvl = 1; lvl < level; ++lvl) {
+                newTower->upgrade();
+            }
+        }
+    }
+
+    file.close();
+    std::cout << "Wczytano gre pomyslnie! (Klawisz F9)" << std::endl;
 }

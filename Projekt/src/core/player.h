@@ -44,6 +44,11 @@ public:
     int getScore() const { return score; }
     // za bonusy dostajemy zycie
     void addLives(int amount) { lives += amount; }
+
+    //settery
+    void setMoney(int m) { money = m; }
+    void setLives(int l) { lives = l; }
+    void setScore(int s) { score = s; }
 };
 
 #endif // PLAYER_H

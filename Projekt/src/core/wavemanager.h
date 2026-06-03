@@ -56,6 +56,10 @@ public:
 
     // Reset do nowej gry
     void reset();
+
+    //do zapisu
+    void setCurrentWaveIndex(int index) { currentWaveIndex = index; }
+    int getCurrentWaveIndex() const { return currentWaveIndex; }
 };
 
 #endif

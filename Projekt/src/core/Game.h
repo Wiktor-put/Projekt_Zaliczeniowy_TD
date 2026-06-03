@@ -64,6 +64,10 @@ public:
     void tryUpgradeTower();
     void trySellTower();
 
+    //zapisywanie gry
+    void saveGame();
+    void loadGame();
+
     // Zeruje martwe targety wież i usuwa martwe obiekty z kontenera.
     // Wywoływane na końcu update() — po update i kolizjach.
     void removeDeadObjects();
