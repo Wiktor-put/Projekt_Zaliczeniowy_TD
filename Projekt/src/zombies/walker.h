@@ -14,8 +14,16 @@ private:
     // Statyczne zmienne - jeden obrazek w pamięci współdzielony przez wszystkie Walkery
     static sf::Texture texture;
     static bool isTextureLoaded;
-
     sf::Sprite sprite; // Obiekt, który "założy" na siebie teksturę
+
+    // --- ZMIENNE DO ANIMACJI ---
+    int currentFrame = 0;       // Obecnie wyświetlana klatka (od 0 do 7)
+    int totalFrames = 8;        // Całkowita liczba klatek w jednym rzędzie
+    float animationTimer = 0.f; // Stoper odmierzający czas
+    float frameDuration = 0.1f; // Czas wyświetlania jednej klatki w sekundach (10 klatek na sekundę)
+
+    int frameWidth;             // Szerokość pojedynczej klatki
+    int frameHeight;            // Wysokość pojedynczej klatki
 public:
     Walker(const std::vector<sf::Vector2f>& waypoints);
 
