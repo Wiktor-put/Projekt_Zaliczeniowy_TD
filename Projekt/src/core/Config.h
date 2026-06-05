@@ -32,6 +32,12 @@ constexpr const char* ARMORED_DOWN = "/assets/textures/amored walk/Zombie_Axe_Do
 constexpr const char* ARMORED_UP = "/assets/textures/amored walk/Zombie_Axe_Up_Walk-Sheet8.png";
 constexpr const char* ARMORED_RIGHT = "/assets/textures/amored walk/Zombie_Axe_Side_Walk-Sheet8.png";
 constexpr const char* ARMORED_LEFT = "/assets/textures/amored walk/Zombie_Axe_Side-left_Walk-Sheet8.png";
+
+// Ścieżki dla Tanka
+constexpr const char* TANK_DOWN = "/assets/textures/tank walk/Zombie_Big_Down_Walk-Sheet8.png";
+constexpr const char* TANK_UP = "/assets/textures/tank walk/Zombie_Big_Up_Walk-Sheet8.png";
+constexpr const char* TANK_RIGHT = "/assets/textures/tank walk/Zombie_Big_Side_Walk-Sheet8.png";
+constexpr const char* TANK_LEFT = "/assets/textures/tank walk/Zombie_Big_Side-left_Walk-Sheet8.png";
 }
 
 // ===== GRACZ =====

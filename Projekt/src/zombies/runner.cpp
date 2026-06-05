@@ -1,5 +1,6 @@
 #include "runner.h"
 #include "Config.h"
+#include <cmath>
 
 // Inicjalizacja zmiennych statycznych
 sf::Texture Runner::texDown;

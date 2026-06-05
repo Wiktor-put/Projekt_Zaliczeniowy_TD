@@ -40,7 +40,7 @@ void Game::startNewGame() {
     selectedSlotIndex = -1;    // anuluj wybór slotu jeśli był
     state = GameState::PLAYING;
     waveManager.reset();
-    waveManager.loadFromFile(std::string(ASSETS_DIR) + "/assets/waves/waves.txt");
+    waveManager.loadFromFile(std::string(ASSETS_DIR) + "/assets/waves/waves_testowe.txt");
 }
 
 void Game::processEvents(){
