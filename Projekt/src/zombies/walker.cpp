@@ -36,6 +36,7 @@ Walker::Walker(const std::vector<sf::Vector2f>& waypoints) : Zombie(waypoints)
         frameWidth = texture.getSize().x / 8;
         frameHeight = texture.getSize().y / 6;
 
+
         sprite.setTextureRect(sf::IntRect(0, 0, frameWidth, frameHeight));
         sprite.setOrigin(frameWidth / 2.f, frameHeight / 2.f);
 
