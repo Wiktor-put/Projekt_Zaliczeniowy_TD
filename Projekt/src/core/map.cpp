@@ -40,10 +40,31 @@ void Map::loadFromFile(const std::string& path) {
 
     std::cout << "Wczytano " << waypoints.size() << " waypointow i "
               << towerSlots.size() << " slotow z " << path << std::endl;
+
+    // --- ŁADOWANIE TŁA MAPY ---
+    if (!isBgLoaded) {
+        if (bgTexture.loadFromFile(std::string(ASSETS_DIR) + Config::Assets::BACKGROUND)) {
+            bgSprite.setTexture(bgTexture);
+
+            // Kod automatycznie skaluje obrazek, żeby idealnie pasował do okna 1280x720
+            float scaleX = static_cast<float>(Config::WINDOW_WIDTH) / bgTexture.getSize().x;
+            float scaleY = static_cast<float>(Config::WINDOW_HEIGHT) / bgTexture.getSize().y;
+            bgSprite.setScale(scaleX, scaleY);
+
+            isBgLoaded = true;
+        } else {
+            std::cerr << "Nie udalo sie zaladowac tla" << std::endl;
+        }
+    }
 }
 
 void Map::draw(sf::RenderWindow& window) const {
     if (waypoints.size() < 2) return;
+
+    // --- RYSOWANIE TŁA MAPY (Zawsze na samym spodzie!) ---
+    if (isBgLoaded) {
+        window.draw(bgSprite);
+    }
 
     // rysowanie ścieżki jako linii łączącej waypointy
     sf::VertexArray path(sf::LineStrip, waypoints.size());

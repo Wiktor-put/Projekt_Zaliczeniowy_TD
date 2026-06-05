@@ -11,21 +11,22 @@
 class Walker : public Zombie
 {
 private:
-    // Statyczne zmienne - jeden obrazek w pamięci współdzielony przez wszystkie Walkery
-    static sf::Texture texture;
-    static bool isTextureLoaded;
+    // Mamy teraz 4 osobne paski animacji
+    static sf::Texture texDown;
+    static sf::Texture texUp;
+    static sf::Texture texRight;
+    static sf::Texture texLeft;
+
+    static bool areTexturesLoaded;
     sf::Sprite sprite; // Obiekt, który "założy" na siebie teksturę
 
     // --- ZMIENNE DO ANIMACJI ---
-    int currentFrame = 0;       // Obecnie wyświetlana klatka w rzędzie (0-7)
-    int currentRow = 0;         // Obecny rząd (kierunek: 0=dół, 1=góra, 2=prawo, 3=lewo)
-    int totalFrames = 8;        // Całkowita liczba klatek w jednym rzędzie
+    int currentFrame = 0;       // Obecnie wyświetlana klatka w rzędzie (0-6)
+    int totalFrames = 6;        // Całkowita liczba klatek w jednym rzędzie
 
     float animationTimer = 0.f; // Stoper odmierzający czas
     float frameDuration = 0.1f; // Czas wyświetlania jednej klatki w sekundach (10 klatek na sekundę)
 
-    int frameWidth;             // Szerokość pojedynczej klatki
-    int frameHeight;            // Wysokość pojedynczej klatki
 public:
     Walker(const std::vector<sf::Vector2f>& waypoints);
 

@@ -26,6 +26,11 @@ private:
     std::vector<sf::Vector2f> waypoints; // kolejne punkty trasy zombie
     std::vector<TowerSlot> towerSlots;   // dostępne miejsca na wieże
     sf::Vector2f dropZonePos{1150.f, 600.f}; // Domyślna pozycja drop zone
+
+    // --- ZMIENNE DO TŁA MAPY ---
+    sf::Texture bgTexture;
+    sf::Sprite bgSprite;
+    bool isBgLoaded = false;
 public:
     Map() = default;
 

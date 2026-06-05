@@ -10,6 +10,24 @@ constexpr int WINDOW_WIDTH = 1280;
 constexpr int WINDOW_HEIGHT = 720;
 constexpr int FPS_LIMIT = 60;
 
+// ===== ASSETS (SCIEZKI DO PLIKOW) =====
+namespace Assets {
+constexpr const char* BACKGROUND = "/assets/textures/background_las.png";
+//constexpr const char* ZOMBIE_WALKER = "/assets/textures/walker.png";
+
+// Nowe ścieżki dla Walkera
+constexpr const char* WALKER_DOWN = "/assets/textures/walker walk/Zombie_Small_Down_walk-Sheet6.png";
+constexpr const char* WALKER_UP = "/assets/textures/walker walk/Zombie_Small_Up_Walk-Sheet6.png";
+constexpr const char* WALKER_RIGHT = "/assets/textures/walker walk/Zombie_Small_Side_Walk-Sheet6.png";
+constexpr const char* WALKER_LEFT = "/assets/textures/walker walk/Zombie_Small_Side-left_Walk-Sheet6.png";
+
+// Ścieżki dla Armored Zombie
+constexpr const char* ARMORED_DOWN = "/assets/textures/amored walk/Zombie_Axe_Down_Walk-Sheet8.png";
+constexpr const char* ARMORED_UP = "/assets/textures/amored walk/Zombie_Axe_Up_Walk-Sheet8.png";
+constexpr const char* ARMORED_RIGHT = "/assets/textures/amored walk/Zombie_Axe_Side_Walk-Sheet8.png";
+constexpr const char* ARMORED_LEFT = "/assets/textures/amored walk/Zombie_Axe_Side-left_Walk-Sheet8.png";
+}
+
 // ===== GRACZ =====
 constexpr int STARTING_LIVES = 20;
 constexpr int STARTING_MONEY = 200;
