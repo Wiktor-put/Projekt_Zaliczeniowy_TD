@@ -50,8 +50,18 @@ public:
     // Rysuje mapę i wszystkie obiekty sceny.
     void render();
 
-    // Aktualizuje wszystkie obiekty i usuwa martwe; dt w sekundach.
+    void renderMenu();
+    void renderPlaying();
+    void renderPaused();
+    void renderGameOver();
+    void renderHighscores();
+    // Rysuje główny interfejs gracza (UI)
+    void renderUI();
+
+    // Ogolna aktualizacja stanu dla wszystkich stanow gry
     void update(float dt);
+    // Aktualizuje wszystkie obiekty i usuwa martwe; dt w sekundach. Podczas trawania gry
+    void updatePlaying(float dt);
 
     // Obsługuje zdarzenia SFML (zamknięcie okna, klawiatura, mysz).
     void processEvents();
@@ -75,13 +85,10 @@ public:
     // Wywoływane na końcu update() — po update i kolizjach.
     void removeDeadObjects();
 
-    void renderGameOver();
-
-    // Rysuje główny interfejs gracza (UI)
-    void renderUI();
-
     void applyBonus(BonusType type);
 
+    int menuSelectedOption;  // ktora opcja menu jest podswietlona (0-3)
+    void handleMenuChoice(int option);
 };
 
 #endif // GAME_H

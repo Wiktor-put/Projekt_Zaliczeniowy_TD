@@ -23,7 +23,7 @@
 #define ASSETS_DIR "."
 #endif
 
-Game::Game() : window(sf::VideoMode(Config::WINDOW_WIDTH, Config::WINDOW_HEIGHT), "DEAD ZONE"), state(GameState::MENU) {
+Game::Game() : window(sf::VideoMode(Config::WINDOW_WIDTH, Config::WINDOW_HEIGHT), "DEAD ZONE"), state(GameState::MENU), menuSelectedOption(0) {
     window.setFramerateLimit(Config::FPS_LIMIT);
     if (!font.loadFromFile(std::string(ASSETS_DIR) + "/assets/fonts/arial.ttf")) {
         std::cerr << "Nie udalo sie zaladowac fontu!" << std::endl;
@@ -48,6 +48,22 @@ void Game::processEvents(){
             window.close();
 
         if (event.type == sf::Event::KeyPressed) {
+            // Obsluga menu
+            if (state == GameState::MENU) {
+                if (event.key.code == sf::Keyboard::Up) {
+                    menuSelectedOption--;
+                    if (menuSelectedOption < 0) menuSelectedOption = 3;
+                }
+                if (event.key.code == sf::Keyboard::Down) {
+                    menuSelectedOption++;
+                    if (menuSelectedOption > 3) menuSelectedOption = 0;
+                }
+                if (event.key.code == sf::Keyboard::Enter
+                    || event.key.code == sf::Keyboard::Return) {
+                    handleMenuChoice(menuSelectedOption);
+                }
+                continue;  // nie wpadaj w obsluge innych klawiszy
+            }
             // R restartuje grę po przegranej
             if (state == GameState::GAME_OVER && event.key.code == sf::Keyboard::R) {
                 startNewGame();
@@ -134,6 +150,28 @@ void Game::processEvents(){
     }
 }
 
+void Game::handleMenuChoice(int option) {
+    switch (option) {
+    case 0:  // Nowa gra
+        startNewGame();
+        state = GameState::PLAYING;
+        break;
+
+    case 1:  // Wczytaj gre
+        // Implementacja w MS4 fazie 3
+        std::cout << "Wczytywanie - dostepne w MS4 fazie 3" << std::endl;
+        break;
+
+    case 2:  // Wyniki
+        state = GameState::HIGHSCORES;
+        break;
+
+    case 3:  // Wyjdz
+        window.close();
+        break;
+    }
+}
+
 void Game::checkCollisions() {
     // Iteracja po wszystkich obiektach, szukamy pociski
     for (auto& obj : objects) {
@@ -168,7 +206,31 @@ void Game::checkCollisions() {
     }
 }
 
-void Game::update(float dt){
+void Game::update(float dt) {
+    switch (state) {
+    case GameState::MENU:
+        // Menu jest statyczne, nic nie aktualizujemy
+        break;
+
+    case GameState::PLAYING:
+        updatePlaying(dt);
+        break;
+
+    case GameState::PAUSED:
+        // Pauza - gra zatrzymana, ekran statyczny
+        break;
+
+    case GameState::GAME_OVER:
+        // Ekran konca, nic nie aktualizujemy
+        break;
+
+    case GameState::HIGHSCORES:
+        // Tablica wynikow, ekran statyczny
+        break;
+    }
+}
+
+void Game::updatePlaying(float dt){
     if (state != GameState::PLAYING) return;
     waveManager.update(dt, objects, map.getWaypoints());
 
@@ -231,6 +293,72 @@ void Game::update(float dt){
     removeDeadObjects();
 }
 
+void Game::renderMenu() {
+    // Tlo - ciemny gradient (na razie zwykly kolor)
+    sf::RectangleShape bg(sf::Vector2f(
+        static_cast<float>(Config::WINDOW_WIDTH),
+        static_cast<float>(Config::WINDOW_HEIGHT)
+        ));
+    bg.setFillColor(sf::Color(20, 30, 20));  // ciemny zielony
+    window.draw(bg);
+
+    if (font.getInfo().family.empty()) return;
+
+    // Tytul gry
+    sf::Text title("DEAD ZONE", font, 80);
+    title.setFillColor(sf::Color(150, 255, 100));  // toksyczna zielen
+    title.setOutlineColor(sf::Color::Black);
+    title.setOutlineThickness(3.f);
+    sf::FloatRect titleBounds = title.getLocalBounds();
+    title.setOrigin(titleBounds.width / 2.f, titleBounds.height / 2.f);
+    title.setPosition(Config::WINDOW_WIDTH / 2.f, 150.f);
+    window.draw(title);
+
+    // Podtytul
+    sf::Text subtitle("Tower Defense | Zombie Apocalypse", font, 22);
+    subtitle.setFillColor(sf::Color::White);
+    sf::FloatRect subBounds = subtitle.getLocalBounds();
+    subtitle.setOrigin(subBounds.width / 2.f, subBounds.height / 2.f);
+    subtitle.setPosition(Config::WINDOW_WIDTH / 2.f, 230.f);
+    window.draw(subtitle);
+
+    // Opcje menu
+    const std::string options[] = {
+        "Nowa gra",
+        "Wczytaj gre",
+        "Wyniki",
+        "Wyjdz"
+    };
+
+    float optionY = 360.f;
+    for (int i = 0; i < 4; ++i) {
+        sf::Text opt(options[i], font, 32);
+
+        // Podswietlenie aktualnie wybranej opcji
+        if (i == menuSelectedOption) {
+            opt.setFillColor(sf::Color(150, 255, 100));
+            opt.setStyle(sf::Text::Bold);
+        } else {
+            opt.setFillColor(sf::Color(200, 200, 200));
+        }
+
+        sf::FloatRect bounds = opt.getLocalBounds();
+        opt.setOrigin(bounds.width / 2.f, bounds.height / 2.f);
+        opt.setPosition(Config::WINDOW_WIDTH / 2.f, optionY);
+        window.draw(opt);
+
+        optionY += 60.f;
+    }
+
+    // Instrukcja na dole
+    sf::Text hint("Strzalki gora/dol, ENTER aby wybrac", font, 16);
+    hint.setFillColor(sf::Color(150, 150, 150));
+    sf::FloatRect hintBounds = hint.getLocalBounds();
+    hint.setOrigin(hintBounds.width / 2.f, hintBounds.height / 2.f);
+    hint.setPosition(Config::WINDOW_WIDTH / 2.f, Config::WINDOW_HEIGHT - 40.f);
+    window.draw(hint);
+}
+
 void Game::renderGameOver() {
     // Półprzezroczyste czarne tło zaciemniające grę
     sf::RectangleShape overlay(sf::Vector2f(
@@ -275,6 +403,10 @@ void Game::renderGameOver() {
         );
     window.draw(restartText);
 }
+
+void Game::renderPaused(){}
+
+void Game::renderHighscores(){}
 
 
 void Game::renderUI() {
@@ -408,9 +540,10 @@ void Game::renderUI() {
     }
 }
 
-void Game::render() {
-    window.clear(sf::Color::Black);
-
+void Game::renderPlaying() {
+    // UWAGA: brak window.clear()/window.display() — robi to render(),
+    // który jest dyrygentem. Podwójny display() na klatkę zamieniał bufory
+    // dwa razy i powodował miganie (stary bufor menu vs. świeża gra).
     map.draw(window);
 
 
@@ -429,13 +562,34 @@ void Game::render() {
         highlight.setOutlineThickness(2.f);
         window.draw(highlight);
     }
-
-    if (state == GameState::PLAYING) {
         renderUI();
-    }
+}
 
-    if (state == GameState::GAME_OVER) {
-        renderGameOver();
+void Game::render() {
+    window.clear(sf::Color::Black);
+
+    switch (state) {
+    case GameState::MENU:
+        renderMenu();
+        break;
+
+    case GameState::PLAYING:
+        renderPlaying();
+        break;
+
+    case GameState::PAUSED:
+        renderPlaying();  // tlo - zatrzymana rozgrywka
+        renderPaused();   // nakladka
+        break;
+
+    case GameState::GAME_OVER:
+        renderPlaying();   // tlo
+        renderGameOver();  // nakladka
+        break;
+
+    case GameState::HIGHSCORES:
+        renderHighscores();
+        break;
     }
 
     window.display();
