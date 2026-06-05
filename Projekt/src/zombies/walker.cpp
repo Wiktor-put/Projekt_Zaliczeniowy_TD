@@ -2,9 +2,12 @@
 #include "Config.h"
 #include <cmath>
 
-// Inicjalizacja statycznych zmiennych klasy
-sf::Texture Walker::texture;
-bool Walker::isTextureLoaded = false;
+// Inicjalizacja statycznych tekstur
+sf::Texture Walker::texDown;
+sf::Texture Walker::texUp;
+sf::Texture Walker::texRight;
+sf::Texture Walker::texLeft;
+bool Walker::areTexturesLoaded = false;
 
 Walker::Walker(const std::vector<sf::Vector2f>& waypoints) : Zombie(waypoints)
 {
@@ -20,29 +23,30 @@ Walker::Walker(const std::vector<sf::Vector2f>& waypoints) : Zombie(waypoints)
 
     // --- MAGIA TEKSTUR ---
     // 1. Ładujemy obrazek z dysku tylko dla pierwszego zombiaka
-    if (!isTextureLoaded) {
-        if (texture.loadFromFile(std::string(ASSETS_DIR) + "/assets/textures/walker.png")) {
-            isTextureLoaded = true;
-        } else {
-            std::cerr << "Nie udalo sie zaladowac grafiki walker.png!" << std::endl;
-        }
+    if (!areTexturesLoaded) {
+        bool ok = true;
+        ok &= texDown.loadFromFile(std::string(ASSETS_DIR) + Config::Assets::WALKER_DOWN);
+        ok &= texUp.loadFromFile(std::string(ASSETS_DIR) + Config::Assets::WALKER_UP);
+        ok &= texRight.loadFromFile(std::string(ASSETS_DIR) + Config::Assets::WALKER_RIGHT);
+        ok &= texLeft.loadFromFile(std::string(ASSETS_DIR) + Config::Assets::WALKER_LEFT);
+
+        if (ok) areTexturesLoaded = true;
+        else std::cerr << "Blad ladowania jednej z grafik Walkera!" << std::endl;
     }
 
     // 2. Podpinamy wczytaną teksturę do naszego sprite'a
-    if (isTextureLoaded) {
-        sprite.setTexture(texture);
+    if (areTexturesLoaded) {
+        // Domyślnie startujemy w prawo
+        sprite.setTexture(texRight);
 
-        // 2. Konfiguracja animacji z wyliczeniem rozmiarów
-        frameWidth = texture.getSize().x / 8;
-        frameHeight = texture.getSize().y / 6;
+        // Zawsze bierzemy wysokość całego paska i 1/6 jego szerokości
+        int fW = texRight.getSize().x / totalFrames;
+        int fH = texRight.getSize().y;
 
-
-        sprite.setTextureRect(sf::IntRect(0, 0, frameWidth, frameHeight));
-        sprite.setOrigin(frameWidth / 2.f, frameHeight / 2.f);
-
+        sprite.setTextureRect(sf::IntRect(0, 0, fW, fH));
+        sprite.setOrigin(fW / 2.f, fH / 2.f);
         sprite.setPosition(position);
-
-        sprite.setScale(0.3f, 0.3f);
+        sprite.setScale(2.0f, 2.0f); // Dopasuj tę wartość, nowa grafika jest malutka!
     }
 
     // "Ukrywamy" stary zielony kwadrat, robiąc go przezroczystym reszte zostawiamy
@@ -57,21 +61,20 @@ void Walker::update(float dt, std::vector<std::unique_ptr<GameObject>>& objects)
     Zombie::update(dt, objects);
 
     // --- LOGIKA ANIMACJI ---
-    if (isTextureLoaded && !reachedEnd()) {
+    if (areTexturesLoaded && !reachedEnd()) {
 
-        // --- WYBÓR KIERUNKU (RZĘDU) ---
-        // Sprawdzamy, czy prędkość jest większa na osi X czy Y
+        // --- WYBÓR TEKSTURY NA PODSTAWIE KIERUNKU ---
         if (std::abs(velocity.x) > std::abs(velocity.y)) {
             // Ruch poziomy
-            if (velocity.x > 0) currentRow = 2;      // Prawo (Rząd 3 na obrazku)
-            else currentRow = 3;                     // Lewo (Rząd 4 na obrazku)
+            if (velocity.x > 0) sprite.setTexture(texRight);
+            else sprite.setTexture(texLeft);
         } else {
             // Ruch pionowy
-            if (velocity.y > 0) currentRow = 0;      // Dół (Rząd 1 na obrazku)
-            else currentRow = 1;                     // Góra (Rząd 2 na obrazku)
+            if (velocity.y > 0) sprite.setTexture(texDown);
+            else sprite.setTexture(texUp);
         }
 
-        // --- ANIMACJA (ZMIANA KLATEK) ---
+        // --- ANIMACJA  ---
         animationTimer += dt;
         if (animationTimer >= frameDuration) {
             animationTimer = 0.f;
@@ -81,8 +84,12 @@ void Walker::update(float dt, std::vector<std::unique_ptr<GameObject>>& objects)
                 currentFrame = 0; // Zapętlamy chodzenie
             }
 
-            // Przesuwamy okienko wycinania w oparciu o wyliczony rząd i klatkę
-            sprite.setTextureRect(sf::IntRect(currentFrame * frameWidth, currentRow * frameHeight, frameWidth, frameHeight));
+            // Pobieramy rozmiary aktualnie założonej tekstury
+            int fW = sprite.getTexture()->getSize().x / totalFrames;
+            int fH = sprite.getTexture()->getSize().y;
+
+            // Zawsze rząd 0, bo to pasek
+            sprite.setTextureRect(sf::IntRect(currentFrame * fW, 0, fW, fH));
         }
     }
     // Obrazek musi podążać za pozycją zombiaka
@@ -91,7 +98,7 @@ void Walker::update(float dt, std::vector<std::unique_ptr<GameObject>>& objects)
 
 void Walker::render(sf::RenderWindow& window) {
     // Jeśli tekstura się wczytała, rysujemy obrazek
-    if (isTextureLoaded) {
+    if (areTexturesLoaded) {
         window.draw(sprite);
     }
 
