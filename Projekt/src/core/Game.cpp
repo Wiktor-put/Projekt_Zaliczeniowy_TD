@@ -563,16 +563,16 @@ void Game::renderUI() {
     }
     // --- NAPISY NA MAPIE (BAZA i DROP ZONE) ---
     if (!font.getInfo().family.empty()) {
-        // 1. Napis DROP ZONE
-        sf::Text dzText("DROP\nZONE", font, 17);
+        // 1. Napis DROP ZONE-> teraz H
+        sf::Text dzText("H", font, 87);
         dzText.setFillColor(sf::Color(0, 255, 0, 150));
         // Pobieramy pozycję strefy z naszej aktualnej mapy
         sf::Vector2f dzPos = map.getDropZonePos();
         // Ustawiamy pozycję tekstu delikatnie przesuniętą
-        dzText.setPosition(dzPos.x - 25.f, dzPos.y - 15.f);
+        dzText.setPosition(dzPos.x - 25.f, dzPos.y - 45.f);
         window.draw(dzText);
 
-        // 2. Napis BAZA (Pionowo)
+        /*// 2. Napis BAZA (Pionowo)
         sf::Text baseText("G\nA\nT\nE", font, 22);
         baseText.setFillColor(sf::Color::White);
         baseText.setStyle(sf::Text::Bold);
@@ -581,7 +581,7 @@ void Game::renderUI() {
         sf::FloatRect baseBounds = baseText.getLocalBounds();
         baseText.setOrigin(baseBounds.width / 0.5, baseBounds.height / 2.f);
         baseText.setPosition(basePos.x, basePos.y);
-        window.draw(baseText);
+        window.draw(baseText);*/
     }
 }
 

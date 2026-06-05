@@ -17,6 +17,11 @@ constexpr const char* BACKGROUND = "/assets/textures/background_las.png";
 
 // Tekstura ścieżki
 constexpr const char* PATH = "/assets/textures/path.png";
+// Tekstura strefy zrzutu (Drop Zone)
+constexpr const char* DROPZONE = "/assets/textures/dropzone.png";
+// Tekstura Bazy / Bramy
+constexpr const char* BASE_GATE = "/assets/textures/gate.png";
+constexpr const char* BASE_WALL_VERT = "/assets/textures/Wooden-wall_Vertical.png";
 
 // Nowe ścieżki dla Walkera
 constexpr const char* WALKER_DOWN = "/assets/textures/walker walk/Zombie_Small_Down_walk-Sheet6.png";

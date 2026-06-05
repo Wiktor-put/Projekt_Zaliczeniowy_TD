@@ -116,30 +116,61 @@ void Map::draw(sf::RenderWindow& window) const {
         window.draw(shape);
     }
 
-    // --- RYSOWANIE DROP ZONE (Tylko grafika terenu) ---
-    sf::RectangleShape dropZone(sf::Vector2f(160.f, 160.f));
-    dropZone.setOrigin(80.f, 80.f); // Środek to połowa nowego wymiaru
-    dropZone.setPosition(dropZonePos); // Teraz bierze pozycję z konkretnej mapy
-    dropZone.setFillColor(sf::Color(0, 255, 0, 40));
-    dropZone.setOutlineColor(sf::Color::Green);
-    dropZone.setOutlineThickness(2.f);
-    window.draw(dropZone);
+    // --- RYSOWANIE DROP ZONE  ---
+    sf::Texture& dzTex = ResourceManager::getTexture(Config::Assets::DROPZONE);
+    sf::Sprite dzSprite(dzTex);
 
-    // --- RYSOWANIE BAZY ---
+    // Ustawiamy środek obrazka (aby rysował się centralnie w punkcie zrzutu)
+    dzSprite.setOrigin(dzTex.getSize().x / 2.f, dzTex.getSize().y / 2.f);
+    dzSprite.setPosition(dropZonePos);
+
+
+    dzSprite.setScale(4.8f, 4.8f);
+    window.draw(dzSprite);
+
+    // --- RYSOWANIE BRAMY (BAZY) ---
     if (!waypoints.empty()) {
-        // Baza zawsze znajduje się na OSTATNIM punkcie ścieżki (waypoint)
+        float scale = 3.5f;
+
+        // 1. Poziome ściany
+        sf::Texture& gateTex = ResourceManager::getTexture(Config::Assets::BASE_GATE);
+        sf::Sprite gateSprite(gateTex);
+        gateSprite.setOrigin(gateTex.getSize().x / 2.f, gateTex.getSize().y / 2.f);
+        gateSprite.setScale(scale, scale);
+
+        // 2. Pionowe ściany
+        sf::Texture& vertTex = ResourceManager::getTexture(Config::Assets::BASE_WALL_VERT);
+        sf::Sprite vertSprite(vertTex);
+        vertSprite.setOrigin(vertTex.getSize().x / 2.f, vertTex.getSize().y / 2.f);
+        vertSprite.setScale(scale, scale);
+
+        // --- OBLICZANIE POZYCJI ---
         sf::Vector2f basePos = waypoints.back();
+        float offset = 55.f; // Przesunięcie poziomych ścian w górę i dół
+        float wallWidth = gateTex.getSize().x * scale;
 
-        sf::RectangleShape baseShape(sf::Vector2f(140.f, 140.f));
-        baseShape.setOrigin(70.f, 70.f);
-        baseShape.setPosition(basePos);
+        float leftX = basePos.x - wallWidth - (wallWidth / 2.f);
+        float gapOffset = -3.5f; // Wielkość otworu
 
-        // Ciemnoniebieski kolor bazy z jasną ramką
-        baseShape.setFillColor(sf::Color(40, 60, 120));
-        baseShape.setOutlineColor(sf::Color(100, 150, 255));
-        baseShape.setOutlineThickness(3.f);
+        // KROK 1: Rysujemy PIONOWE ściany (będą na samym spodzie)
+        vertSprite.setPosition(leftX, basePos.y - offset - gapOffset);
+        window.draw(vertSprite);
 
-        window.draw(baseShape);
+        vertSprite.setPosition(leftX, basePos.y + offset + gapOffset);
+        window.draw(vertSprite);
+
+        // KROK 2: Rysujemy POZIOME ściany (nałożą się na pionowe i przykryją ich końce)
+        // Prawa strona
+        gateSprite.setPosition(basePos.x, basePos.y - offset);
+        window.draw(gateSprite);
+        gateSprite.setPosition(basePos.x, basePos.y + offset);
+        window.draw(gateSprite);
+
+        // Lewa strona
+        gateSprite.setPosition(basePos.x - wallWidth, basePos.y - offset);
+        window.draw(gateSprite);
+        gateSprite.setPosition(basePos.x - wallWidth, basePos.y + offset);
+        window.draw(gateSprite);
     }
 }
 
