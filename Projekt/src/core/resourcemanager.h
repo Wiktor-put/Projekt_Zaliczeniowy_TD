@@ -3,6 +3,8 @@
 
 class ResourceManager
 {
+private:
+
 public:
     ResourceManager();
 };

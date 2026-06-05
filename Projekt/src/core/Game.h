@@ -16,8 +16,11 @@
 #include "wavemanager.h"
 
 enum class GameState {
-    PLAYING,
-    GAME_OVER
+    MENU,          // ekran startowy z opcjami
+    PLAYING,       // wlasciwa rozgrywka
+    PAUSED,        // pauza w trakcie gry
+    GAME_OVER,     // ekran konca gry z wynikiem
+    HIGHSCORES     // tablica top 10 wynikow
 };
 
 // Odpowiada za okno, pętlę gry oraz integrację wszystkich podsystemów

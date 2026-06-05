@@ -23,13 +23,11 @@
 #define ASSETS_DIR "."
 #endif
 
-Game::Game() : window(sf::VideoMode(Config::WINDOW_WIDTH, Config::WINDOW_HEIGHT), "DEAD ZONE"), state(GameState::PLAYING) {
+Game::Game() : window(sf::VideoMode(Config::WINDOW_WIDTH, Config::WINDOW_HEIGHT), "DEAD ZONE"), state(GameState::MENU) {
     window.setFramerateLimit(Config::FPS_LIMIT);
     if (!font.loadFromFile(std::string(ASSETS_DIR) + "/assets/fonts/arial.ttf")) {
         std::cerr << "Nie udalo sie zaladowac fontu!" << std::endl;
     }
-
-    startNewGame();
 }
 
 void Game::startNewGame() {
