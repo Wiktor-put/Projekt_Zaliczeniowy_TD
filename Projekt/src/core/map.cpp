@@ -1,6 +1,7 @@
 #include "map.h"
 #include "Config.h"
 #include "resourcemanager.h"
+#include <cmath>
 
 void Map::loadFromFile(const std::string& path) {
     waypoints.clear();
@@ -59,15 +60,51 @@ void Map::draw(sf::RenderWindow& window) const {
     if (waypoints.size() < 2) return;
 
     // --- RYSOWANIE TŁA MAPY (Zawsze na samym spodzie) ---
-        window.draw(bgSprite);
+    window.draw(bgSprite);
 
-    // rysowanie ścieżki jako linii łączącej waypointy
-    sf::VertexArray path(sf::LineStrip, waypoints.size());
-    for (size_t i = 0; i < waypoints.size(); ++i) {
-        path[i].position = waypoints[i];
-        path[i].color = sf::Color(100, 60, 40);  // brązowa droga
+    // 2. RYSOWANIE ŚCIEŻKI Z TEKSTURĄ I ZAOKRĄGLONYMI ZAKRĘTAMI
+    sf::Texture& pathTex = ResourceManager::getTexture(Config::Assets::PATH);
+    pathTex.setRepeated(true); // Kluczowe! Pozwala teksturze zapętlać się na długich odcinkach
+
+    float pathWidth = 50.f;             // Szerokość ścieżki
+    float radius = pathWidth / 2.f;     // Promień dla "przegubów" na zakrętach
+
+    // 2. RYSOWANIE ŚCIEŻKI
+    for (size_t i = 0; i < waypoints.size() - 1; ++i) {
+        sf::Vector2f p1 = waypoints[i];
+        sf::Vector2f p2 = waypoints[i + 1];
+
+        // --- RYSOWANIE OKRĄGŁEGO "PRZEGUBU" NA ZAKRĘCIE ---
+        sf::CircleShape joint(radius);
+        joint.setOrigin(radius, radius);
+        joint.setPosition(p1);
+        joint.setTexture(&pathTex);
+        window.draw(joint);
+
+        // --- RYSOWANIE PROSTEGO ODCINKA DROGI ---
+        float dx = p2.x - p1.x;
+        float dy = p2.y - p1.y;
+        float length = std::sqrt(dx * dx + dy * dy);
+        float angle = std::atan2(dy, dx) * 180.f / 3.14159265f;
+
+        sf::RectangleShape segment(sf::Vector2f(length, pathWidth));
+        segment.setOrigin(0.f, radius);
+        segment.setPosition(p1);
+        segment.setRotation(angle);
+        segment.setTexture(&pathTex);
+
+        // Zamiast rozciągać, mówimy SFML-owi, by kafelkował teksturę wzdłuż długości
+        segment.setTextureRect(sf::IntRect(0, 0, static_cast<int>(length), static_cast<int>(pathWidth)));
+        window.draw(segment);
     }
-    window.draw(path);
+    // Dodanie ostatniego kółka na samym końcu ścieżki (w bazie)
+    if (!waypoints.empty()) {
+        sf::CircleShape lastJoint(radius);
+        lastJoint.setOrigin(radius, radius);
+        lastJoint.setPosition(waypoints.back());
+        lastJoint.setTexture(&pathTex);
+        window.draw(lastJoint);
+    }
 
     // rysowanie slotów jako szare kwadraty
     for (const auto& slot : towerSlots) {

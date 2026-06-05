@@ -15,6 +15,9 @@ namespace Assets {
 constexpr const char* BACKGROUND = "/assets/textures/background_las.png";
 //constexpr const char* ZOMBIE_WALKER = "/assets/textures/walker.png";
 
+// Tekstura ścieżki
+constexpr const char* PATH = "/assets/textures/path.png";
+
 // Nowe ścieżki dla Walkera
 constexpr const char* WALKER_DOWN = "/assets/textures/walker walk/Zombie_Small_Down_walk-Sheet6.png";
 constexpr const char* WALKER_UP = "/assets/textures/walker walk/Zombie_Small_Up_Walk-Sheet6.png";

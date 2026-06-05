@@ -31,7 +31,7 @@ Runner::Runner(const std::vector<sf::Vector2f>& waypoints) : Zombie(waypoints) {
     sprite.setTextureRect(sf::IntRect(0, 0, fW, fH));
     sprite.setOrigin(fW / 2.f, fH / 2.f);
     sprite.setPosition(position);
-    sprite.setScale(2.1f, 2.1f); // Dajemy mu podobny rozmiar
+    sprite.setScale(1.9f, 1.9f); // Dajemy mu podobny rozmiar
 
 }
 

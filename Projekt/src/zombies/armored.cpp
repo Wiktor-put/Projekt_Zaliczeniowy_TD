@@ -29,7 +29,7 @@ Armored::Armored(const std::vector<sf::Vector2f>& waypoints) : Zombie(waypoints)
         sprite.setTextureRect(sf::IntRect(0, 0, fW, fH));
         sprite.setOrigin(fW / 2.f, fH / 2.f);
         sprite.setPosition(position);
-        sprite.setScale(2.2f, 2.2f); // Dostosuj tę skalę, by zombiak wyglądał potężnie
+        sprite.setScale(2.1f, 2.1f); // Dostosuj tę skalę, by zombiak wyglądał potężnie
 
 
 

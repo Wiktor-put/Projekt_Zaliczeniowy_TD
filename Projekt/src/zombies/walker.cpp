@@ -35,7 +35,7 @@ Walker::Walker(const std::vector<sf::Vector2f>& waypoints) : Zombie(waypoints)
         sprite.setTextureRect(sf::IntRect(0, 0, fW, fH));
         sprite.setOrigin(fW / 2.f, fH / 2.f);
         sprite.setPosition(position);
-        sprite.setScale(2.0f, 2.0f); // Dopasuj tę wartość, nowa grafika jest malutka
+        sprite.setScale(1.8f, 1.8f); // rozmiar walkera
 
 
     // "Ukrywamy" stary zielony kwadrat, robiąc go przezroczystym reszte zostawiamy

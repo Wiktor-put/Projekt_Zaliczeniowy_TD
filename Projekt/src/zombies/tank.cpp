@@ -27,7 +27,7 @@ Tank::Tank(const std::vector<sf::Vector2f>& waypoints) : Zombie(waypoints) {
     sprite.setTextureRect(sf::IntRect(0, 0, fW, fH));
     sprite.setOrigin(fW / 2.f, fH / 2.f);
     sprite.setPosition(position);
-    sprite.setScale(3.5f, 3.5f); // Skala bossa!
+    sprite.setScale(3.1f, 3.1f); // Skala bossa!
 
 
     // Ukrywamy stary, magentowy kwadrat
@@ -41,15 +41,22 @@ Tank::Tank(const std::vector<sf::Vector2f>& waypoints) : Zombie(waypoints) {
 void Tank::update(float dt, std::vector<std::unique_ptr<GameObject>>& objects) {
     Zombie::update(dt, objects);
 
+    // Zmienna przechowująca korektę wizualną obrazka (domyślnie brak przesunięcia)
+    sf::Vector2f visualOffset(0.f, 0.f);
+
     if (!reachedEnd()) {
 
         // --- WYBÓR KIERUNKU ---
         if (std::abs(velocity.x) > std::abs(velocity.y)) {
             if (velocity.x > 0) sprite.setTexture(*texRight);
             else sprite.setTexture(*texLeft);
+            // KOREKTA WIZUALNA: Podnosimy obrazek do góry.
+
+            visualOffset.y = -20.f;
         } else {
             if (velocity.y > 0) sprite.setTexture(*texDown);
             else sprite.setTexture(*texUp);
+            visualOffset.y = -20.f;
         }
 
         // --- CIĘŻKA, WOLNA ANIMACJA ---
@@ -68,7 +75,7 @@ void Tank::update(float dt, std::vector<std::unique_ptr<GameObject>>& objects) {
         }
     }
 
-    sprite.setPosition(position);
+    sprite.setPosition(position+ visualOffset);
 }
 
 void Tank::render(sf::RenderWindow& window) {
