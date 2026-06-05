@@ -41,112 +41,113 @@ void Game::startNewGame() {
     waveManager.loadFromFile(std::string(ASSETS_DIR) + "/assets/waves/waves_testowe.txt");
 }
 
-void Game::processEvents(){
+void Game::processEvents() {
     sf::Event event;
     while (window.pollEvent(event)) {
-        if (event.type == sf::Event::Closed)
-            window.close();
+        switch (event.type) {
 
-        if (event.type == sf::Event::KeyPressed) {
-            // Obsluga menu
-            if (state == GameState::MENU) {
+        // 1. ZAMKNIĘCIE OKNA
+        case sf::Event::Closed:
+            window.close();
+            break;
+
+        // 2. OBSŁUGA MYSZY
+        case sf::Event::MouseButtonPressed:
+            // Zazwyczaj interakcje myszką mają sens tylko podczas właściwej rozgrywki
+            if (state == GameState::PLAYING) {
+                if (event.mouseButton.button == sf::Mouse::Left) {
+                    sf::Vector2f mouse(static_cast<float>(event.mouseButton.x),
+                                       static_cast<float>(event.mouseButton.y));
+
+                    // Sprawdzamy, czy gracz nie kliknął w bonus
+                    bool clickedBonus = false;
+                    for (auto& obj : objects) {
+                        Bonus* bonus = dynamic_cast<Bonus*>(obj.get());
+                        if (bonus && bonus->isAlive() && bonus->contains(mouse)) {
+                            applyBonus(bonus->getType());
+                            bonus->destroy();
+                            clickedBonus = true;
+                            break;
+                        }
+                    }
+
+                    // Zaznaczamy slot
+                    int idx = map.getSlotAt(mouse);
+                    selectedSlotIndex = (idx >= 0) ? idx : -1;
+
+                } else if (event.mouseButton.button == sf::Mouse::Right) {
+                    selectedSlotIndex = -1; // PPM — odznacz slot
+                }
+            }
+            break;
+
+        // 3. OBSŁUGA KLAWIATURY
+        case sf::Event::KeyPressed:
+            // Dzielimy logikę klawiszy w zależności od obecnego stanu gry
+            switch (state) {
+            case GameState::MENU:
                 if (event.key.code == sf::Keyboard::Up) {
-                    menuSelectedOption--;
-                    if (menuSelectedOption < 0) menuSelectedOption = 3;
-                }
-                if (event.key.code == sf::Keyboard::Down) {
-                    menuSelectedOption++;
-                    if (menuSelectedOption > 3) menuSelectedOption = 0;
-                }
-                if (event.key.code == sf::Keyboard::Enter
-                    || event.key.code == sf::Keyboard::Return) {
+                    menuSelectedOption = (menuSelectedOption > 0) ? menuSelectedOption - 1 : 3;
+                } else if (event.key.code == sf::Keyboard::Down) {
+                    menuSelectedOption = (menuSelectedOption < 3) ? menuSelectedOption + 1 : 0;
+                } else if (event.key.code == sf::Keyboard::Enter || event.key.code == sf::Keyboard::Return) {
                     handleMenuChoice(menuSelectedOption);
                 }
-                continue;  // nie wpadaj w obsluge innych klawiszy
-            }
-            // R restartuje grę po przegranej
-            if (state == GameState::GAME_OVER && event.key.code == sf::Keyboard::R) {
-                startNewGame();
-                continue;
-            }
+                break;
 
-            if (state != GameState::PLAYING) continue;
-        }
+            case GameState::GAME_OVER:
+                if (event.key.code == sf::Keyboard::R) {
+                    startNewGame();
+                }
+                break;
 
-        // Kliknięcie LPM
-        if (event.type == sf::Event::MouseButtonPressed &&
-            event.mouseButton.button == sf::Mouse::Left) {
-            sf::Vector2f mouse(static_cast<float>(event.mouseButton.x),
-                               static_cast<float>(event.mouseButton.y));
+            case GameState::PAUSED:
+                if (event.key.code == sf::Keyboard::Escape) {
+                    state = GameState::PLAYING;
+                    std::cout << "Wznowiono\n";
+                } else if (event.key.code == sf::Keyboard::M) {
+                    state = GameState::MENU;
+                    menuSelectedOption = 0;
+                    std::cout << "Powrot do menu\n";
+                }
+                break;
 
-            // 1. Sprawdzamy, czy gracz nie kliknął w bonus
-            bool clickedBonus = false;
-            for (auto& obj : objects) {
-                Bonus* bonus = dynamic_cast<Bonus*>(obj.get());
-                if (bonus && bonus->isAlive() && bonus->contains(mouse)) {
-                    applyBonus(bonus->getType()); // Nakładamy efekt (kasa/życie/EMP)
-                    bonus->destroy(); // Zbieramy pudełko
-                    clickedBonus = true;
+            case GameState::PLAYING:
+                // Skoro jesteśmy w PLAYING, używamy switcha dla konkretnych klawiszy
+                switch (event.key.code) {
+                case sf::Keyboard::Escape:
+                    if (selectedSlotIndex != -1) {
+                        selectedSlotIndex = -1;
+                        std::cout << "Anulowano wybor slotu\n";
+                    } else {
+                        state = GameState::PAUSED;
+                        std::cout << "PAUZA\n";
+                    }
+                    break;
+                case sf::Keyboard::Num1: tryBuyTower(1); break;
+                case sf::Keyboard::Num2: tryBuyTower(2); break;
+                case sf::Keyboard::Num3: tryBuyTower(3); break;
+                case sf::Keyboard::Num4: tryBuyTower(4); break;
+                case sf::Keyboard::Num5: tryBuyTower(5); break;
+                case sf::Keyboard::U:    tryUpgradeTower(); break;
+                case sf::Keyboard::S:    trySellTower(); break;
+                case sf::Keyboard::F5:   saveGame(); break;
+                case sf::Keyboard::F9:   loadGame(); break;
+                case sf::Keyboard::Space:
+                    if (!waveManager.isWaveInProgress()) {
+                        waveManager.startNextWave();
+                    }
+                    break;
+                default:
                     break;
                 }
+                break; // Koniec GameState::PLAYING
             }
-            int idx = map.getSlotAt(mouse);
+            break; // Koniec sf::Event::KeyPressed
 
-            // TERAZ ZAZNACZAMY KAŻDY SLOT, NIEWAŻNE CZY ZAJĘTY CZY NIE
-            selectedSlotIndex = (idx >= 0) ? idx : -1;
+        default:
+            break;
         }
-
-        // PPM — odznacz slot
-        if (event.type == sf::Event::MouseButtonPressed &&
-            event.mouseButton.button == sf::Mouse::Right) {
-            selectedSlotIndex = -1;
-        }
-
-
-        if (event.type == sf::Event::KeyPressed) {
-            // Klawisz 1 — kup MachineGunTower w zaznaczonym slocie
-            if (event.key.code == sf::Keyboard::Num1)
-                tryBuyTower(1);
-
-            // Klawisz 2 — kup SniperTower
-            if (event.key.code == sf::Keyboard::Num2)
-                tryBuyTower(2);
-
-            if (event.key.code == sf::Keyboard::Num3)
-                tryBuyTower(3);
-
-            if (event.key.code == sf::Keyboard::Num4)
-                tryBuyTower(4);
-            if (event.key.code == sf::Keyboard::Num5)
-                tryBuyTower(5);
-
-            // Klawisz U - Ulepszenie
-            if (event.key.code == sf::Keyboard::U)
-                tryUpgradeTower();
-
-            // Klawisz S - Sprzedaż
-            if (event.key.code == sf::Keyboard::S)
-                trySellTower();
-
-            // Escape — odznacz slot bez kupowania
-            if (event.key.code == sf::Keyboard::Escape)
-                selectedSlotIndex = -1;
-
-            // Klawisz F5 - Zapisz grę
-            if (event.key.code == sf::Keyboard::F5)
-                saveGame();
-
-            // Klawisz F9 - Wczytaj grę
-            if (event.key.code == sf::Keyboard::F9)
-                loadGame();
-            // spacja - nowa fala
-            if (event.key.code == sf::Keyboard::Space) {
-                if (!waveManager.isWaveInProgress()) {
-                    waveManager.startNextWave();
-                }
-            }
-        }
-
     }
 }
 
@@ -404,7 +405,51 @@ void Game::renderGameOver() {
     window.draw(restartText);
 }
 
-void Game::renderPaused(){}
+void Game::renderPaused() {
+    // Polprzezroczyste tlo zaciemniajace rozgrywke
+    sf::RectangleShape overlay(sf::Vector2f(
+        static_cast<float>(Config::WINDOW_WIDTH),
+        static_cast<float>(Config::WINDOW_HEIGHT)
+        ));
+    overlay.setFillColor(sf::Color(0, 0, 0, 150));  // 60% widocznosc
+    window.draw(overlay);
+
+    if (font.getInfo().family.empty()) return;
+
+    // Napis PAUZA
+    sf::Text pauseText("PAUZA", font, 80);
+    pauseText.setFillColor(sf::Color::White);
+    pauseText.setOutlineColor(sf::Color(150, 255, 100));
+    pauseText.setOutlineThickness(3.f);
+    sf::FloatRect bounds = pauseText.getLocalBounds();
+    pauseText.setOrigin(bounds.width / 2.f, bounds.height / 2.f);
+    pauseText.setPosition(
+        Config::WINDOW_WIDTH / 2.f,
+        Config::WINDOW_HEIGHT / 2.f - 50.f
+        );
+    window.draw(pauseText);
+
+    // Instrukcje
+    sf::Text resumeHint("ESC - wznow", font, 26);
+    resumeHint.setFillColor(sf::Color::White);
+    bounds = resumeHint.getLocalBounds();
+    resumeHint.setOrigin(bounds.width / 2.f, bounds.height / 2.f);
+    resumeHint.setPosition(
+        Config::WINDOW_WIDTH / 2.f,
+        Config::WINDOW_HEIGHT / 2.f + 50.f
+        );
+    window.draw(resumeHint);
+
+    sf::Text menuHint("M - powrot do menu", font, 26);
+    menuHint.setFillColor(sf::Color::White);
+    bounds = menuHint.getLocalBounds();
+    menuHint.setOrigin(bounds.width / 2.f, bounds.height / 2.f);
+    menuHint.setPosition(
+        Config::WINDOW_WIDTH / 2.f,
+        Config::WINDOW_HEIGHT / 2.f + 100.f
+        );
+    window.draw(menuHint);
+}
 
 void Game::renderHighscores(){}
 
@@ -664,7 +709,6 @@ void Game::applyBonus(BonusType type) {
         }
     }
 }
-
 
 void Game::tryUpgradeTower() {
     if (selectedSlotIndex < 0) return;
