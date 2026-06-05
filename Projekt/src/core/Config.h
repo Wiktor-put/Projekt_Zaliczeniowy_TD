@@ -21,6 +21,12 @@ constexpr const char* WALKER_UP = "/assets/textures/walker walk/Zombie_Small_Up_
 constexpr const char* WALKER_RIGHT = "/assets/textures/walker walk/Zombie_Small_Side_Walk-Sheet6.png";
 constexpr const char* WALKER_LEFT = "/assets/textures/walker walk/Zombie_Small_Side-left_Walk-Sheet6.png";
 
+// Ścieżki dla Runnera (Wersja bez topora)
+constexpr const char* RUNNER_DOWN = "/assets/textures/amored walk/Zombie_Axe_No-axe_Down_Walk-Sheet8.png";
+constexpr const char* RUNNER_UP = "/assets/textures/amored walk/Zombie_Axe_No-axe_Up_Walk-Sheet8.png";
+constexpr const char* RUNNER_RIGHT = "/assets/textures/amored walk/Zombie_Axe_No-axe_Side_Walk-Sheet8.png";
+constexpr const char* RUNNER_LEFT = "/assets/textures/amored walk/Zombie_Axe_No-axe_Side-left_Walk-Sheet8.png";
+
 // Ścieżki dla Armored Zombie
 constexpr const char* ARMORED_DOWN = "/assets/textures/amored walk/Zombie_Axe_Down_Walk-Sheet8.png";
 constexpr const char* ARMORED_UP = "/assets/textures/amored walk/Zombie_Axe_Up_Walk-Sheet8.png";
