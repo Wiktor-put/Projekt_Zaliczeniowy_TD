@@ -7,11 +7,11 @@
 class Tank : public Zombie
 {
 private:
-    static sf::Texture texDown;
-    static sf::Texture texUp;
-    static sf::Texture texRight;
-    static sf::Texture texLeft;
-    static bool areTexturesLoaded;
+     sf::Texture* texDown;
+     sf::Texture* texUp;
+     sf::Texture* texRight;
+     sf::Texture* texLeft;
+
 
     sf::Sprite sprite;
 

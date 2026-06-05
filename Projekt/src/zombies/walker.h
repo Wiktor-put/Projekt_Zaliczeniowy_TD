@@ -12,12 +12,11 @@ class Walker : public Zombie
 {
 private:
     // Mamy teraz 4 osobne paski animacji
-    static sf::Texture texDown;
-    static sf::Texture texUp;
-    static sf::Texture texRight;
-    static sf::Texture texLeft;
+    sf::Texture* texDown;
+    sf::Texture* texUp;
+    sf::Texture* texRight;
+    sf::Texture* texLeft;
 
-    static bool areTexturesLoaded;
     sf::Sprite sprite; // Obiekt, który "założy" na siebie teksturę
 
     // --- ZMIENNE DO ANIMACJI ---

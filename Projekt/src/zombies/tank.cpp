@@ -1,12 +1,6 @@
 #include "tank.h"
 #include "Config.h"
-
-// Inicjalizacja zmiennych statycznych
-sf::Texture Tank::texDown;
-sf::Texture Tank::texUp;
-sf::Texture Tank::texRight;
-sf::Texture Tank::texLeft;
-bool Tank::areTexturesLoaded = false;
+#include "resourcemanager.h"
 
 Tank::Tank(const std::vector<sf::Vector2f>& waypoints) : Zombie(waypoints) {
     position = waypoints[0];
@@ -19,31 +13,22 @@ Tank::Tank(const std::vector<sf::Vector2f>& waypoints) : Zombie(waypoints) {
     reward       = Config::Tank::REWARD;
     lifeCost     = Config::Tank::LIFECOST;
 
-    // 1. Ładujemy grafiki Tanka
-    if (!areTexturesLoaded) {
-        bool ok = true;
-        ok &= texDown.loadFromFile(std::string(ASSETS_DIR) + Config::Assets::TANK_DOWN);
-        ok &= texUp.loadFromFile(std::string(ASSETS_DIR) + Config::Assets::TANK_UP);
-        ok &= texRight.loadFromFile(std::string(ASSETS_DIR) + Config::Assets::TANK_RIGHT);
-        ok &= texLeft.loadFromFile(std::string(ASSETS_DIR) + Config::Assets::TANK_LEFT);
+    // 1. Pobieramy grafiki Tanka
+    texDown  = &ResourceManager::getTexture(Config::Assets::TANK_DOWN);
+    texUp    = &ResourceManager::getTexture(Config::Assets::TANK_UP);
+    texRight = &ResourceManager::getTexture(Config::Assets::TANK_RIGHT);
+    texLeft  = &ResourceManager::getTexture(Config::Assets::TANK_LEFT);
 
-        if (ok) areTexturesLoaded = true;
-        else std::cerr << "Blad ladowania grafik Tanka!" << std::endl;
-    }
+    sprite.setTexture(*texDown);
 
-    if (areTexturesLoaded) {
-        sprite.setTexture(texDown);
+    int fW = texDown->getSize().x / totalFrames;
+    int fH = texDown->getSize().y;
 
-        int fW = texDown.getSize().x / totalFrames;
-        int fH = texDown.getSize().y;
+    sprite.setTextureRect(sf::IntRect(0, 0, fW, fH));
+    sprite.setOrigin(fW / 2.f, fH / 2.f);
+    sprite.setPosition(position);
+    sprite.setScale(3.5f, 3.5f); // Skala bossa!
 
-        sprite.setTextureRect(sf::IntRect(0, 0, fW, fH));
-        sprite.setOrigin(fW / 2.f, fH / 2.f);
-        sprite.setPosition(position);
-
-        // POTĘŻNA SKALA - Tank musi być dużo większy od reszty!
-        sprite.setScale(3.5f, 3.5f);
-    }
 
     // Ukrywamy stary, magentowy kwadrat
     shape.setSize(sf::Vector2f(50.f, 50.f));
@@ -56,15 +41,15 @@ Tank::Tank(const std::vector<sf::Vector2f>& waypoints) : Zombie(waypoints) {
 void Tank::update(float dt, std::vector<std::unique_ptr<GameObject>>& objects) {
     Zombie::update(dt, objects);
 
-    if (areTexturesLoaded && !reachedEnd()) {
+    if (!reachedEnd()) {
 
         // --- WYBÓR KIERUNKU ---
         if (std::abs(velocity.x) > std::abs(velocity.y)) {
-            if (velocity.x > 0) sprite.setTexture(texRight);
-            else sprite.setTexture(texLeft);
+            if (velocity.x > 0) sprite.setTexture(*texRight);
+            else sprite.setTexture(*texLeft);
         } else {
-            if (velocity.y > 0) sprite.setTexture(texDown);
-            else sprite.setTexture(texUp);
+            if (velocity.y > 0) sprite.setTexture(*texDown);
+            else sprite.setTexture(*texUp);
         }
 
         // --- CIĘŻKA, WOLNA ANIMACJA ---
@@ -87,6 +72,6 @@ void Tank::update(float dt, std::vector<std::unique_ptr<GameObject>>& objects) {
 }
 
 void Tank::render(sf::RenderWindow& window) {
-    if (areTexturesLoaded) window.draw(sprite);
+    window.draw(sprite);
     Zombie::render(window); // Rysuje pasek HP na górze
 }

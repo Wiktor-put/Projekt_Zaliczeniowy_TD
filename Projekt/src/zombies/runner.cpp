@@ -1,13 +1,8 @@
 #include "runner.h"
 #include "Config.h"
 #include <cmath>
+#include "resourcemanager.h"
 
-// Inicjalizacja zmiennych statycznych
-sf::Texture Runner::texDown;
-sf::Texture Runner::texUp;
-sf::Texture Runner::texRight;
-sf::Texture Runner::texLeft;
-bool Runner::areTexturesLoaded = false;
 
 Runner::Runner(const std::vector<sf::Vector2f>& waypoints) : Zombie(waypoints) {
     position = waypoints[0];
@@ -22,49 +17,36 @@ Runner::Runner(const std::vector<sf::Vector2f>& waypoints) : Zombie(waypoints) {
     lifeCost     = Config::Runner::LIFECOST;
     lifeCost     = Config::Runner::LIFECOST;
 
-    // 1. Ładujemy grafiki "No-axe"
-    if (!areTexturesLoaded) {
-        bool ok = true;
-        ok &= texDown.loadFromFile(std::string(ASSETS_DIR) + Config::Assets::RUNNER_DOWN);
-        ok &= texUp.loadFromFile(std::string(ASSETS_DIR) + Config::Assets::RUNNER_UP);
-        ok &= texRight.loadFromFile(std::string(ASSETS_DIR) + Config::Assets::RUNNER_RIGHT);
-        ok &= texLeft.loadFromFile(std::string(ASSETS_DIR) + Config::Assets::RUNNER_LEFT);
+    // --- POBIERANIE TEKSTUR ---
+    texDown  = &ResourceManager::getTexture(Config::Assets::RUNNER_DOWN);
+    texUp    = &ResourceManager::getTexture(Config::Assets::RUNNER_UP);
+    texRight = &ResourceManager::getTexture(Config::Assets::RUNNER_RIGHT);
+    texLeft  = &ResourceManager::getTexture(Config::Assets::RUNNER_LEFT);
 
-        if (ok) areTexturesLoaded = true;
-        else std::cerr << "Blad ladowania grafik Runnera!" << std::endl;
-    }
+    sprite.setTexture(*texDown);
 
-    if (areTexturesLoaded) {
-        sprite.setTexture(texDown);
+    int fW = texDown->getSize().x / totalFrames;
+    int fH = texDown->getSize().y;
 
-        int fW = texDown.getSize().x / totalFrames;
-        int fH = texDown.getSize().y;
+    sprite.setTextureRect(sf::IntRect(0, 0, fW, fH));
+    sprite.setOrigin(fW / 2.f, fH / 2.f);
+    sprite.setPosition(position);
+    sprite.setScale(2.1f, 2.1f); // Dajemy mu podobny rozmiar
 
-        sprite.setTextureRect(sf::IntRect(0, 0, fW, fH));
-        sprite.setOrigin(fW / 2.f, fH / 2.f);
-        sprite.setPosition(position);
-        sprite.setScale(2.1f, 2.1f); // Dajemy mu podobny rozmiar
-    }
-
-    // Przezroczysty, mniejszy kwadrat
-    shape.setSize(sf::Vector2f(25.f, 25.f));
-    shape.setFillColor(sf::Color::Transparent);
-    shape.setOrigin(12.5f, 12.5f);
-    shape.setPosition(position);
 }
 
 void Runner::update(float dt, std::vector<std::unique_ptr<GameObject>>& objects) {
     Zombie::update(dt, objects);
 
-    if (areTexturesLoaded && !reachedEnd()) {
+    if (!reachedEnd()) {
 
         // --- WYBÓR KIERUNKU ---
         if (std::abs(velocity.x) > std::abs(velocity.y)) {
-            if (velocity.x > 0) sprite.setTexture(texRight);
-            else sprite.setTexture(texLeft);
+            if (velocity.x > 0) sprite.setTexture(*texRight);
+            else sprite.setTexture(*texLeft);
         } else {
-            if (velocity.y > 0) sprite.setTexture(texDown);
-            else sprite.setTexture(texUp);
+            if (velocity.y > 0) sprite.setTexture(*texDown);
+            else sprite.setTexture(*texUp);
         }
 
         // --- SZYBKA ANIMACJA ---
@@ -87,6 +69,6 @@ void Runner::update(float dt, std::vector<std::unique_ptr<GameObject>>& objects)
 }
 
 void Runner::render(sf::RenderWindow& window) {
-    if (areTexturesLoaded) window.draw(sprite);
+    window.draw(sprite);
     Zombie::render(window); // Rysuje pasek HP
 }
