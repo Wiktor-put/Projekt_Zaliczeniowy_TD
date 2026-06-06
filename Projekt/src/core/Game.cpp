@@ -14,6 +14,7 @@
 #include "flamethrowertower.h"
 #include "slowertower.h"
 #include "Random.h"
+#include "resourcemanager.h"
 #include <cmath>
 #include <fstream>
 
@@ -295,13 +296,24 @@ void Game::updatePlaying(float dt){
 }
 
 void Game::renderMenu() {
-    // Tlo - ciemny gradient (na razie zwykly kolor)
+    // --- RYSOWANIE TŁA MENU GŁÓWNEGO ---
+    sf::Texture& menuTex = ResourceManager::getTexture(Config::Assets::MAIN_MENU_BG);
+    sf::Sprite menuSprite(menuTex);
+
+    // Skalujemy obrazek tak, aby idealnie wypełnił całe okno gry
+    float scaleX = static_cast<float>(Config::WINDOW_WIDTH) / menuTex.getSize().x;
+    float scaleY = static_cast<float>(Config::WINDOW_HEIGHT) / menuTex.getSize().y;
+    menuSprite.setScale(scaleX, scaleY);
+
+    // Rysujemy tło
+    window.draw(menuSprite);
+    /*// Tlo - ciemny gradient (na razie zwykly kolor)
     sf::RectangleShape bg(sf::Vector2f(
         static_cast<float>(Config::WINDOW_WIDTH),
         static_cast<float>(Config::WINDOW_HEIGHT)
         ));
     bg.setFillColor(sf::Color(20, 30, 20));  // ciemny zielony
-    window.draw(bg);
+    window.draw(bg);*/
 
     if (font.getInfo().family.empty()) return;
 
@@ -317,7 +329,7 @@ void Game::renderMenu() {
 
     // Podtytul
     sf::Text subtitle("Tower Defense | Zombie Apocalypse", font, 22);
-    subtitle.setFillColor(sf::Color::White);
+    subtitle.setFillColor(sf::Color::Black);
     sf::FloatRect subBounds = subtitle.getLocalBounds();
     subtitle.setOrigin(subBounds.width / 2.f, subBounds.height / 2.f);
     subtitle.setPosition(Config::WINDOW_WIDTH / 2.f, 230.f);

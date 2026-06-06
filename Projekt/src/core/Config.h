@@ -12,6 +12,9 @@ constexpr int FPS_LIMIT = 60;
 
 // ===== ASSETS (SCIEZKI DO PLIKOW) =====
 namespace Assets {
+// Tekstura ekranu początkowego
+constexpr const char* MAIN_MENU_BG = "/assets/textures/main_menu.png";
+
 constexpr const char* BACKGROUND = "/assets/textures/background_las.png";
 //constexpr const char* ZOMBIE_WALKER = "/assets/textures/walker.png";
 
