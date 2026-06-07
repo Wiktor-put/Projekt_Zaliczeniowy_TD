@@ -14,6 +14,7 @@
 #include "player.h"
 #include "bonus.h"
 #include "wavemanager.h"
+#include "button.h"
 
 enum class GameState {
     MENU,          // ekran startowy z opcjami
@@ -41,6 +42,19 @@ private:
     int mapSelectedOption = 0;                        // podświetlona mapa na ekranie wyboru
     sf::Font font;
     WaveManager waveManager;    // potrzebny do napisu GAME OVER
+
+    // --- PRZYCISKI UI (klasa Button) ---
+    Button menuButtons[4];            // Nowa gra / Wczytaj / Wyniki / Wyjdz
+    std::vector<Button> mapButtons;   // jeden przycisk na mapę z Config::Maps
+    Button pauseButtons[2];           // 0 = wznow, 1 = menu
+    Button gameOverButtons[2];        // 0 = zagraj ponownie, 1 = menu
+    Button hsBackButton;              // powrot z ekranu wynikow
+    Button buildButtons[5];           // wybor wiezy w HUD (gdy slot wolny)
+    Button upgradeButton;             // ulepszenie wiezy w HUD (gdy slot zajety)
+    Button sellButton;                // sprzedaz wiezy w HUD (gdy slot zajety)
+
+    // Tworzy i pozycjonuje wszystkie przyciski. Wołane raz w konstruktorze.
+    void initButtons();
 
 public:
     Game();

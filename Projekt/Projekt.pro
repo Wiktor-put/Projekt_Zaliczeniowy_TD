@@ -8,6 +8,7 @@ SOURCES += \
             src/core/Game.cpp \
             src/core/map.cpp \
             src/core/resourcemanager.cpp \
+            src/core/button.cpp \
             src/core/wavemanager.cpp \
             src/core/player.cpp \
             src/entities/Gameobject.cpp \
@@ -33,6 +34,7 @@ HEADERS += \
             src/core/Game.h \
             src/core/map.h \
             src/core/resourcemanager.h \
+            src/core/button.h \
             src/core/wavemanager.h \
             src/core/Config.h \
             src/core/Random.h \

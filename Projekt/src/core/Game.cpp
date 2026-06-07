@@ -29,6 +29,58 @@ Game::Game() : window(sf::VideoMode(Config::WINDOW_WIDTH, Config::WINDOW_HEIGHT)
     if (!font.loadFromFile(std::string(ASSETS_DIR) + "/assets/fonts/arial.ttf")) {
         std::cerr << "Nie udalo sie zaladowac fontu!" << std::endl;
     }
+    initButtons();  // przyciski wymagają wczytanej czcionki
+}
+
+void Game::initButtons() {
+    const float cx = Config::WINDOW_WIDTH / 2.f;  // środek poziomy okna
+    const sf::Vector2f bigSize(360.f, 50.f);      // standardowy rozmiar przycisku menu
+
+    // --- MENU GŁÓWNE ---
+    const char* menuLabels[4] = { "Nowa gra", "Wczytaj gre", "Wyniki", "Wyjdz" };
+    float y = 360.f;
+    for (int i = 0; i < 4; ++i) {
+        menuButtons[i].setup(font, menuLabels[i], {cx, y}, bigSize, 30);
+        y += 65.f;
+    }
+
+    // --- WYBÓR MAPY (jeden przycisk na mapę z Config) ---
+    mapButtons.resize(Config::Maps::COUNT);
+    y = 320.f;
+    for (int i = 0; i < Config::Maps::COUNT; ++i) {
+        mapButtons[i].setup(font, Config::Maps::NAMES[i], {cx, y}, bigSize, 32);
+        y += 65.f;
+    }
+
+    // --- PAUZA ---
+    pauseButtons[0].setup(font, "Wznow (ESC)", {cx, Config::WINDOW_HEIGHT / 2.f + 40.f}, bigSize, 28);
+    pauseButtons[1].setup(font, "Menu glowne (M)", {cx, Config::WINDOW_HEIGHT / 2.f + 105.f}, bigSize, 28);
+
+    // --- GAME OVER ---
+    gameOverButtons[0].setup(font, "Zagraj ponownie (R)", {cx, Config::WINDOW_HEIGHT / 2.f + 80.f}, bigSize, 28);
+    gameOverButtons[1].setup(font, "Menu glowne (M)", {cx, Config::WINDOW_HEIGHT / 2.f + 145.f}, bigSize, 28);
+
+    // --- EKRAN WYNIKÓW ---
+    hsBackButton.setup(font, "Powrot do menu (ESC)", {cx, Config::WINDOW_HEIGHT - 60.f}, {320.f, 46.f}, 22);
+
+    // --- HUD: panel budowy/ulepszeń (lewy górny róg, środek panelu x=150) ---
+    const float panelCx = 150.f;
+    const sf::Vector2f hudSize(260.f, 28.f);
+    const char* buildLabels[5] = {
+        "1: Karabin ($50)",
+        "2: Snajper ($100)",
+        "3: Wyrzutnia ($150)",
+        "4: Miotacz ognia ($80)",
+        "5: Spowalniacz ($60)"
+    };
+    float hy = 120.f;
+    for (int i = 0; i < 5; ++i) {
+        buildButtons[i].setup(font, buildLabels[i], {panelCx, hy}, hudSize, 16);
+        hy += 34.f;
+    }
+    // Teksty ulepszenia/sprzedaży są dynamiczne — ustawiamy je co klatkę w renderUI.
+    upgradeButton.setup(font, "", {panelCx, 130.f}, {260.f, 34.f}, 16);
+    sellButton.setup(font, "", {panelCx, 175.f}, {260.f, 34.f}, 16);
 }
 
 void Game::startNewGame() {
@@ -52,35 +104,103 @@ void Game::processEvents() {
             window.close();
             break;
 
-        // 2. OBSŁUGA MYSZY
-        case sf::Event::MouseButtonPressed:
-            // Zazwyczaj interakcje myszką mają sens tylko podczas właściwej rozgrywki
-            if (state == GameState::PLAYING) {
-                if (event.mouseButton.button == sf::Mouse::Left) {
-                    sf::Vector2f mouse(static_cast<float>(event.mouseButton.x),
-                                       static_cast<float>(event.mouseButton.y));
+        // 2. OBSŁUGA MYSZY — RUCH (podświetlanie przycisków pod kursorem)
+        case sf::Event::MouseMoved: {
+            sf::Vector2f m(static_cast<float>(event.mouseMove.x),
+                           static_cast<float>(event.mouseMove.y));
+            // W menu i wyborze mapy mysz współdzieli zaznaczenie z klawiaturą.
+            if (state == GameState::MENU) {
+                for (int i = 0; i < 4; ++i)
+                    if (menuButtons[i].contains(m)) menuSelectedOption = i;
+            } else if (state == GameState::MAP_SELECT) {
+                for (int i = 0; i < Config::Maps::COUNT; ++i)
+                    if (mapButtons[i].contains(m)) mapSelectedOption = i;
+            }
+            break;
+        }
 
-                    // Sprawdzamy, czy gracz nie kliknął w bonus
-                    bool clickedBonus = false;
+        // 2b. OBSŁUGA MYSZY — KLIKNIĘCIE
+        case sf::Event::MouseButtonPressed: {
+            sf::Vector2f mouse(static_cast<float>(event.mouseButton.x),
+                               static_cast<float>(event.mouseButton.y));
+            bool left = (event.mouseButton.button == sf::Mouse::Left);
+
+            switch (state) {
+            case GameState::MENU:
+                if (left)
+                    for (int i = 0; i < 4; ++i)
+                        if (menuButtons[i].contains(mouse)) { handleMenuChoice(i); break; }
+                break;
+
+            case GameState::MAP_SELECT:
+                if (left)
+                    for (int i = 0; i < Config::Maps::COUNT; ++i)
+                        if (mapButtons[i].contains(mouse)) {
+                            currentMapPath = Config::Maps::PATHS[i];
+                            startNewGame();
+                            break;
+                        }
+                break;
+
+            case GameState::PAUSED:
+                if (left) {
+                    if (pauseButtons[0].contains(mouse)) state = GameState::PLAYING;
+                    else if (pauseButtons[1].contains(mouse)) { state = GameState::MENU; menuSelectedOption = 0; }
+                }
+                break;
+
+            case GameState::GAME_OVER:
+                if (left) {
+                    if (gameOverButtons[0].contains(mouse)) startNewGame();
+                    else if (gameOverButtons[1].contains(mouse)) { state = GameState::MENU; menuSelectedOption = 0; }
+                }
+                break;
+
+            case GameState::HIGHSCORES:
+                if (left && hsBackButton.contains(mouse)) { state = GameState::MENU; menuSelectedOption = 0; }
+                break;
+
+            case GameState::PLAYING:
+                if (left) {
+                    // Najpierw przyciski HUD aktywnego slotu — żeby klik w panel
+                    // nie odznaczał slotu (panel nie leży nad slotem mapy).
+                    if (selectedSlotIndex >= 0) {
+                        const TowerSlot& slot = map.getSlots()[selectedSlotIndex];
+                        bool handled = false;
+                        if (!slot.occupied) {
+                            for (int i = 0; i < 5; ++i)
+                                if (buildButtons[i].contains(mouse)) { tryBuyTower(i + 1); handled = true; break; }
+                        } else {
+                            if (upgradeButton.contains(mouse)) { tryUpgradeTower(); handled = true; }
+                            else if (sellButton.contains(mouse)) { trySellTower(); handled = true; }
+                        }
+                        if (handled) break;
+                    }
+
+                    // Kliknięcie w bonus (paczkę) na mapie.
                     for (auto& obj : objects) {
                         Bonus* bonus = dynamic_cast<Bonus*>(obj.get());
                         if (bonus && bonus->isAlive() && bonus->contains(mouse)) {
                             applyBonus(bonus->getType());
                             bonus->destroy();
-                            clickedBonus = true;
                             break;
                         }
                     }
 
-                    // Zaznaczamy slot
+                    // Zaznaczenie slotu pod kursorem (-1 gdy kliknięto poza slotem).
                     int idx = map.getSlotAt(mouse);
                     selectedSlotIndex = (idx >= 0) ? idx : -1;
 
                 } else if (event.mouseButton.button == sf::Mouse::Right) {
                     selectedSlotIndex = -1; // PPM — odznacz slot
                 }
+                break;
+
+            default:
+                break;
             }
             break;
+        }
 
         // 3. OBSŁUGA KLAWIATURY
         case sf::Event::KeyPressed:
@@ -111,7 +231,18 @@ void Game::processEvents() {
 
             case GameState::GAME_OVER:
                 if (event.key.code == sf::Keyboard::R) {
-                    startNewGame();
+                    startNewGame();  // R — zagraj ponownie na tej samej mapie
+                } else if (event.key.code == sf::Keyboard::M) {
+                    state = GameState::MENU;  // M — powrot do menu glownego
+                    menuSelectedOption = 0;
+                }
+                break;
+
+            case GameState::HIGHSCORES:
+                // Z tablicy wynikow wracamy do menu (ESC lub M).
+                if (event.key.code == sf::Keyboard::Escape || event.key.code == sf::Keyboard::M) {
+                    state = GameState::MENU;
+                    menuSelectedOption = 0;
                 }
                 break;
 
@@ -352,36 +483,13 @@ void Game::renderMenu() {
     subtitle.setPosition(Config::WINDOW_WIDTH / 2.f, 230.f);
     window.draw(subtitle);
 
-    // Opcje menu
-    const std::string options[] = {
-        "Nowa gra",
-        "Wczytaj gre",
-        "Wyniki",
-        "Wyjdz"
-    };
-
-    float optionY = 360.f;
-    for (int i = 0; i < 4; ++i) {
-        sf::Text opt(options[i], font, 32);
-
-        // Podswietlenie aktualnie wybranej opcji
-        if (i == menuSelectedOption) {
-            opt.setFillColor(sf::Color(150, 255, 100));
-            opt.setStyle(sf::Text::Bold);
-        } else {
-            opt.setFillColor(sf::Color(200, 200, 200));
-        }
-
-        sf::FloatRect bounds = opt.getLocalBounds();
-        opt.setOrigin(bounds.width / 2.f, bounds.height / 2.f);
-        opt.setPosition(Config::WINDOW_WIDTH / 2.f, optionY);
-        window.draw(opt);
-
-        optionY += 60.f;
-    }
+    // Opcje menu jako przyciski (klasa Button). Podświetlenie steruje wspólnym
+    // indeksem menuSelectedOption — ustawianym i przez klawiaturę, i przez mysz.
+    for (int i = 0; i < 4; ++i)
+        menuButtons[i].draw(window, i == menuSelectedOption);
 
     // Instrukcja na dole
-    sf::Text hint("Strzalki gora/dol, ENTER aby wybrac", font, 16);
+    sf::Text hint("Strzalki + ENTER lub mysz, aby wybrac", font, 16);
     hint.setFillColor(sf::Color(150, 150, 150));
     sf::FloatRect hintBounds = hint.getLocalBounds();
     hint.setOrigin(hintBounds.width / 2.f, hintBounds.height / 2.f);
@@ -409,29 +517,12 @@ void Game::renderMapSelect() {
     title.setPosition(Config::WINDOW_WIDTH / 2.f, 150.f);
     window.draw(title);
 
-    // Lista dostępnych map z Config::Maps
-    float optionY = 320.f;
-    for (int i = 0; i < Config::Maps::COUNT; ++i) {
-        sf::Text opt(Config::Maps::NAMES[i], font, 36);
-
-        // Podświetlenie aktualnie wybranej mapy
-        if (i == mapSelectedOption) {
-            opt.setFillColor(sf::Color(150, 255, 100));
-            opt.setStyle(sf::Text::Bold);
-        } else {
-            opt.setFillColor(sf::Color(200, 200, 200));
-        }
-
-        sf::FloatRect bounds = opt.getLocalBounds();
-        opt.setOrigin(bounds.width / 2.f, bounds.height / 2.f);
-        opt.setPosition(Config::WINDOW_WIDTH / 2.f, optionY);
-        window.draw(opt);
-
-        optionY += 60.f;
-    }
+    // Lista dostępnych map jako przyciski (klasa Button).
+    for (int i = 0; i < Config::Maps::COUNT; ++i)
+        mapButtons[i].draw(window, i == mapSelectedOption);
 
     // Instrukcja na dole
-    sf::Text hint("Strzalki gora/dol, ENTER aby grac, ESC aby wrocic", font, 16);
+    sf::Text hint("Strzalki + ENTER lub mysz, aby grac; ESC aby wrocic", font, 16);
     hint.setFillColor(sf::Color(150, 150, 150));
     sf::FloatRect hintBounds = hint.getLocalBounds();
     hint.setOrigin(hintBounds.width / 2.f, hintBounds.height / 2.f);
@@ -472,16 +563,10 @@ void Game::renderGameOver() {
         );
     window.draw(scoreText);
 
-    // Instrukcja
-    sf::Text restartText("Wcisnij R aby zagrac ponownie", font, 24);
-    restartText.setFillColor(sf::Color::White);
-    bounds = restartText.getLocalBounds();
-    restartText.setOrigin(bounds.width / 2.f, bounds.height / 2.f);
-    restartText.setPosition(
-        Config::WINDOW_WIDTH / 2.f,
-        Config::WINDOW_HEIGHT / 2.f + 80.f
-        );
-    window.draw(restartText);
+    // Przyciski (klasa Button) — klawisze R/M nadal działają, mysz podświetla.
+    sf::Vector2f m = window.mapPixelToCoords(sf::Mouse::getPosition(window));
+    gameOverButtons[0].draw(window, gameOverButtons[0].contains(m));
+    gameOverButtons[1].draw(window, gameOverButtons[1].contains(m));
 }
 
 void Game::renderPaused() {
@@ -508,29 +593,44 @@ void Game::renderPaused() {
         );
     window.draw(pauseText);
 
-    // Instrukcje
-    sf::Text resumeHint("ESC - wznow", font, 26);
-    resumeHint.setFillColor(sf::Color::White);
-    bounds = resumeHint.getLocalBounds();
-    resumeHint.setOrigin(bounds.width / 2.f, bounds.height / 2.f);
-    resumeHint.setPosition(
-        Config::WINDOW_WIDTH / 2.f,
-        Config::WINDOW_HEIGHT / 2.f + 50.f
-        );
-    window.draw(resumeHint);
-
-    sf::Text menuHint("M - powrot do menu", font, 26);
-    menuHint.setFillColor(sf::Color::White);
-    bounds = menuHint.getLocalBounds();
-    menuHint.setOrigin(bounds.width / 2.f, bounds.height / 2.f);
-    menuHint.setPosition(
-        Config::WINDOW_WIDTH / 2.f,
-        Config::WINDOW_HEIGHT / 2.f + 100.f
-        );
-    window.draw(menuHint);
+    // Przyciski (klasa Button) — podświetlane pod kursorem myszy.
+    sf::Vector2f m = window.mapPixelToCoords(sf::Mouse::getPosition(window));
+    pauseButtons[0].draw(window, pauseButtons[0].contains(m));
+    pauseButtons[1].draw(window, pauseButtons[1].contains(m));
 }
 
-void Game::renderHighscores(){}
+void Game::renderHighscores(){
+    // Tlo spojne z menu glownym.
+    sf::Texture& menuTex = ResourceManager::getTexture(Config::Assets::MAIN_MENU_BG);
+    sf::Sprite menuSprite(menuTex);
+    menuSprite.setScale(static_cast<float>(Config::WINDOW_WIDTH) / menuTex.getSize().x,
+                        static_cast<float>(Config::WINDOW_HEIGHT) / menuTex.getSize().y);
+    window.draw(menuSprite);
+
+    if (font.getInfo().family.empty()) return;
+
+    // Naglowek
+    sf::Text title("WYNIKI", font, 60);
+    title.setFillColor(sf::Color(150, 255, 100));
+    title.setOutlineColor(sf::Color::Black);
+    title.setOutlineThickness(3.f);
+    sf::FloatRect titleBounds = title.getLocalBounds();
+    title.setOrigin(titleBounds.width / 2.f, titleBounds.height / 2.f);
+    title.setPosition(Config::WINDOW_WIDTH / 2.f, 150.f);
+    window.draw(title);
+
+    // Tablica wynikow zostanie uzupelniona w MS4 — na razie placeholder.
+    sf::Text placeholder("Tablica wynikow - wkrotce (MS4)", font, 26);
+    placeholder.setFillColor(sf::Color(200, 200, 200));
+    sf::FloatRect phBounds = placeholder.getLocalBounds();
+    placeholder.setOrigin(phBounds.width / 2.f, phBounds.height / 2.f);
+    placeholder.setPosition(Config::WINDOW_WIDTH / 2.f, Config::WINDOW_HEIGHT / 2.f);
+    window.draw(placeholder);
+
+    // Przycisk powrotu (klasa Button) — działa też ESC/M.
+    sf::Vector2f m = window.mapPixelToCoords(sf::Mouse::getPosition(window));
+    hsBackButton.draw(window, hsBackButton.contains(m));
+}
 
 
 void Game::renderUI() {
@@ -588,26 +688,30 @@ void Game::renderUI() {
         const TowerSlot& slot = map.getSlots()[selectedSlotIndex];
 
         // Tło pod menu
-        sf::RectangleShape menuBg(sf::Vector2f(280.f, 210.f));
+        sf::RectangleShape menuBg(sf::Vector2f(280.f, 250.f));
         menuBg.setPosition(10.f, 70.f);
         menuBg.setFillColor(sf::Color(30, 30, 50, 210)); // Ciemnogranatowe, przezroczyste tło
         menuBg.setOutlineThickness(2.f);
         menuBg.setOutlineColor(sf::Color(100, 150, 255));
         window.draw(menuBg);
 
+        // Pozycja kursora do podświetlania przycisków HUD.
+        sf::Vector2f hudMouse = window.mapPixelToCoords(sf::Mouse::getPosition(window));
+
         if (!slot.occupied) {
-            // MENU BUDOWANIA
-            sf::Text buildText(
-                "WYBIERZ WIEZE:\n\n"
-                "[1] Karabin ($50)\n"
-                "[2] Snajper ($100)\n"
-                "[3] Wyrzutnia ($150)\n"
-                "[4] Miotacz Ognia ($80)\n"
-                "[5] Spowalniacz ($60)\n"
-                "[ESC] Anuluj", font, 20);
-            buildText.setPosition(25.f, 80.f);
-            buildText.setFillColor(sf::Color::White);
-            window.draw(buildText);
+            // MENU BUDOWANIA — przyciski (klasa Button); klawisze 1-5 też działają.
+            sf::Text buildTitle("WYBIERZ WIEZE:", font, 18);
+            buildTitle.setPosition(25.f, 80.f);
+            buildTitle.setFillColor(sf::Color::White);
+            window.draw(buildTitle);
+
+            for (int i = 0; i < 5; ++i)
+                buildButtons[i].draw(window, buildButtons[i].contains(hudMouse));
+
+            sf::Text cancelHint("[ESC / PPM] Anuluj", font, 15);
+            cancelHint.setPosition(40.f, 290.f);
+            cancelHint.setFillColor(sf::Color(180, 180, 180));
+            window.draw(cancelHint);
         } else {
             // MENU ULEPSZEŃ / SPRZEDAŻY
             // Musimy znaleźć wieżę, żeby pobrać jej statystyki
@@ -625,18 +729,24 @@ void Game::renderUI() {
                 int refund = static_cast<int>(selectedTower->getCost() * Config::SELL_REFUND);
                 int lvl = selectedTower->getLevel();
 
-                std::string upgradeStr = (lvl < 3) ?
-                                             "[U] Ulepsz ($" + std::to_string(upgCost) + ")\n" :
-                                             "[U] MAX POZIOM\n";
+                // Nagłówek panelu z poziomem wieży.
+                sf::Text upgTitle("WIEZA - POZIOM " + std::to_string(lvl), font, 18);
+                upgTitle.setPosition(25.f, 80.f);
+                upgTitle.setFillColor(sf::Color(255, 150, 255));
+                window.draw(upgTitle);
 
-                sf::Text upgradeText(
-                    "WIEZA - POZIOM " + std::to_string(lvl) + "\n\n" +
-                        upgradeStr +
-                        "[S] Sprzedaj ($" + std::to_string(refund) + ")\n\n" +
-                        "[ESC] Anuluj", font, 20);
-                upgradeText.setPosition(25.f, 80.f);
-                upgradeText.setFillColor(sf::Color(255, 150, 255)); // Różowawy kolor
-                window.draw(upgradeText);
+                // Dynamiczne teksty przycisków (koszt zależy od wieży i poziomu).
+                upgradeButton.setText((lvl < 3) ? "U: Ulepsz ($" + std::to_string(upgCost) + ")"
+                                                : "U: MAX POZIOM");
+                sellButton.setText("S: Sprzedaj ($" + std::to_string(refund) + ")");
+
+                upgradeButton.draw(window, upgradeButton.contains(hudMouse));
+                sellButton.draw(window, sellButton.contains(hudMouse));
+
+                sf::Text cancelHint("[ESC / PPM] Anuluj", font, 15);
+                cancelHint.setPosition(40.f, 215.f);
+                cancelHint.setFillColor(sf::Color(180, 180, 180));
+                window.draw(cancelHint);
             }
         }
     }
