@@ -1,0 +1,27 @@
+# Mapa 2 "Miasto" — rozdzielczość okna docelowego: 1280x720
+
+# === TŁO MAPY ===
+# Brak linii B -> używane jest tło domyślne z Config::Assets::BACKGROUND.
+# Aby dać tej mapie własną grafikę, wrzuć plik do assets/textures/ i dopisz np.:
+# B /assets/textures/background_miasto.png
+
+# === WAYPOINTY (ŚCIEŻKA ZOMBIE) — trasa w kształcie zygzaka ===
+W 0 150
+W 1080 150
+W 1080 360
+W 200 360
+W 200 570
+W 1280 570
+
+# === SLOTY NA WIEŻE ===
+S 300 250
+S 600 250
+S 900 250
+S 500 460
+S 800 460
+S 1000 460
+S 400 670
+S 700 670
+
+# === DROP ZONE ===
+D 1120 470

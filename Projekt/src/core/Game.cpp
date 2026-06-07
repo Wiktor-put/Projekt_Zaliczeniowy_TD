@@ -24,7 +24,7 @@
 #define ASSETS_DIR "."
 #endif
 
-Game::Game() : window(sf::VideoMode(Config::WINDOW_WIDTH, Config::WINDOW_HEIGHT), "DEAD ZONE"), state(GameState::MENU), menuSelectedOption(0) {
+Game::Game() : window(sf::VideoMode(Config::WINDOW_WIDTH, Config::WINDOW_HEIGHT), "DEAD ZONE"), state(GameState::MENU), currentMapPath(Config::Maps::PATHS[0]), menuSelectedOption(0) {
     window.setFramerateLimit(Config::FPS_LIMIT);
     if (!font.loadFromFile(std::string(ASSETS_DIR) + "/assets/fonts/arial.ttf")) {
         std::cerr << "Nie udalo sie zaladowac fontu!" << std::endl;
@@ -34,7 +34,7 @@ Game::Game() : window(sf::VideoMode(Config::WINDOW_WIDTH, Config::WINDOW_HEIGHT)
 void Game::startNewGame() {
     objects.clear();           // usuń wszystkie zombi, wieże, pociski
     player.reset();            // reset gracza do startowych wartości
-    map.loadFromFile(std::string(ASSETS_DIR) + "/assets/maps/map1.txt");  // przeładuj mapę (zwalnia sloty)
+    map.loadFromFile(std::string(ASSETS_DIR) + currentMapPath);  // przeładuj wybraną mapę (zwalnia sloty)
     spawnTimer = 0.f;
     selectedSlotIndex = -1;    // anuluj wybór slotu jeśli był
     state = GameState::PLAYING;
@@ -96,6 +96,19 @@ void Game::processEvents() {
                 }
                 break;
 
+            case GameState::MAP_SELECT:
+                if (event.key.code == sf::Keyboard::Up) {
+                    mapSelectedOption = (mapSelectedOption > 0) ? mapSelectedOption - 1 : Config::Maps::COUNT - 1;
+                } else if (event.key.code == sf::Keyboard::Down) {
+                    mapSelectedOption = (mapSelectedOption < Config::Maps::COUNT - 1) ? mapSelectedOption + 1 : 0;
+                } else if (event.key.code == sf::Keyboard::Enter || event.key.code == sf::Keyboard::Return) {
+                    currentMapPath = Config::Maps::PATHS[mapSelectedOption];  // zapamiętaj wybór
+                    startNewGame();                                           // ustawia stan na PLAYING
+                } else if (event.key.code == sf::Keyboard::Escape) {
+                    state = GameState::MENU;  // powrót do menu głównego
+                }
+                break;
+
             case GameState::GAME_OVER:
                 if (event.key.code == sf::Keyboard::R) {
                     startNewGame();
@@ -154,9 +167,9 @@ void Game::processEvents() {
 
 void Game::handleMenuChoice(int option) {
     switch (option) {
-    case 0:  // Nowa gra
-        startNewGame();
-        state = GameState::PLAYING;
+    case 0:  // Nowa gra — najpierw wybór mapy
+        mapSelectedOption = 0;
+        state = GameState::MAP_SELECT;
         break;
 
     case 1:  // Wczytaj gre
@@ -212,6 +225,10 @@ void Game::update(float dt) {
     switch (state) {
     case GameState::MENU:
         // Menu jest statyczne, nic nie aktualizujemy
+        break;
+
+    case GameState::MAP_SELECT:
+        // Ekran wyboru mapy jest statyczny
         break;
 
     case GameState::PLAYING:
@@ -365,6 +382,56 @@ void Game::renderMenu() {
 
     // Instrukcja na dole
     sf::Text hint("Strzalki gora/dol, ENTER aby wybrac", font, 16);
+    hint.setFillColor(sf::Color(150, 150, 150));
+    sf::FloatRect hintBounds = hint.getLocalBounds();
+    hint.setOrigin(hintBounds.width / 2.f, hintBounds.height / 2.f);
+    hint.setPosition(Config::WINDOW_WIDTH / 2.f, Config::WINDOW_HEIGHT - 40.f);
+    window.draw(hint);
+}
+
+void Game::renderMapSelect() {
+    // Tło reużywamy z menu głównego dla spójności wizualnej.
+    sf::Texture& menuTex = ResourceManager::getTexture(Config::Assets::MAIN_MENU_BG);
+    sf::Sprite menuSprite(menuTex);
+    menuSprite.setScale(static_cast<float>(Config::WINDOW_WIDTH) / menuTex.getSize().x,
+                        static_cast<float>(Config::WINDOW_HEIGHT) / menuTex.getSize().y);
+    window.draw(menuSprite);
+
+    if (font.getInfo().family.empty()) return;
+
+    // Nagłówek
+    sf::Text title("WYBIERZ MAPE", font, 60);
+    title.setFillColor(sf::Color(150, 255, 100));
+    title.setOutlineColor(sf::Color::Black);
+    title.setOutlineThickness(3.f);
+    sf::FloatRect titleBounds = title.getLocalBounds();
+    title.setOrigin(titleBounds.width / 2.f, titleBounds.height / 2.f);
+    title.setPosition(Config::WINDOW_WIDTH / 2.f, 150.f);
+    window.draw(title);
+
+    // Lista dostępnych map z Config::Maps
+    float optionY = 320.f;
+    for (int i = 0; i < Config::Maps::COUNT; ++i) {
+        sf::Text opt(Config::Maps::NAMES[i], font, 36);
+
+        // Podświetlenie aktualnie wybranej mapy
+        if (i == mapSelectedOption) {
+            opt.setFillColor(sf::Color(150, 255, 100));
+            opt.setStyle(sf::Text::Bold);
+        } else {
+            opt.setFillColor(sf::Color(200, 200, 200));
+        }
+
+        sf::FloatRect bounds = opt.getLocalBounds();
+        opt.setOrigin(bounds.width / 2.f, bounds.height / 2.f);
+        opt.setPosition(Config::WINDOW_WIDTH / 2.f, optionY);
+        window.draw(opt);
+
+        optionY += 60.f;
+    }
+
+    // Instrukcja na dole
+    sf::Text hint("Strzalki gora/dol, ENTER aby grac, ESC aby wrocic", font, 16);
     hint.setFillColor(sf::Color(150, 150, 150));
     sf::FloatRect hintBounds = hint.getLocalBounds();
     hint.setOrigin(hintBounds.width / 2.f, hintBounds.height / 2.f);
@@ -630,6 +697,10 @@ void Game::render() {
         renderMenu();
         break;
 
+    case GameState::MAP_SELECT:
+        renderMapSelect();
+        break;
+
     case GameState::PLAYING:
         renderPlaying();
         break;
@@ -774,6 +845,9 @@ void Game::saveGame() {
         return;
     }
 
+    // 0. Zapisujemy ścieżkę mapy (osobna linia — może zawierać spacje).
+    file << currentMapPath << "\n";
+
     // 1. Zapisujemy Gracza i aktualną falę z WaveManager
     file << player.getMoney() << " " << player.getLives() << " "
          << player.getScore() << " " << waveManager.getCurrentWaveIndex() << "\n";
@@ -812,7 +886,10 @@ void Game::loadGame() {
 
     // 1. Czyścimy obecny stan gry
     objects.clear();
-    map.loadFromFile(std::string(ASSETS_DIR) + "/assets/maps/map1.txt"); // Reset slotów do stanu "puste"
+
+    // Wczytujemy ścieżkę mapy (pierwsza linia zapisu) i ładujemy tę planszę.
+    std::getline(file, currentMapPath);
+    map.loadFromFile(std::string(ASSETS_DIR) + currentMapPath); // Reset slotów do stanu "puste"
     selectedSlotIndex = -1;
     state = GameState::PLAYING;
 

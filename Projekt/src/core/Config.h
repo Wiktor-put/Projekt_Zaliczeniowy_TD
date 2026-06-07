@@ -51,6 +51,23 @@ constexpr const char* TANK_RIGHT = "/assets/textures/tank walk/Zombie_Big_Side_W
 constexpr const char* TANK_LEFT = "/assets/textures/tank walk/Zombie_Big_Side-left_Walk-Sheet8.png";
 }
 
+// ===== DOSTĘPNE MAPY (do wyboru z menu) =====
+// Aby dodać kolejną planszę: stwórz plik w assets/maps/, dopisz jego ścieżkę
+// i nazwę poniżej oraz zwiększ COUNT. Reszta (wybór, ładowanie) działa sama.
+namespace Maps {
+constexpr int COUNT = 2;
+// Ścieżki względem katalogu projektu (ASSETS_DIR doklejany przy ładowaniu).
+constexpr const char* PATHS[COUNT] = {
+    "/assets/maps/map1.txt",
+    "/assets/maps/map2.txt"
+};
+// Nazwy wyświetlane w menu wyboru mapy.
+constexpr const char* NAMES[COUNT] = {
+    "Las",
+    "Miasto"
+};
+}
+
 // ===== GRACZ =====
 constexpr int STARTING_LIVES = 20;
 constexpr int STARTING_MONEY = 200;

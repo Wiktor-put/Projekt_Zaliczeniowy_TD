@@ -17,6 +17,7 @@
 
 enum class GameState {
     MENU,          // ekran startowy z opcjami
+    MAP_SELECT,    // ekran wyboru mapy przed rozpoczeciem gry
     PLAYING,       // wlasciwa rozgrywka
     PAUSED,        // pauza w trakcie gry
     GAME_OVER,     // ekran konca gry z wynikiem
@@ -36,6 +37,8 @@ private:
     float spawnTimer = 0.f;
     int selectedSlotIndex = -1;                       // indeks klikniętego slotu, -1 = brak wyboru
     GameState state;                                  // stan gry
+    std::string currentMapPath;                       // ścieżka aktualnie wybranej mapy (względna)
+    int mapSelectedOption = 0;                        // podświetlona mapa na ekranie wyboru
     sf::Font font;
     WaveManager waveManager;    // potrzebny do napisu GAME OVER
 
@@ -51,6 +54,8 @@ public:
     void render();
 
     void renderMenu();
+    // Ekran wyboru mapy (lista plansz z Config::Maps).
+    void renderMapSelect();
     void renderPlaying();
     void renderPaused();
     void renderGameOver();
