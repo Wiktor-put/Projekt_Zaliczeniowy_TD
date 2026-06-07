@@ -7,12 +7,14 @@ przed nadciągającymi falami zombie. Projekt zaliczeniowy z C++ / SFML.
 
 ## Status projektu
 
-W trakcie realizacji — obecnie zrealizowany **Milestone 1** (fundament).
+W trakcie realizacji — obecnie zrealizowane:
+-**Milestone 1** (fundament)
+-**Milestone 2** (grywalny prototyp)
 
 ## Autorzy
 
-- Imię Nazwisko (login GitHub)
-- Imię Nazwisko (login GitHub)
+- Natalia Ćwiek (Natalia2006420)
+- Wiktor Czapliński (Wiktor-put)
 
 ## Technologia
 
