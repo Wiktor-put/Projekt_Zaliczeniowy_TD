@@ -29,6 +29,8 @@ void HUD::init(const sf::Font& f) {
     // Teksty ulepszenia/sprzedaży są dynamiczne — ustawiamy je co klatkę w draw().
     upgradeButton.setup(f, "", {panelCx, 130.f}, {260.f, 34.f}, 16);
     sellButton.setup(f, "", {panelCx, 175.f}, {260.f, 34.f}, 16);
+    // Przycisk pomocy w lewym rogu (znak zapytania)
+    helpButton.setup(f, "?", {40.f, 680.f}, {40.f, 40.f}, 24);
 }
 
 void HUD::draw(sf::RenderWindow& window,
@@ -74,6 +76,10 @@ void HUD::draw(sf::RenderWindow& window,
     window.draw(livesText);
     window.draw(scoreText);
     window.draw(waveText);
+
+    // Rysowanie przycisku pomocy (sprawdzamy czy kursor na nim jest)
+    sf::Vector2f hudMouse = window.mapPixelToCoords(sf::Mouse::getPosition(window));
+    helpButton.draw(window, helpButton.contains(hudMouse));
 
     // ==========================================
     // 2. PANEL SLOTU (tylko gdy zaznaczono slot)
@@ -157,6 +163,12 @@ void HUD::draw(sf::RenderWindow& window,
 
 HudClick HUD::handleClick(sf::Vector2f mouse, bool occupied) const {
     HudClick result;
+    // Sprawdzamy przycisk pomocy niezależnie od zaznaczonego slotu
+    if (helpButton.contains(mouse)) {
+        result.action = HudAction::HELP;
+        return result;
+    }
+
     if (!occupied) {
         for (int i = 0; i < 5; ++i)
             if (buildButtons[i].contains(mouse)) {

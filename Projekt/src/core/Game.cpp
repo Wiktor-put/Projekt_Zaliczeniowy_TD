@@ -38,12 +38,14 @@ void Game::initButtons() {
     const sf::Vector2f bigSize(360.f, 50.f);      // standardowy rozmiar przycisku menu
 
     // --- MENU GŁÓWNE ---
-    const char* menuLabels[4] = { "Nowa gra", "Wczytaj gre", "Wyniki", "Wyjdz" };
+    const char* menuLabels[5] = { "Nowa gra", "Wczytaj gre", "Wyniki", "Wyjdz", "Zasady Gry" };
     float y = 360.f;
-    for (int i = 0; i < 4; ++i) {
+    for (int i = 0; i < 5; ++i) {
         menuButtons[i].setup(font, menuLabels[i], {cx, y}, bigSize, 30);
         y += 65.f;
     }
+    // Używamy tego samego przycisku powrotu (hsBackButton) dla ekranu Help!
+    hsBackButton.setup(font, "Powrot", {cx, y}, bigSize, 30);
 
     // --- WYBÓR MAPY (jeden przycisk na mapę z Config) ---
     mapButtons.resize(Config::Maps::COUNT);
@@ -94,7 +96,7 @@ void Game::processEvents() {
                            static_cast<float>(event.mouseMove.y));
             // W menu i wyborze mapy mysz współdzieli zaznaczenie z klawiaturą.
             if (state == GameState::MENU) {
-                for (int i = 0; i < 4; ++i)
+                for (int i = 0; i < 5; ++i)
                     if (menuButtons[i].contains(m)) menuSelectedOption = i;
             } else if (state == GameState::MAP_SELECT) {
                 for (int i = 0; i < Config::Maps::COUNT; ++i)
@@ -112,7 +114,7 @@ void Game::processEvents() {
             switch (state) {
             case GameState::MENU:
                 if (left)
-                    for (int i = 0; i < 4; ++i)
+                    for (int i = 0; i < 5; ++i)
                         if (menuButtons[i].contains(mouse)) { handleMenuChoice(i); break; }
                 break;
 
@@ -144,22 +146,30 @@ void Game::processEvents() {
                 if (left && hsBackButton.contains(mouse)) { state = GameState::MENU; menuSelectedOption = 0; }
                 break;
 
+            case GameState::HELP:
+                if (left && hsBackButton.contains(mouse)) { state = previousState; }
+                break;
+
             case GameState::PLAYING:
                 if (left) {
-                    // Najpierw przyciski HUD aktywnego slotu — żeby klik w panel
-                    // nie odznaczał slotu (panel nie leży nad slotem mapy).
-                    if (selectedSlotIndex >= 0) {
-                        const TowerSlot& slot = map.getSlots()[selectedSlotIndex];
-                        HudClick hc = hud.handleClick(mouse, slot.occupied);
-                        if (hc.action != HudAction::NONE) {
-                            switch (hc.action) {
-                            case HudAction::BUY_TOWER: tryBuyTower(hc.towerType); break;
-                            case HudAction::UPGRADE:   tryUpgradeTower(); break;
-                            case HudAction::SELL:      trySellTower(); break;
-                            default: break;
-                            }
-                            break;  // klik obsłużony przez HUD — nie zaznaczamy slotu na nowo
+                    // Sprawdzamy interfejs HUD (niezależnie od tego, czy slot jest zaznaczony)
+                    bool isOccupied = (selectedSlotIndex >= 0) ? map.getSlots()[selectedSlotIndex].occupied : false;
+                    HudClick hc = hud.handleClick(mouse, isOccupied);
+
+                    if (hc.action == HudAction::HELP) {
+                        previousState = state;     // Zapisujemy, że pomoc włączono w trakcie gry
+                        state = GameState::HELP;   // Gra się pauzuje i wyświetla instrukcję
+                        break;                     // Przerywamy sprawdzanie innych kliknięć
+                    }
+                    else if (hc.action != HudAction::NONE && selectedSlotIndex >= 0) {
+                        switch (hc.action) {
+                        case HudAction::BUY_TOWER: tryBuyTower(hc.towerType); break;
+                        case HudAction::UPGRADE:   tryUpgradeTower(); break;
+                        case HudAction::SELL:      trySellTower(); break;
+                        default: break;
                         }
+                        break;  // Kliknięto w menu budowy, nie zaznaczamy slotu na mapie
+
                     }
 
                     // Kliknięcie w bonus (paczkę) na mapie.
@@ -193,9 +203,9 @@ void Game::processEvents() {
             switch (state) {
             case GameState::MENU:
                 if (event.key.code == sf::Keyboard::Up) {
-                    menuSelectedOption = (menuSelectedOption > 0) ? menuSelectedOption - 1 : 3;
+                    menuSelectedOption = (menuSelectedOption > 0) ? menuSelectedOption - 1 : 4;
                 } else if (event.key.code == sf::Keyboard::Down) {
-                    menuSelectedOption = (menuSelectedOption < 3) ? menuSelectedOption + 1 : 0;
+                    menuSelectedOption = (menuSelectedOption < 4) ? menuSelectedOption + 1 : 0;
                 } else if (event.key.code == sf::Keyboard::Enter || event.key.code == sf::Keyboard::Return) {
                     handleMenuChoice(menuSelectedOption);
                 }
@@ -239,6 +249,15 @@ void Game::processEvents() {
                     state = GameState::MENU;
                     menuSelectedOption = 0;
                     std::cout << "Powrot do menu\n";
+                }
+                break;
+
+            case GameState::HELP:
+                if (event.type == sf::Event::MouseButtonPressed) {
+                sf::Vector2f mousePos = window.mapPixelToCoords(sf::Mouse::getPosition(window));
+                if (hsBackButton.contains(mousePos)) {
+                    state = previousState; // <--- ZMIANA: Wracamy dokładnie tam, skąd przyszliśmy!
+                }
                 }
                 break;
 
@@ -299,6 +318,11 @@ void Game::handleMenuChoice(int option) {
 
     case 3:  // Wyjdz
         window.close();
+        break;
+
+    case 4:  // Pomoc
+        previousState = state;     // Zapisujemy, gdzie byliśmy
+        state = GameState::HELP;
         break;
     }
 }
@@ -470,7 +494,7 @@ void Game::renderMenu() {
 
     // Opcje menu jako przyciski (klasa Button). Podświetlenie steruje wspólnym
     // indeksem menuSelectedOption — ustawianym i przez klawiaturę, i przez mysz.
-    for (int i = 0; i < 4; ++i)
+    for (int i = 0; i < 5; ++i)
         menuButtons[i].draw(window, i == menuSelectedOption);
 
     // Instrukcja na dole
@@ -617,6 +641,65 @@ void Game::renderHighscores(){
     hsBackButton.draw(window, hsBackButton.contains(m));
 }
 
+void Game::renderHelp() {
+    // 1.  możemy narysować tło z menu, żeby było ładniej
+    sf::Texture& menuTex = ResourceManager::getTexture(Config::Assets::MAIN_MENU_BG);
+    sf::Sprite menuSprite(menuTex);
+    float scaleX = static_cast<float>(Config::WINDOW_WIDTH) / menuTex.getSize().x;
+    float scaleY = static_cast<float>(Config::WINDOW_HEIGHT) / menuTex.getSize().y;
+    menuSprite.setScale(scaleX, scaleY);
+    window.draw(menuSprite);
+
+    // 2. Ciemne, półprzezroczyste tło dla czytelności tekstu
+    sf::RectangleShape bgPanel(sf::Vector2f(1000.f, 550.f));
+    bgPanel.setOrigin(500.f, 275.f);
+    bgPanel.setPosition(Config::WINDOW_WIDTH / 2.f, Config::WINDOW_HEIGHT / 2.f - 10.f);
+    bgPanel.setFillColor(sf::Color(20, 20, 20, 220));
+    bgPanel.setOutlineThickness(3.f);
+    bgPanel.setOutlineColor(sf::Color(100, 150, 255));
+    window.draw(bgPanel);
+
+    // 3. Tytuł
+    sf::Text title("ZASADY GRY", font, 40);
+    title.setFillColor(sf::Color::Cyan);
+    title.setStyle(sf::Text::Bold);
+    title.setOrigin(title.getLocalBounds().width / 2.f, 0.f);
+    title.setPosition(Config::WINDOW_WIDTH / 2.f, 90.f);
+    window.draw(title);
+
+    // 4. Treść instrukcji
+    std::string rulesText =
+        "CEL GRY:\n"
+        "Nie pozwol, aby zombie dotarly do Twojej bazy (brama na koncu drogi).\n"
+        "Masz 20 zyc. Kazdy zombie zabiera 1 lub wiecej zyc.\n\n"
+
+        "STEROWANIE:\n"
+        "- Kliknij LEWYM przyciskiem na szary kwadrat (slot), aby wybrac miejsce na wieze.\n"
+        "- Uzyj menu po lewej stronie, aby kupic wieze za dolary ($).\n"
+        "- Kliknij na zbudowana wieze, aby ja ULEPSZYC lub SPRZEDAC.\n"
+        "- ESC / PRAWY przycisk myszy - odznacza wybrany slot.\n"
+        "- ESC (gdy slot nie jest zaznaczony) - PAUZUJE GRE.\n"
+        "- F5 / F9 - Szybki zapis (Quicksave) oraz wczytanie (Quickload) gry.\n"
+        "- SPACJA - wypuszcza kolejna fale zombie.\n\n"
+
+        "ZOMBIE:\n"
+        "- Walker: Zwykly zombie.\n"
+        "- Runner: Bardzo szybki, ale malo odporny.\n"
+        "- Armored: Powolny, posiada pancerz dajacy 50% odpornosci na kule!\n"
+        "- Tank: Ogromny boss z gigantyczna iloscia HP.\n\n"
+
+        "WSKAZOWKA: Obserwuj zrzuty zaopatrzenia w strefie \"H\"!";
+
+    sf::Text content(rulesText, font, 16);
+    content.setFillColor(sf::Color::White);
+    content.setPosition(200.f, 160.f);
+    content.setLineSpacing(1.2f); // Zwiększa odstępy między linijkami dla czytelności
+    window.draw(content);
+
+    // 5. Przycisk powrotu
+    sf::Vector2f mousePos = window.mapPixelToCoords(sf::Mouse::getPosition(window));
+    hsBackButton.draw(window, hsBackButton.contains(mousePos));
+}
 
 void Game::renderPlaying() {
     // UWAGA: brak window.clear()/window.display() — robi to render(),
@@ -673,6 +756,10 @@ void Game::render() {
 
     case GameState::HIGHSCORES:
         renderHighscores();
+        break;
+
+    case GameState::HELP:
+        renderHelp();
         break;
     }
 

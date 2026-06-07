@@ -23,7 +23,8 @@ enum class GameState {
     PLAYING,       // wlasciwa rozgrywka
     PAUSED,        // pauza w trakcie gry
     GAME_OVER,     // ekran konca gry z wynikiem
-    HIGHSCORES     // tablica top 10 wynikow
+    HIGHSCORES,     // tablica top 10 wynikow
+    HELP            // ekran instrukcji
 };
 
 // Odpowiada za okno, pętlę gry oraz integrację wszystkich podsystemów
@@ -39,13 +40,14 @@ private:
     float spawnTimer = 0.f;
     int selectedSlotIndex = -1;                       // indeks klikniętego slotu, -1 = brak wyboru
     GameState state;                                  // stan gry
+    GameState previousState;                          // Zapamiętuje, skąd weszliśmy w Pomoc
     std::string currentMapPath;                       // ścieżka aktualnie wybranej mapy (względna)
     int mapSelectedOption = 0;                        // podświetlona mapa na ekranie wyboru
     sf::Font font;
     WaveManager waveManager;    // potrzebny do napisu GAME OVER
 
     // --- PRZYCISKI UI (klasa Button) ---
-    Button menuButtons[4];            // Nowa gra / Wczytaj / Wyniki / Wyjdz
+    Button menuButtons[5];            // Nowa gra / Wczytaj / Wyniki / Wyjdz / Zasady gry
     std::vector<Button> mapButtons;   // jeden przycisk na mapę z Config::Maps
     Button pauseButtons[2];           // 0 = wznow, 1 = menu
     Button gameOverButtons[2];        // 0 = zagraj ponownie, 1 = menu
@@ -73,6 +75,7 @@ public:
     void renderPaused();
     void renderGameOver();
     void renderHighscores();
+    void renderHelp();
 
     // Ogolna aktualizacja stanu dla wszystkich stanow gry
     void update(float dt);

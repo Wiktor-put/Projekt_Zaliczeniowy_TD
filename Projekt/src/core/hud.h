@@ -19,7 +19,8 @@ enum class HudAction {
     NONE,
     BUY_TOWER,   // kup wieżę — patrz pole towerType (1..5)
     UPGRADE,     // ulepsz wieżę w zaznaczonym slocie
-    SELL         // sprzedaj wieżę w zaznaczonym slocie
+    SELL,         // sprzedaj wieżę w zaznaczonym slocie
+    HELP         // akcja wywołania pomocy
 };
 
 // Wynik kliknięcia: rodzaj akcji + ewentualny typ wieży do kupienia.
@@ -38,6 +39,7 @@ private:
     Button buildButtons[5];  // wybór wieży (gdy slot wolny)
     Button upgradeButton;    // ulepszenie wieży (gdy slot zajęty)
     Button sellButton;       // sprzedaż wieży (gdy slot zajęty)
+    Button helpButton;       // przycisk pomocy
 
 public:
     HUD() = default;
