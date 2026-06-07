@@ -13,8 +13,41 @@ Tower::Tower(sf::Vector2f pos) {
 }
 
 
+void Tower::initSprite(const sf::Texture* lvl1, const sf::Texture* lvl2, const sf::Texture* lvl3,
+                       float scale, float forwardOffsetDeg) {
+    levelTextures[0] = lvl1;
+    levelTextures[1] = lvl2;
+    levelTextures[2] = lvl3;
+    textureForwardOffset = forwardOffsetDeg;
+    useSprite = true;
+
+    sprite.setScale(scale, scale);
+    sprite.setPosition(position);
+    updateSpriteForLevel();
+}
+
+void Tower::updateSpriteForLevel() {
+    int idx = level - 1;            // poziom 1 -> indeks 0
+    if (idx < 0) idx = 0;
+    if (idx > 2) idx = 2;
+
+    const sf::Texture* tex = levelTextures[idx];
+    if (!tex) return;
+
+    sprite.setTexture(*tex, true);  // true = zresetuj prostokąt tekstury do pełnej grafiki
+    // Origin na środku grafiki — żeby obrót następował wokół środka wieży.
+    sprite.setOrigin(tex->getSize().x / 2.f, tex->getSize().y / 2.f);
+}
+
 void Tower::render(sf::RenderWindow& window){
-    window.draw(shape);
+    if (useSprite) {
+        sprite.setPosition(position);
+        // Obracamy sprite w stronę celu; offset koryguje domyślną orientację tekstury.
+        sprite.setRotation(rotation + textureForwardOffset);
+        window.draw(sprite);
+    } else {
+        window.draw(shape);
+    }
 }
 
 void Tower::rotateToward(sf::Vector2f targetPos, float dt){
@@ -96,7 +129,13 @@ void Tower::upgrade() {
     // Aktualizujemy całkowitą wartość wieży (przyda się do zwrotu kasy przy sprzedaży)
     cost = static_cast<int>(cost * Config::UPGRADE_COST_MULTIPLIER);
 
-    // Wizualny akcent - wieża robi się odrobinę ciemniejsza po ulepszeniu
+    // Wieże teksturowe zmieniają grafikę na odpowiadającą nowemu poziomowi.
+    if (useSprite) {
+        updateSpriteForLevel();
+        return;
+    }
+
+    // Placeholder: wieża robi się odrobinę ciemniejsza po ulepszeniu
     sf::Color currentColor = shape.getFillColor();
     shape.setFillColor(sf::Color(
         std::max(0, currentColor.r - 20),

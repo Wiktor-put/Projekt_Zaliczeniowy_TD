@@ -21,7 +21,22 @@ protected:
     int level       = 1;           // poziom ulepszenia (1 = bazowy)
     Zombie* currentTarget = nullptr; // aktualnie śledzony cel (nullptr = brak)
 
-    sf::RectangleShape shape;   // placeholder graficzny
+    sf::RectangleShape shape;   // placeholder graficzny (gdy wieża nie ma tekstur)
+
+    // --- GRAFIKA TEKSTUROWA (opcjonalna, gdy wieża wczytała tekstury) ---
+    sf::Sprite sprite;                                // obracany model wieży
+    const sf::Texture* levelTextures[3] = {nullptr, nullptr, nullptr}; // tekstury poziomów 1-3
+    bool useSprite = false;                           // true = rysuj sprite zamiast shape
+    float textureForwardOffset = 0.f;                 // obrót korygujący orientację tekstury
+
+    // Konfiguruje sprite wieży z tekstur poziomów (obserwatorzy z ResourceManager).
+    // Wywoływane z konstruktora klasy pochodnej. Poziom 3 może wskazywać na teksturę
+    // poziomu 2 (gdy wieża ma tylko 2 grafiki).
+    void initSprite(const sf::Texture* lvl1, const sf::Texture* lvl2, const sf::Texture* lvl3,
+                    float scale, float forwardOffsetDeg);
+
+    // Ustawia teksturę sprite'a zgodną z aktualnym poziomem (wołane po upgrade()).
+    void updateSpriteForLevel();
 
 public:
     // Ustawia pozycję wieży; wartości zasięgu/damage inicjalizuje klasa pochodna.

@@ -1,6 +1,7 @@
 #include "rockettower.h"
 #include "rocket.h"
 #include "Config.h"
+#include "resourcemanager.h"
 
 RocketTower::RocketTower(sf::Vector2f pos) : Tower(pos) {
     // Pobranie statystyk dla wyrzutni rakiet
@@ -11,8 +12,11 @@ RocketTower::RocketTower(sf::Vector2f pos) : Tower(pos) {
     rotationSpeed = Config::RocketTower::ROTATION_SPEED;
     aoeRadius = Config::RocketTower::AOE_RADIUS;
 
-    // Ciemnoczerwony kolor dla wyrzutni
-    shape.setFillColor(sf::Color(150, 50, 50));
+    // Wyrzutnia ma 3 osobne grafiki poziomów.
+    initSprite(&ResourceManager::getTexture(Config::Assets::ROCKET_TOWER_LVL1),
+               &ResourceManager::getTexture(Config::Assets::ROCKET_TOWER_LVL2),
+               &ResourceManager::getTexture(Config::Assets::ROCKET_TOWER_LVL3),
+               0.75f, Config::TOWER_TEXTURE_FORWARD);
 }
 
 void RocketTower::shoot(std::vector<std::unique_ptr<GameObject>>& objects) {

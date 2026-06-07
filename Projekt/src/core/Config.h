@@ -49,7 +49,22 @@ constexpr const char* TANK_DOWN = "/assets/textures/tank walk/Zombie_Big_Down_Wa
 constexpr const char* TANK_UP = "/assets/textures/tank walk/Zombie_Big_Up_Walk-Sheet8.png";
 constexpr const char* TANK_RIGHT = "/assets/textures/tank walk/Zombie_Big_Side_Walk-Sheet8.png";
 constexpr const char* TANK_LEFT = "/assets/textures/tank walk/Zombie_Big_Side-left_Walk-Sheet8.png";
+
+// Tekstury wieży karabinu maszynowego (folder wg nazwy nadanej przez użytkownika).
+// Wieża ma tylko 2 poziomy grafiki — poziom 3 używa tekstury poziomu 2.
+constexpr const char* MG_TOWER_LVL1 = "/assets/textures/machingunTower/Poziom_1.png";
+constexpr const char* MG_TOWER_LVL2 = "/assets/textures/machingunTower/Poziom_2.png";
+
+// Tekstury wyrzutni rakiet (3 poziomy) + tekstura pocisku-rakiety.
+constexpr const char* ROCKET_TOWER_LVL1 = "/assets/textures/rocketTower/Poziom_1.png";
+constexpr const char* ROCKET_TOWER_LVL2 = "/assets/textures/rocketTower/Poziom_2.png";
+constexpr const char* ROCKET_TOWER_LVL3 = "/assets/textures/rocketTower/Poziom_3.png";
+constexpr const char* ROCKET_PROJECTILE = "/assets/textures/rocketTower/Rakieta.png";
 }
+
+// Tekstury wież i rakiety narysowane są "lufą do góry". Pole rotation liczone jest
+// atan2 (0° = w prawo), więc sprite obracamy o ten offset, by lufa celowała w cel.
+constexpr float TOWER_TEXTURE_FORWARD = 90.f;
 
 // ===== DOSTĘPNE MAPY (do wyboru z menu) =====
 // Aby dodać kolejną planszę: stwórz plik w assets/maps/, dopisz jego ścieżkę

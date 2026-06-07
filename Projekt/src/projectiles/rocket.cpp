@@ -1,5 +1,6 @@
 #include "rocket.h"
 #include "Config.h"
+#include "resourcemanager.h"
 #include <cmath>
 
 Rocket::Rocket(sf::Vector2f startPos, sf::Vector2f targetPos, int damage, float aoeRadius)
@@ -9,11 +10,19 @@ Rocket::Rocket(sf::Vector2f startPos, sf::Vector2f targetPos, int damage, float 
     speed = Config::ROCKET_SPEED;
     velocity *= speed;
 
-    // Rakieta będzie odrobinę większa i czerwona
-    shape.setRadius(6.f);
-    shape.setOrigin(6.f, 6.f);
-    shape.setFillColor(sf::Color::Red);
-    shape.setPosition(position);
+    // Tekstura rakiety. rotation jest wyliczone w Projectile (kierunek lotu),
+    // a tekstura narysowana jest "dziobem do góry", więc korygujemy offsetem.
+    const sf::Texture& tex = ResourceManager::getTexture(Config::Assets::ROCKET_PROJECTILE);
+    sprite.setTexture(tex, true);
+    sprite.setOrigin(tex.getSize().x / 2.f, tex.getSize().y / 2.f);
+    sprite.setScale(0.6f, 0.6f);
+    sprite.setPosition(position);
+    sprite.setRotation(rotation + Config::TOWER_TEXTURE_FORWARD);
+}
+
+void Rocket::render(sf::RenderWindow& window) {
+    sprite.setPosition(position);  // pozycja zmienia się co klatkę; obrót jest stały
+    window.draw(sprite);
 }
 
 void Rocket::onHit(Zombie* hitZombie, std::vector<std::unique_ptr<GameObject>>& objects) {
