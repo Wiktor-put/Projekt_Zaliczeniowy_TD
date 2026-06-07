@@ -29,7 +29,8 @@ Game::Game() : window(sf::VideoMode(Config::WINDOW_WIDTH, Config::WINDOW_HEIGHT)
     if (!font.loadFromFile(std::string(ASSETS_DIR) + "/assets/fonts/arial.ttf")) {
         std::cerr << "Nie udalo sie zaladowac fontu!" << std::endl;
     }
-    initButtons();  // przyciski wymagają wczytanej czcionki
+    initButtons();   // przyciski ekranów wymagają wczytanej czcionki
+    hud.init(font);  // interfejs gracza (pasek + panel wież)
 }
 
 void Game::initButtons() {
@@ -63,24 +64,7 @@ void Game::initButtons() {
     // --- EKRAN WYNIKÓW ---
     hsBackButton.setup(font, "Powrot do menu (ESC)", {cx, Config::WINDOW_HEIGHT - 60.f}, {320.f, 46.f}, 22);
 
-    // --- HUD: panel budowy/ulepszeń (lewy górny róg, środek panelu x=150) ---
-    const float panelCx = 150.f;
-    const sf::Vector2f hudSize(260.f, 28.f);
-    const char* buildLabels[5] = {
-        "1: Karabin ($50)",
-        "2: Snajper ($100)",
-        "3: Wyrzutnia ($150)",
-        "4: Miotacz ognia ($80)",
-        "5: Spowalniacz ($60)"
-    };
-    float hy = 120.f;
-    for (int i = 0; i < 5; ++i) {
-        buildButtons[i].setup(font, buildLabels[i], {panelCx, hy}, hudSize, 16);
-        hy += 34.f;
-    }
-    // Teksty ulepszenia/sprzedaży są dynamiczne — ustawiamy je co klatkę w renderUI.
-    upgradeButton.setup(font, "", {panelCx, 130.f}, {260.f, 34.f}, 16);
-    sellButton.setup(font, "", {panelCx, 175.f}, {260.f, 34.f}, 16);
+    // Przyciski HUD (panel budowy/ulepszeń) konfiguruje sama klasa HUD w init().
 }
 
 void Game::startNewGame() {
@@ -166,15 +150,16 @@ void Game::processEvents() {
                     // nie odznaczał slotu (panel nie leży nad slotem mapy).
                     if (selectedSlotIndex >= 0) {
                         const TowerSlot& slot = map.getSlots()[selectedSlotIndex];
-                        bool handled = false;
-                        if (!slot.occupied) {
-                            for (int i = 0; i < 5; ++i)
-                                if (buildButtons[i].contains(mouse)) { tryBuyTower(i + 1); handled = true; break; }
-                        } else {
-                            if (upgradeButton.contains(mouse)) { tryUpgradeTower(); handled = true; }
-                            else if (sellButton.contains(mouse)) { trySellTower(); handled = true; }
+                        HudClick hc = hud.handleClick(mouse, slot.occupied);
+                        if (hc.action != HudAction::NONE) {
+                            switch (hc.action) {
+                            case HudAction::BUY_TOWER: tryBuyTower(hc.towerType); break;
+                            case HudAction::UPGRADE:   tryUpgradeTower(); break;
+                            case HudAction::SELL:      trySellTower(); break;
+                            default: break;
+                            }
+                            break;  // klik obsłużony przez HUD — nie zaznaczamy slotu na nowo
                         }
-                        if (handled) break;
                     }
 
                     // Kliknięcie w bonus (paczkę) na mapie.
@@ -633,147 +618,6 @@ void Game::renderHighscores(){
 }
 
 
-void Game::renderUI() {
-    // Zabezpieczenie: jeśli czcionka się nie wczytała, nie rysujemy napisów
-    if (font.getInfo().family.empty()) return;
-
-    // ==========================================
-    // 1. GÓRNY PASEK STATYSTYK (TOP BAR)
-    // ==========================================
-
-    // Tło paska
-    sf::RectangleShape topBar(sf::Vector2f(Config::WINDOW_WIDTH, 50.f));
-    topBar.setFillColor(sf::Color(20, 20, 20, 230)); // Ciemnoszary, lekko przezroczysty
-    topBar.setOutlineThickness(2.f);
-    topBar.setOutlineColor(sf::Color(80, 80, 80));
-    window.draw(topBar);
-
-    // Życia (Po lewej)
-    sf::Text livesText("ZYCIA: " + std::to_string(player.getLives()), font, 24);
-    livesText.setPosition(20.f, 10.f);
-    livesText.setFillColor(sf::Color(255, 80, 80)); // Czerwony
-    livesText.setStyle(sf::Text::Bold);
-
-    // Kasa (Bliżej lewej)
-    sf::Text moneyText("KASA: $" + std::to_string(player.getMoney()), font, 24);
-    moneyText.setPosition(250.f, 10.f);
-    moneyText.setFillColor(sf::Color(255, 215, 0)); // Złoty
-    moneyText.setStyle(sf::Text::Bold);
-
-    // Punkty (Na środku)
-    sf::Text scoreText("PUNKTY: " + std::to_string(player.getScore()), font, 24);
-    scoreText.setPosition(500.f, 10.f);
-    scoreText.setFillColor(sf::Color::White);
-    scoreText.setStyle(sf::Text::Bold);
-
-    // Fala (Po prawej)
-    std::string waveStr = waveManager.isWaveInProgress() ?
-                              "FALA: " + std::to_string(waveManager.getCurrentWaveNumber()) + " (W TOKU...)" :
-                              "FALA: " + std::to_string(waveManager.getCurrentWaveNumber()) + " [Wcisnij SPACJE]";
-
-    sf::Text waveText(waveStr, font, 24);
-    // Pozycjonujemy do prawej krawędzi (zakładając szerokość okna 1280)
-    waveText.setPosition(880.f, 10.f);
-    waveText.setFillColor(sf::Color::Cyan);
-    waveText.setStyle(sf::Text::Bold);
-
-    // Rysujemy statystyki
-    window.draw(moneyText);
-    window.draw(livesText);
-    window.draw(scoreText);
-    window.draw(waveText);
-
-    // 4. Wyświetlanie menu budowania TYLKO gdy zaznaczono slot
-    if (selectedSlotIndex >= 0) {
-        const TowerSlot& slot = map.getSlots()[selectedSlotIndex];
-
-        // Tło pod menu
-        sf::RectangleShape menuBg(sf::Vector2f(280.f, 250.f));
-        menuBg.setPosition(10.f, 70.f);
-        menuBg.setFillColor(sf::Color(30, 30, 50, 210)); // Ciemnogranatowe, przezroczyste tło
-        menuBg.setOutlineThickness(2.f);
-        menuBg.setOutlineColor(sf::Color(100, 150, 255));
-        window.draw(menuBg);
-
-        // Pozycja kursora do podświetlania przycisków HUD.
-        sf::Vector2f hudMouse = window.mapPixelToCoords(sf::Mouse::getPosition(window));
-
-        if (!slot.occupied) {
-            // MENU BUDOWANIA — przyciski (klasa Button); klawisze 1-5 też działają.
-            sf::Text buildTitle("WYBIERZ WIEZE:", font, 18);
-            buildTitle.setPosition(25.f, 80.f);
-            buildTitle.setFillColor(sf::Color::White);
-            window.draw(buildTitle);
-
-            for (int i = 0; i < 5; ++i)
-                buildButtons[i].draw(window, buildButtons[i].contains(hudMouse));
-
-            sf::Text cancelHint("[ESC / PPM] Anuluj", font, 15);
-            cancelHint.setPosition(40.f, 290.f);
-            cancelHint.setFillColor(sf::Color(180, 180, 180));
-            window.draw(cancelHint);
-        } else {
-            // MENU ULEPSZEŃ / SPRZEDAŻY
-            // Musimy znaleźć wieżę, żeby pobrać jej statystyki
-            Tower* selectedTower = nullptr;
-            for (auto& obj : objects) {
-                Tower* t = dynamic_cast<Tower*>(obj.get());
-                if (t && t->isAlive() && t->getPosition() == slot.position) {
-                    selectedTower = t;
-                    break;
-                }
-            }
-
-            if (selectedTower) {
-                int upgCost = selectedTower->getUpgradeCost();
-                int refund = static_cast<int>(selectedTower->getCost() * Config::SELL_REFUND);
-                int lvl = selectedTower->getLevel();
-
-                // Nagłówek panelu z poziomem wieży.
-                sf::Text upgTitle("WIEZA - POZIOM " + std::to_string(lvl), font, 18);
-                upgTitle.setPosition(25.f, 80.f);
-                upgTitle.setFillColor(sf::Color(255, 150, 255));
-                window.draw(upgTitle);
-
-                // Dynamiczne teksty przycisków (koszt zależy od wieży i poziomu).
-                upgradeButton.setText((lvl < 3) ? "U: Ulepsz ($" + std::to_string(upgCost) + ")"
-                                                : "U: MAX POZIOM");
-                sellButton.setText("S: Sprzedaj ($" + std::to_string(refund) + ")");
-
-                upgradeButton.draw(window, upgradeButton.contains(hudMouse));
-                sellButton.draw(window, sellButton.contains(hudMouse));
-
-                sf::Text cancelHint("[ESC / PPM] Anuluj", font, 15);
-                cancelHint.setPosition(40.f, 215.f);
-                cancelHint.setFillColor(sf::Color(180, 180, 180));
-                window.draw(cancelHint);
-            }
-        }
-    }
-    // --- NAPISY NA MAPIE (BAZA i DROP ZONE) ---
-    if (!font.getInfo().family.empty()) {
-        // 1. Napis DROP ZONE-> teraz H
-        sf::Text dzText("H", font, 87);
-        dzText.setFillColor(sf::Color(0, 255, 0, 150));
-        // Pobieramy pozycję strefy z naszej aktualnej mapy
-        sf::Vector2f dzPos = map.getDropZonePos();
-        // Ustawiamy pozycję tekstu delikatnie przesuniętą
-        dzText.setPosition(dzPos.x - 25.f, dzPos.y - 45.f);
-        window.draw(dzText);
-
-        /*// 2. Napis BAZA (Pionowo)
-        sf::Text baseText("G\nA\nT\nE", font, 22);
-        baseText.setFillColor(sf::Color::White);
-        baseText.setStyle(sf::Text::Bold);
-
-        sf::Vector2f basePos = map.getWaypoints().back(); // Ostatni waypoint to baza
-        sf::FloatRect baseBounds = baseText.getLocalBounds();
-        baseText.setOrigin(baseBounds.width / 0.5, baseBounds.height / 2.f);
-        baseText.setPosition(basePos.x, basePos.y);
-        window.draw(baseText);*/
-    }
-}
-
 void Game::renderPlaying() {
     // UWAGA: brak window.clear()/window.display() — robi to render(),
     // który jest dyrygentem. Podwójny display() na klatkę zamieniał bufory
@@ -796,7 +640,9 @@ void Game::renderPlaying() {
         highlight.setOutlineThickness(2.f);
         window.draw(highlight);
     }
-        renderUI();
+
+    // Interfejs gracza rysuje osobna klasa HUD.
+    hud.draw(window, player, waveManager, map, objects, selectedSlotIndex);
 }
 
 void Game::render() {

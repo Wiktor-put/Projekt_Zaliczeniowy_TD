@@ -15,6 +15,7 @@
 #include "bonus.h"
 #include "wavemanager.h"
 #include "button.h"
+#include "hud.h"
 
 enum class GameState {
     MENU,          // ekran startowy z opcjami
@@ -49,11 +50,9 @@ private:
     Button pauseButtons[2];           // 0 = wznow, 1 = menu
     Button gameOverButtons[2];        // 0 = zagraj ponownie, 1 = menu
     Button hsBackButton;              // powrot z ekranu wynikow
-    Button buildButtons[5];           // wybor wiezy w HUD (gdy slot wolny)
-    Button upgradeButton;             // ulepszenie wiezy w HUD (gdy slot zajety)
-    Button sellButton;                // sprzedaz wiezy w HUD (gdy slot zajety)
+    HUD hud;                          // interfejs gracza (pasek statystyk + panel wież)
 
-    // Tworzy i pozycjonuje wszystkie przyciski. Wołane raz w konstruktorze.
+    // Tworzy i pozycjonuje przyciski ekranów (menu/pauza/itp.). Wołane w konstruktorze.
     void initButtons();
 
 public:
@@ -74,8 +73,6 @@ public:
     void renderPaused();
     void renderGameOver();
     void renderHighscores();
-    // Rysuje główny interfejs gracza (UI)
-    void renderUI();
 
     // Ogolna aktualizacja stanu dla wszystkich stanow gry
     void update(float dt);
