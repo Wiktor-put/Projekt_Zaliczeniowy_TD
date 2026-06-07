@@ -13,12 +13,13 @@ void HUD::init(const sf::Font& f) {
     // Panel budowy/ulepszeń w lewym górnym rogu — środek panelu na x=150.
     const float panelCx = 150.f;
     const sf::Vector2f hudSize(260.f, 28.f);
-    const char* buildLabels[5] = {
-        "1: Karabin ($50)",
-        "2: Snajper ($100)",
-        "3: Wyrzutnia ($150)",
-        "4: Miotacz ognia ($80)",
-        "5: Spowalniacz ($60)"
+    // Koszty pobierane z Config — brak "magic numbers", zmiana balansu w jednym miejscu.
+    const std::string buildLabels[5] = {
+        "1: Karabin ($"      + std::to_string(Config::MachineGunTower::COST)   + ")",
+        "2: Snajper ($"      + std::to_string(Config::SniperTower::COST)       + ")",
+        "3: Wyrzutnia ($"    + std::to_string(Config::RocketTower::COST)       + ")",
+        "4: Miotacz ognia ($" + std::to_string(Config::FlamethrowerTower::COST) + ")",
+        "5: Spowalniacz ($"  + std::to_string(Config::SlowerTower::COST)       + ")"
     };
     float hy = 120.f;
     for (int i = 0; i < 5; ++i) {
