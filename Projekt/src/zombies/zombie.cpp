@@ -1,4 +1,5 @@
 #include "zombie.h"
+#include "resourcemanager.h"
 #include <cmath>
 
 Zombie::Zombie(const std::vector<sf::Vector2f>& waypoints)
@@ -48,11 +49,14 @@ void Zombie::update(float dt, std::vector<std::unique_ptr<GameObject>>& objects)
     }
     else destroy();
 
-    shape.setPosition(position);
+    // Wspólna animacja kierunkowa + podpięcie sprite'a pod pozycję obiektu.
+    updateAnimation(dt);
+    sprite.setPosition(position + spriteOffset);
 }
 
 void Zombie::render(sf::RenderWindow& window) {
-    window.draw(shape);
+    // Rysujemy model tylko gdy klasa pochodna ustawiła tekstury przez initSprite().
+    if (texDown) window.draw(sprite);
 
     // Pasek HP
     float ratio = (maxHp > 0) ? static_cast<float>(hp) / static_cast<float>(maxHp) : 0.f;
@@ -86,4 +90,51 @@ void Zombie::applyBurn(int dps, float duration) {
 
 bool Zombie::reachedEnd() const {
     return currentWaypointIndex >= static_cast<int>(path.size());
+}
+
+void Zombie::initSprite(const char* down, const char* up, const char* right, const char* left,
+                        int frames, float frameDur, float scale) {
+    // Wszystkie tekstury przechodzą przez ResourceManager (jedna kopia w pamięci).
+    texDown  = &ResourceManager::getTexture(down);
+    texUp    = &ResourceManager::getTexture(up);
+    texRight = &ResourceManager::getTexture(right);
+    texLeft  = &ResourceManager::getTexture(left);
+
+    totalFrames   = frames;
+    frameDuration = frameDur;
+
+    // Startujemy od pierwszej klatki paska "w prawo".
+    sprite.setTexture(*texRight);
+    int fW = static_cast<int>(texRight->getSize().x) / totalFrames;
+    int fH = static_cast<int>(texRight->getSize().y);
+    sprite.setTextureRect(sf::IntRect(0, 0, fW, fH));
+    sprite.setOrigin(fW / 2.f, fH / 2.f);
+    sprite.setScale(scale, scale);
+    sprite.setPosition(position);
+}
+
+void Zombie::updateAnimation(float dt) {
+    if (!texDown) return;        // klasa pochodna nie ustawiła tekstur
+    if (reachedEnd()) return;    // zombie dotarło do bazy — nie animujemy
+
+    // Wybór paska wg dominującej składowej prędkości.
+    sf::Texture* dir;
+    if (std::abs(velocity.x) > std::abs(velocity.y))
+        dir = (velocity.x > 0.f) ? texRight : texLeft;
+    else
+        dir = (velocity.y > 0.f) ? texDown : texUp;
+
+    sprite.setTexture(*dir);
+
+    animationTimer += dt;
+    if (animationTimer >= frameDuration) {
+        animationTimer = 0.f;
+        currentFrame = (currentFrame + 1) % totalFrames;
+    }
+
+    // Rect liczymy z AKTUALNEJ tekstury — paski "bok" i "przód" mogą mieć różną
+    // szerokość klatki, więc nie wolno tu cache'ować rozmiaru z innego kierunku.
+    int fW = static_cast<int>(dir->getSize().x) / totalFrames;
+    int fH = static_cast<int>(dir->getSize().y);
+    sprite.setTextureRect(sf::IntRect(currentFrame * fW, 0, fW, fH));
 }

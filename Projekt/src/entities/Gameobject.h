@@ -20,7 +20,10 @@ protected:
     bool alive = true;                 // false = obiekt do usunięcia z listy
 public:
     GameObject() = default;
-    ~GameObject() = default;
+    // Wirtualny destruktor — obiekty są usuwane polimorficznie przez
+    // unique_ptr<GameObject>, więc bez 'virtual' destruktory klas pochodnych
+    // nie zostałyby wywołane (niezdefiniowane zachowanie).
+    virtual ~GameObject() = default;
 
     // Zwraca false gdy obiekt należy usunąć z listy sceny.
     bool isAlive() const { return alive; }

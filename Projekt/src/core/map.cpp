@@ -23,90 +23,136 @@ void Map::loadFromFile(const std::string& path) {
 
         std::istringstream iss(line);
         char type;
-        float x, y;
+        iss >> type;
 
-        if (iss >> type >> x >> y) {
+        if (type == 'B') {
+            // Tło tej mapy: reszta linii to ścieżka do pliku (może zawierać spacje).
+            std::string rest;
+            std::getline(iss, rest);
+            // usuń wiodące białe znaki
+            size_t start = rest.find_first_not_of(" \t");
+            if (start != std::string::npos) backgroundPath = rest.substr(start);
+            continue;
+        }
+
+        float x, y;
+        if (iss >> x >> y) {
             if (type == 'W') {
                 waypoints.push_back(sf::Vector2f(x, y));
             } else if (type == 'S') {
                 towerSlots.push_back({sf::Vector2f(x, y), false});
+            } else if (type == 'D') {
+                dropZonePos = sf::Vector2f(x, y);
+            } else {
+                std::cerr << "Nieznany typ '" << type << "' w linii " << lineNumber << std::endl;
             }
-        } else if (type == 'D') {
-            // zapisujemy pozycję strefy zrzutu
-            dropZonePos = sf::Vector2f(x, y);
-
         } else {
-            std::cerr << "Nieznany typ '" << type << "' w linii " << lineNumber << std::endl;
+            std::cerr << "Bledna linia " << lineNumber << ": " << line << std::endl;
         }
     }
 
     std::cout << "Wczytano " << waypoints.size() << " waypointow i "
               << towerSlots.size() << " slotow z " << path << std::endl;
 
-    // --- ŁADOWANIE TŁA MAPY PRZEZ MANAGER---
-    const sf::Texture& tex = ResourceManager::getTexture(Config::Assets::BACKGROUND);
-    bgSprite.setTexture(tex);
+    // Cała kosztowna praca (ładowanie tekstur, budowa geometrii) — raz, tutaj.
+    buildVisuals();
+}
 
-    // Skalujemy
-    float scaleX = static_cast<float>(Config::WINDOW_WIDTH) / tex.getSize().x;
-    float scaleY = static_cast<float>(Config::WINDOW_HEIGHT) / tex.getSize().y;
-    bgSprite.setScale(scaleX, scaleY);
+void Map::buildVisuals() {
+    // --- TŁO MAPY (własne dla każdej planszy, przeskalowane do okna) ---
+    const sf::Texture& bgTex = ResourceManager::getTexture(backgroundPath);
+    bgSprite.setTexture(bgTex, true);
+    bgSprite.setScale(static_cast<float>(Config::WINDOW_WIDTH) / bgTex.getSize().x,
+                      static_cast<float>(Config::WINDOW_HEIGHT) / bgTex.getSize().y);
 
+    // --- GEOMETRIA ŚCIEŻKI (przeguby na zakrętach + proste odcinki) ---
+    pathJoints.clear();
+    pathSegments.clear();
 
+    if (waypoints.size() >= 2) {
+        sf::Texture& pathTex = ResourceManager::getTexture(Config::Assets::PATH);
+        pathTex.setRepeated(true); // pozwala kafelkować teksturę na długich odcinkach
 
+        const float pathWidth = 50.f;
+        const float radius = pathWidth / 2.f;
+
+        auto makeJoint = [&](sf::Vector2f pos) {
+            sf::CircleShape joint(radius);
+            joint.setOrigin(radius, radius);
+            joint.setPosition(pos);
+            joint.setTexture(&pathTex);
+            pathJoints.push_back(joint);
+        };
+
+        for (size_t i = 0; i + 1 < waypoints.size(); ++i) {
+            sf::Vector2f p1 = waypoints[i];
+            sf::Vector2f p2 = waypoints[i + 1];
+            makeJoint(p1);
+
+            float dx = p2.x - p1.x;
+            float dy = p2.y - p1.y;
+            float length = std::sqrt(dx * dx + dy * dy);
+            float angle = std::atan2(dy, dx) * 180.f / 3.14159265f;
+
+            sf::RectangleShape segment(sf::Vector2f(length, pathWidth));
+            segment.setOrigin(0.f, radius);
+            segment.setPosition(p1);
+            segment.setRotation(angle);
+            segment.setTexture(&pathTex);
+            // Kafelkowanie tekstury wzdłuż odcinka (zamiast rozciągania).
+            segment.setTextureRect(sf::IntRect(0, 0, static_cast<int>(length), static_cast<int>(pathWidth)));
+            pathSegments.push_back(segment);
+        }
+        makeJoint(waypoints.back()); // domknięcie ścieżki w bazie
+    }
+
+    // --- DROP ZONE ---
+    sf::Texture& dzTex = ResourceManager::getTexture(Config::Assets::DROPZONE);
+    dzSprite.setTexture(dzTex, true);
+    dzSprite.setOrigin(dzTex.getSize().x / 2.f, dzTex.getSize().y / 2.f);
+    dzSprite.setScale(4.8f, 4.8f);
+    dzSprite.setPosition(dropZonePos);
+
+    // --- BRAMA / ŚCIANY BAZY ---
+    gateSprites.clear();
+    if (!waypoints.empty()) {
+        const float scale = 3.5f;
+        sf::Texture& gateTex = ResourceManager::getTexture(Config::Assets::BASE_GATE);
+        sf::Texture& vertTex = ResourceManager::getTexture(Config::Assets::BASE_WALL_VERT);
+
+        sf::Vector2f basePos = waypoints.back();
+        const float offset = 55.f;
+        const float wallWidth = gateTex.getSize().x * scale;
+        const float leftX = basePos.x - wallWidth - (wallWidth / 2.f);
+        const float gapOffset = -3.5f;
+
+        auto makeSprite = [&](sf::Texture& tex, sf::Vector2f pos) {
+            sf::Sprite s(tex);
+            s.setOrigin(tex.getSize().x / 2.f, tex.getSize().y / 2.f);
+            s.setScale(scale, scale);
+            s.setPosition(pos);
+            gateSprites.push_back(s);
+        };
+
+        // Najpierw pionowe ściany (na spodzie), potem poziome przykrywające ich końce.
+        makeSprite(vertTex, {leftX, basePos.y - offset - gapOffset});
+        makeSprite(vertTex, {leftX, basePos.y + offset + gapOffset});
+        makeSprite(gateTex, {basePos.x, basePos.y - offset});
+        makeSprite(gateTex, {basePos.x, basePos.y + offset});
+        makeSprite(gateTex, {basePos.x - wallWidth, basePos.y - offset});
+        makeSprite(gateTex, {basePos.x - wallWidth, basePos.y + offset});
+    }
 }
 
 void Map::draw(sf::RenderWindow& window) const {
-    if (waypoints.size() < 2) return;
-
-    // --- RYSOWANIE TŁA MAPY (Zawsze na samym spodzie) ---
+    // Rysujemy wyłącznie gotowe obiekty zbudowane w buildVisuals() — bez alokacji
+    // i bez lookupów tekstur w trakcie klatki.
     window.draw(bgSprite);
 
-    // 2. RYSOWANIE ŚCIEŻKI Z TEKSTURĄ I ZAOKRĄGLONYMI ZAKRĘTAMI
-    sf::Texture& pathTex = ResourceManager::getTexture(Config::Assets::PATH);
-    pathTex.setRepeated(true); // Kluczowe! Pozwala teksturze zapętlać się na długich odcinkach
+    for (const auto& joint : pathJoints) window.draw(joint);
+    for (const auto& segment : pathSegments) window.draw(segment);
 
-    float pathWidth = 50.f;             // Szerokość ścieżki
-    float radius = pathWidth / 2.f;     // Promień dla "przegubów" na zakrętach
-
-    // 2. RYSOWANIE ŚCIEŻKI
-    for (size_t i = 0; i < waypoints.size() - 1; ++i) {
-        sf::Vector2f p1 = waypoints[i];
-        sf::Vector2f p2 = waypoints[i + 1];
-
-        // --- RYSOWANIE OKRĄGŁEGO "PRZEGUBU" NA ZAKRĘCIE ---
-        sf::CircleShape joint(radius);
-        joint.setOrigin(radius, radius);
-        joint.setPosition(p1);
-        joint.setTexture(&pathTex);
-        window.draw(joint);
-
-        // --- RYSOWANIE PROSTEGO ODCINKA DROGI ---
-        float dx = p2.x - p1.x;
-        float dy = p2.y - p1.y;
-        float length = std::sqrt(dx * dx + dy * dy);
-        float angle = std::atan2(dy, dx) * 180.f / 3.14159265f;
-
-        sf::RectangleShape segment(sf::Vector2f(length, pathWidth));
-        segment.setOrigin(0.f, radius);
-        segment.setPosition(p1);
-        segment.setRotation(angle);
-        segment.setTexture(&pathTex);
-
-        // Zamiast rozciągać, mówimy SFML-owi, by kafelkował teksturę wzdłuż długości
-        segment.setTextureRect(sf::IntRect(0, 0, static_cast<int>(length), static_cast<int>(pathWidth)));
-        window.draw(segment);
-    }
-    // Dodanie ostatniego kółka na samym końcu ścieżki (w bazie)
-    if (!waypoints.empty()) {
-        sf::CircleShape lastJoint(radius);
-        lastJoint.setOrigin(radius, radius);
-        lastJoint.setPosition(waypoints.back());
-        lastJoint.setTexture(&pathTex);
-        window.draw(lastJoint);
-    }
-
-    // rysowanie slotów jako szare kwadraty
+    // Sloty są lekkie i mogą zmieniać wygląd (np. podświetlenie) — rysujemy na bieżąco.
     for (const auto& slot : towerSlots) {
         sf::RectangleShape shape(sf::Vector2f(30.f, 30.f));
         shape.setPosition(slot.position - sf::Vector2f(15.f, 15.f));
@@ -116,62 +162,8 @@ void Map::draw(sf::RenderWindow& window) const {
         window.draw(shape);
     }
 
-    // --- RYSOWANIE DROP ZONE  ---
-    sf::Texture& dzTex = ResourceManager::getTexture(Config::Assets::DROPZONE);
-    sf::Sprite dzSprite(dzTex);
-
-    // Ustawiamy środek obrazka (aby rysował się centralnie w punkcie zrzutu)
-    dzSprite.setOrigin(dzTex.getSize().x / 2.f, dzTex.getSize().y / 2.f);
-    dzSprite.setPosition(dropZonePos);
-
-
-    dzSprite.setScale(4.8f, 4.8f);
     window.draw(dzSprite);
-
-    // --- RYSOWANIE BRAMY (BAZY) ---
-    if (!waypoints.empty()) {
-        float scale = 3.5f;
-
-        // 1. Poziome ściany
-        sf::Texture& gateTex = ResourceManager::getTexture(Config::Assets::BASE_GATE);
-        sf::Sprite gateSprite(gateTex);
-        gateSprite.setOrigin(gateTex.getSize().x / 2.f, gateTex.getSize().y / 2.f);
-        gateSprite.setScale(scale, scale);
-
-        // 2. Pionowe ściany
-        sf::Texture& vertTex = ResourceManager::getTexture(Config::Assets::BASE_WALL_VERT);
-        sf::Sprite vertSprite(vertTex);
-        vertSprite.setOrigin(vertTex.getSize().x / 2.f, vertTex.getSize().y / 2.f);
-        vertSprite.setScale(scale, scale);
-
-        // --- OBLICZANIE POZYCJI ---
-        sf::Vector2f basePos = waypoints.back();
-        float offset = 55.f; // Przesunięcie poziomych ścian w górę i dół
-        float wallWidth = gateTex.getSize().x * scale;
-
-        float leftX = basePos.x - wallWidth - (wallWidth / 2.f);
-        float gapOffset = -3.5f; // Wielkość otworu
-
-        // KROK 1: Rysujemy PIONOWE ściany (będą na samym spodzie)
-        vertSprite.setPosition(leftX, basePos.y - offset - gapOffset);
-        window.draw(vertSprite);
-
-        vertSprite.setPosition(leftX, basePos.y + offset + gapOffset);
-        window.draw(vertSprite);
-
-        // KROK 2: Rysujemy POZIOME ściany (nałożą się na pionowe i przykryją ich końce)
-        // Prawa strona
-        gateSprite.setPosition(basePos.x, basePos.y - offset);
-        window.draw(gateSprite);
-        gateSprite.setPosition(basePos.x, basePos.y + offset);
-        window.draw(gateSprite);
-
-        // Lewa strona
-        gateSprite.setPosition(basePos.x - wallWidth, basePos.y - offset);
-        window.draw(gateSprite);
-        gateSprite.setPosition(basePos.x - wallWidth, basePos.y + offset);
-        window.draw(gateSprite);
-    }
+    for (const auto& g : gateSprites) window.draw(g);
 }
 
 

@@ -10,6 +10,7 @@
 #include <sstream>
 #include <SFML/Window.hpp>
 #include <SFML/Graphics.hpp>
+#include "Config.h"
 
 // Pojedynczy slot, w którym gracz może postawić wieżę.
 struct TowerSlot {
@@ -27,8 +28,22 @@ private:
     std::vector<TowerSlot> towerSlots;   // dostępne miejsca na wieże
     sf::Vector2f dropZonePos{1150.f, 600.f}; // Domyślna pozycja drop zone
 
+    // Ścieżka do tła TEJ mapy — pozwala każdej planszy mieć własną grafikę
+    // (ustawiana w pliku mapy linią "B <ścieżka>"; domyślnie wartość z Config).
+    std::string backgroundPath = Config::Assets::BACKGROUND;
 
-    sf::Sprite bgSprite;
+    // --- WIZUALIA ZBUDOWANE RAZ PRZY WCZYTANIU (nie co klatkę) ---
+    // Trzymanie gotowych sprite'ów eliminuje per-klatkowe lookupy w ResourceManager
+    // (std::map po stringu) oraz alokacje kształtów w każdej klatce draw().
+    sf::Sprite bgSprite;                     // tło planszy
+    sf::Sprite dzSprite;                     // strefa zrzutu (drop zone)
+    std::vector<sf::CircleShape> pathJoints; // okrągłe "przeguby" na zakrętach
+    std::vector<sf::RectangleShape> pathSegments; // proste odcinki drogi
+    std::vector<sf::Sprite> gateSprites;     // ściany/brama bazy
+
+    // Buduje sprite'y i geometrię ścieżki na podstawie wczytanych danych.
+    // Wołane na końcu loadFromFile — tu dzieją się wszystkie kosztowne operacje.
+    void buildVisuals();
 
 public:
     Map() = default;

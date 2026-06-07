@@ -1,5 +1,10 @@
 # Przykładowa Mapa, rozdzielczość okna docelowego: 1280x720
 
+# === TŁO MAPY ===
+# Ścieżka do grafiki tła (bez ASSETS_DIR - dokleja je ResourceManager).
+# Linia opcjonalna; gdy brak, używane jest tło domyślne z Config::Assets::BACKGROUND.
+B /assets/textures/background_las.png
+
 # === WAYPOINTY (ŚCIEŻKA ZOMBIE) ===
 # Zombie zaczynają po lewej stronie ekranu na środku wysokości
 W 0 360
