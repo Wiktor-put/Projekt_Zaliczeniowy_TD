@@ -11,7 +11,7 @@ class Bonus : public GameObject {
 private:
     BonusType type;
     float lifetime;
-    sf::RectangleShape shape;
+    sf::Sprite sprite;
     // Zmienne do spadania
     float targetY;
     bool isFalling;
@@ -27,7 +27,7 @@ public:
 
     // Sprawdza, czy gracz kliknął dokładnie na to pudełko
     bool contains(sf::Vector2f point) const {
-        return shape.getGlobalBounds().contains(point);
+        return sprite.getGlobalBounds().contains(point);
     }
 };
 

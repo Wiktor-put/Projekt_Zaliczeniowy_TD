@@ -176,7 +176,7 @@ void Game::processEvents() {
                     for (auto& obj : objects) {
                         Bonus* bonus = dynamic_cast<Bonus*>(obj.get());
                         if (bonus && bonus->isAlive() && bonus->contains(mouse)) {
-                            applyBonus(bonus->getType());
+                            applyBonus(bonus->getType(), bonus->getPosition());
                             bonus->destroy();
                             break;
                         }
@@ -443,6 +443,25 @@ void Game::updatePlaying(float dt){
     for (auto& b : newBonuses) {
         objects.push_back(std::move(b));
     }
+
+    // Obsługa błękitnego błysku
+    if (freezeTintTimer > 0.f) {
+        freezeTintTimer -= dt;
+    }
+
+    // Obsługa lecących ikonek
+    for (auto it = flyingIcons.begin(); it != flyingIcons.end(); ) {
+        it->progress += 2.0f * dt; // Prędkość lotu (2.0 = pół sekundy lotu)
+        if (it->progress >= 1.0f) {
+            it = flyingIcons.erase(it); // Usuń po dotarciu
+        } else {
+            // Animacja płynnego przemieszczania
+            sf::Vector2f diff = it->targetPos - it->startPos;
+            it->sprite.setPosition(it->startPos + diff * it->progress);
+            ++it;
+        }
+    }
+
 
     if (!player.isAlive()) {
         state = GameState::GAME_OVER;
@@ -726,6 +745,21 @@ void Game::renderPlaying() {
 
     // Interfejs gracza rysuje osobna klasa HUD.
     hud.draw(window, player, waveManager, map, objects, selectedSlotIndex);
+
+    // Błękitny błysk ekranu (EMP / LÓD) - Rysowany NAD mapą i pod HUDem (lub na wszystkim)
+    if (freezeTintTimer > 0.f) {
+        sf::RectangleShape tint(sf::Vector2f(Config::WINDOW_WIDTH, Config::WINDOW_HEIGHT));
+        int alpha = static_cast<int>(freezeTintTimer * 100.f);
+        if (alpha > 100) alpha = 100;
+        if (alpha < 0) alpha = 0;
+        tint.setFillColor(sf::Color(100, 200, 255, alpha)); // Przezroczysty lodowy
+        window.draw(tint);
+    }
+
+    // Lecące ikonki rysowane ZUPEŁNIE na wierzchu!
+    for (auto& fi : flyingIcons) {
+        window.draw(fi.sprite);
+    }
 }
 
 void Game::render() {
@@ -820,12 +854,34 @@ void Game::run() {
     }
 }
 
-void Game::applyBonus(BonusType type) {
+void Game::applyBonus(BonusType type, sf::Vector2f startPos) {
     if (type == BonusType::AMMO) {
         player.addMoney(Config::AMMO_BONUS_VALUE); // +30 dolarów
-    } else if (type == BonusType::MEDKIT) {
+        // Tworzy monetę, która leci do ikonki "Kasa"
+        FlyingIcon fi;
+        fi.sprite.setTexture(ResourceManager::getTexture(Config::Assets::ICON_COIN), true);
+        float s = 30.f / fi.sprite.getTexture()->getSize().x;
+        fi.sprite.setScale(s, s);
+        fi.sprite.setOrigin(fi.sprite.getTexture()->getSize().x / 2.f, fi.sprite.getTexture()->getSize().y / 2.f);
+        fi.startPos = startPos;
+        fi.targetPos = sf::Vector2f(290.f, 25.f); // Pozycja ikonki monety na pasku
+        flyingIcons.push_back(fi);
+    }
+    else if (type == BonusType::MEDKIT) {
         player.addLives(Config::MEDKIT_BONUS_VALUE); // +1 życie
+        // Tworzy serce, które leci do ikonki "Życia"
+        FlyingIcon fi;
+        fi.sprite.setTexture(ResourceManager::getTexture(Config::Assets::ICON_HEART), true);
+        float s = 30.f / fi.sprite.getTexture()->getSize().x;
+        fi.sprite.setScale(s, s);
+        fi.sprite.setOrigin(fi.sprite.getTexture()->getSize().x / 2.f, fi.sprite.getTexture()->getSize().y / 2.f);
+        fi.startPos = startPos;
+        fi.targetPos = sf::Vector2f(35.f, 25.f); // Pozycja ikonki na pasku
+        flyingIcons.push_back(fi);
+
     } else if (type == BonusType::EMP) {
+        // Efekt EMP: błękitny ekran na 1.5 sekundy
+        freezeTintTimer = 1.5f;
         // Granat EMP ogłusza KAŻDEGO zombiaka na całej mapie!
         for (auto& obj : objects) {
             Zombie* z = dynamic_cast<Zombie*>(obj.get());

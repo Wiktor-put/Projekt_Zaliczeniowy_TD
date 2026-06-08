@@ -27,6 +27,13 @@ enum class GameState {
     HELP            // ekran instrukcji
 };
 
+struct FlyingIcon {
+    sf::Sprite sprite;
+    sf::Vector2f startPos;
+    sf::Vector2f targetPos;
+    float progress = 0.f;  // od 0.0 (start) do 1.0 (koniec lotu)
+};
+
 // Odpowiada za okno, pętlę gry oraz integrację wszystkich podsystemów
 // (mapa, obiekty, kolizje). Jeden egzemplarz na całą aplikację.
 class Game
@@ -53,6 +60,9 @@ private:
     Button gameOverButtons[2];        // 0 = zagraj ponownie, 1 = menu
     Button hsBackButton;              // powrot z ekranu wynikow
     HUD hud;                          // interfejs gracza (pasek statystyk + panel wież)
+
+    std::vector<FlyingIcon> flyingIcons; // Lista animowanych ikon lecących do HUD
+    float freezeTintTimer = 0.f;         // Czas trwania błękitnego błysku
 
     // Tworzy i pozycjonuje przyciski ekranów (menu/pauza/itp.). Wołane w konstruktorze.
     void initButtons();
@@ -104,7 +114,7 @@ public:
     // Wywoływane na końcu update() — po update i kolizjach.
     void removeDeadObjects();
 
-    void applyBonus(BonusType type);
+    void applyBonus(BonusType type, sf::Vector2f startPos);
 
     int menuSelectedOption;  // ktora opcja menu jest podswietlona (0-3)
     void handleMenuChoice(int option);
