@@ -7,6 +7,8 @@ void Map::loadFromFile(const std::string& path) {
     waypoints.clear();
     towerSlots.clear();
 
+    backgroundPath = Config::Assets::BACKGROUND;
+
     std::ifstream file(path);
     if (!file.is_open()) {
         std::cerr << "Nie udalo sie otworzyc pliku: " << path << std::endl;
@@ -31,7 +33,12 @@ void Map::loadFromFile(const std::string& path) {
             std::getline(iss, rest);
             // usuń wiodące białe znaki
             size_t start = rest.find_first_not_of(" \t");
-            if (start != std::string::npos) backgroundPath = rest.substr(start);
+            if (start != std::string::npos)backgroundPath = rest.substr(start);
+
+            // 2. ZABEZPIECZENIE: Usunięcie niewidzialnego znaku \r z Windowsa!
+            if (!backgroundPath.empty() && backgroundPath.back() == '\r') {
+                backgroundPath.pop_back();
+            }
             continue;
         }
 

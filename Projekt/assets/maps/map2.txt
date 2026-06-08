@@ -3,8 +3,7 @@
 # === TŁO MAPY ===
 # Brak linii B -> używane jest tło domyślne z Config::Assets::BACKGROUND.
 # Aby dać tej mapie własną grafikę, wrzuć plik do assets/textures/ i dopisz np.:
-# B /assets/textures/background_miasto.png
-
+B /assets/textures/background_miasto.png
 # === WAYPOINTY (ŚCIEŻKA ZOMBIE) — trasa w kształcie zygzaka ===
 W 0 150
 W 1080 150
