@@ -154,11 +154,13 @@ void HUD::draw(sf::RenderWindow& window,
     // ==========================================
     // 3. NAPIS STREFY ZRZUTU (DROP ZONE -> "H")
     // ==========================================
+    /*
     sf::Text dzText("H", *font, 87);
     dzText.setFillColor(sf::Color(0, 255, 0, 150));
     sf::Vector2f dzPos = map.getDropZonePos();
     dzText.setPosition(dzPos.x - 25.f, dzPos.y - 45.f);
     window.draw(dzText);
+*/
 }
 
 HudClick HUD::handleClick(sf::Vector2f mouse, bool occupied) const {

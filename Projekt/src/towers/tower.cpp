@@ -34,9 +34,18 @@ void Tower::updateSpriteForLevel() {
     const sf::Texture* tex = levelTextures[idx];
     if (!tex) return;
 
-    sprite.setTexture(*tex, true);  // true = zresetuj prostokąt tekstury do pełnej grafiki
-    // Origin na środku grafiki — żeby obrót następował wokół środka wieży.
-    sprite.setOrigin(tex->getSize().x / 2.f, tex->getSize().y / 2.f);
+    sprite.setTexture(*tex, false);  // false = NIE resetuj do wielkości całego paska
+
+    // --- AUTOMATYCZNE WYCINANIE PIERWSZEJ KLATKI ---
+    // Ponieważ pasek jest poziomy, a pojedyncza klatka to idealny kwadrat,
+    // to wysokość (Y) pliku jest jednocześnie szerokością (X) jednej wieżyczki!
+    int frameSize = tex->getSize().y;
+
+    // Wytnij kwadrat o boku frameSize x frameSize z lewego górnego rogu (0,0)
+    sprite.setTextureRect(sf::IntRect(0, 0, frameSize, frameSize));
+
+    // Ustaw środek obrotu idealnie w centrum wyciętej wieżyczki
+    sprite.setOrigin(frameSize / 2.f, frameSize / 2.f);
 }
 
 void Tower::render(sf::RenderWindow& window){

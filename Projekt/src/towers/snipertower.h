@@ -9,6 +9,7 @@ class SniperTower : public Tower
 public:
     SniperTower(sf::Vector2f pos);
     void shoot(std::vector<std::unique_ptr<GameObject>>& objects) override;
+    void upgrade(); // Nadpisana, by skalować grafikę
 };
 
 #endif // SNIPERTOWER_H

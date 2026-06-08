@@ -21,7 +21,7 @@ constexpr const char* BACKGROUND = "/assets/textures/background_las.png";
 // Tekstura ścieżki
 constexpr const char* PATH = "/assets/textures/path.png";
 // Tekstura strefy zrzutu (Drop Zone)
-constexpr const char* DROPZONE = "/assets/textures/dropzone.png";
+constexpr const char* DROPZONE = "/assets/textures/H.jpg";
 // Tekstura Bazy / Bramy
 constexpr const char* BASE_GATE = "/assets/textures/gate.png";
 constexpr const char* BASE_WALL_VERT = "/assets/textures/Wooden-wall_Vertical.png";
@@ -50,6 +50,30 @@ constexpr const char* TANK_UP = "/assets/textures/tank walk/Zombie_Big_Up_Walk-S
 constexpr const char* TANK_RIGHT = "/assets/textures/tank walk/Zombie_Big_Side_Walk-Sheet8.png";
 constexpr const char* TANK_LEFT = "/assets/textures/tank walk/Zombie_Big_Side-left_Walk-Sheet8.png";
 
+//NOWE WIEŻE
+// 1. ZIELONY KARABIN (Machine Gun)
+constexpr const char* MG_TOWER_LVL1 = "/assets/textures/green/turret_01_mk1.png";
+constexpr const char* MG_TOWER_LVL2 = "/assets/textures/green/turret_01_mk2.png";
+constexpr const char* MG_TOWER_LVL3 = "/assets/textures/green/turret_01_mk3.png";
+
+// 2. ZŁOTY SNAJPER (Sniper) - Używamy jednej grafiki, ale w kodzie będziemy ją wydłużać!
+constexpr const char* SNIPER_TOWER  = "/assets/textures/gold/turret_01_mk1.png";
+
+// 3. FIOLETOWA WYRZUTNIA (Rocket)
+constexpr const char* ROCKET_TOWER_LVL1 = "/assets/textures/purple/turret_01_mk2.png";
+constexpr const char* ROCKET_TOWER_LVL2 = "/assets/textures/purple/turret_01_mk3.png";
+constexpr const char* ROCKET_TOWER_LVL3 = "/assets/textures/purple/turret_01_mk4.png";
+
+// 4. CZERWONY MIOTACZ OGNIA (Flamethrower) - Używamy masywnych luf
+constexpr const char* FLAME_TOWER_LVL1 = "/assets/textures/red/turret_02_mk3.png";
+constexpr const char* FLAME_TOWER_LVL2 = "/assets/textures/red/turret_02_mk4.png";
+constexpr const char* FLAME_TOWER_LVL3 = "/assets/textures/red/turret_02_mk4.png";
+
+// 5. NIEBIESKI SPOWALNIACZ (Slower) - Używamy luf z rdzeniem energetycznym
+constexpr const char* SLOWER_TOWER_LVL1 = "/assets/textures/blue/turret_02_mk1.png";
+constexpr const char* SLOWER_TOWER_LVL2 = "/assets/textures/blue/turret_02_mk2.png";
+constexpr const char* SLOWER_TOWER_LVL3 = "/assets/textures/blue/turret_02_mk3.png";
+/*
 // Tekstury wieży karabinu maszynowego (folder wg nazwy nadanej przez użytkownika).
 // Wieża ma tylko 2 poziomy grafiki — poziom 3 używa tekstury poziomu 2.
 constexpr const char* MG_TOWER_LVL1 = "/assets/textures/machingunTower/Poziom_1.png";
@@ -58,8 +82,9 @@ constexpr const char* MG_TOWER_LVL2 = "/assets/textures/machingunTower/Poziom_2.
 // Tekstury wyrzutni rakiet (3 poziomy) + tekstura pocisku-rakiety.
 constexpr const char* ROCKET_TOWER_LVL1 = "/assets/textures/rocketTower/Poziom_1.png";
 constexpr const char* ROCKET_TOWER_LVL2 = "/assets/textures/rocketTower/Poziom_2.png";
-constexpr const char* ROCKET_TOWER_LVL3 = "/assets/textures/rocketTower/Poziom_3.png";
+constexpr const char* ROCKET_TOWER_LVL3 = "/assets/textures/rocketTower/Poziom_3.png";*/
 constexpr const char* ROCKET_PROJECTILE = "/assets/textures/rocketTower/Rakieta.png";
+
 }
 
 // Tekstury wież i rakiety narysowane są "lufą do góry". Pole rotation liczone jest
@@ -85,7 +110,7 @@ constexpr const char* NAMES[COUNT] = {
 
 // ===== GRACZ =====
 constexpr int STARTING_LIVES = 20;
-constexpr int STARTING_MONEY = 200;
+constexpr int STARTING_MONEY = 230;
 
 // ===== ZOMBIE (statystyki bazowe) =====
 namespace Walker {
@@ -145,9 +170,10 @@ constexpr float AOE_RADIUS = 60.f;
 namespace FlamethrowerTower {
 constexpr int COST = 80;
 constexpr int DAMAGE_PER_SECOND = 15;
-constexpr float RANGE = 100.f;
+constexpr float RANGE = 120.f;
 constexpr float FIRE_RATE = 5.f;
 constexpr float BURN_DURATION = 2.f;
+constexpr float ROTATION_SPEED = 230.f;
 }
 
 namespace SlowerTower {
@@ -156,6 +182,7 @@ constexpr float RANGE = 120.f;
 constexpr float SLOW_FACTOR = 0.5f;         // mnożnik prędkości
 constexpr float SLOW_DURATION = 1.f;
 constexpr float FIRE_RATE = 1.5f;
+constexpr float ROTATION_SPEED = 150.f;
 }
 
 // ===== POCISKI =====

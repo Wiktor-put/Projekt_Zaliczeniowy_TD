@@ -117,7 +117,7 @@ void Map::buildVisuals() {
     sf::Texture& dzTex = ResourceManager::getTexture(Config::Assets::DROPZONE);
     dzSprite.setTexture(dzTex, true);
     dzSprite.setOrigin(dzTex.getSize().x / 2.f, dzTex.getSize().y / 2.f);
-    dzSprite.setScale(4.8f, 4.8f);
+    dzSprite.setScale(0.25f, 0.25f);
     dzSprite.setPosition(dropZonePos);
 
     // --- BRAMA / ŚCIANY BAZY ---
