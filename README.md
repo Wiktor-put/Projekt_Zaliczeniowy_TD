@@ -10,6 +10,7 @@ przed nadciągającymi falami zombie. Projekt zaliczeniowy z C++ / SFML.
 W trakcie realizacji — obecnie zrealizowane:
 -**Milestone 1** (fundament)
 -**Milestone 2** (grywalny prototyp)
+-**Milestone 4** (game feel)
 
 ## Autorzy
 
