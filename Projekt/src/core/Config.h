@@ -16,7 +16,6 @@ namespace Assets {
 constexpr const char* MAIN_MENU_BG = "/assets/textures/main_menu.png";
 
 constexpr const char* BACKGROUND = "/assets/textures/background_las.png";
-//constexpr const char* ZOMBIE_WALKER = "/assets/textures/walker.png";
 
 // Tekstura ścieżki
 constexpr const char* PATH = "/assets/textures/path.png";
@@ -25,6 +24,12 @@ constexpr const char* DROPZONE = "/assets/textures/H.jpg";
 // Tekstura Bazy / Bramy
 constexpr const char* BASE_GATE = "/assets/textures/gate.png";
 constexpr const char* BASE_WALL_VERT = "/assets/textures/Wooden-wall_Vertical.png";
+
+// --- Ikonki UI i Bonusów ---
+constexpr const char* ICON_HEART = "/assets/textures/bonus/heart.png";
+constexpr const char* ICON_COIN  = "/assets/textures/bonus/coin.png";
+constexpr const char* ICON_STAR  = "/assets/textures/bonus/Green Star.png";
+constexpr const char* ICON_ICE   = "/assets/textures/bonus/ice.png";
 
 // Nowe ścieżki dla Walkera
 constexpr const char* WALKER_DOWN = "/assets/textures/walker walk/Zombie_Small_Down_walk-Sheet6.png";
@@ -60,14 +65,14 @@ constexpr const char* MG_TOWER_LVL3 = "/assets/textures/green/turret_01_mk3.png"
 constexpr const char* SNIPER_TOWER  = "/assets/textures/gold/turret_01_mk1.png";
 
 // 3. FIOLETOWA WYRZUTNIA (Rocket)
-constexpr const char* ROCKET_TOWER_LVL1 = "/assets/textures/purple/turret_01_mk2.png";
-constexpr const char* ROCKET_TOWER_LVL2 = "/assets/textures/purple/turret_01_mk3.png";
-constexpr const char* ROCKET_TOWER_LVL3 = "/assets/textures/purple/turret_01_mk4.png";
+constexpr const char* ROCKET_TOWER_LVL1 = "/assets/textures/purple/turret_03_mk1.png";
+constexpr const char* ROCKET_TOWER_LVL2 = "/assets/textures/purple/turret_03_mk2.png";
+constexpr const char* ROCKET_TOWER_LVL3 = "/assets/textures/purple/turret_03_mk3.png";
 
 // 4. CZERWONY MIOTACZ OGNIA (Flamethrower) - Używamy masywnych luf
-constexpr const char* FLAME_TOWER_LVL1 = "/assets/textures/red/turret_02_mk3.png";
-constexpr const char* FLAME_TOWER_LVL2 = "/assets/textures/red/turret_02_mk4.png";
-constexpr const char* FLAME_TOWER_LVL3 = "/assets/textures/red/turret_02_mk4.png";
+constexpr const char* FLAME_TOWER_LVL1 = "/assets/textures/red/turret_04_mk1.png";
+constexpr const char* FLAME_TOWER_LVL2 = "/assets/textures/red/turret_04_mk2.png";
+constexpr const char* FLAME_TOWER_LVL3 = "/assets/textures/red/turret_04_mk3.png";
 
 // 5. NIEBIESKI SPOWALNIACZ (Slower) - Używamy luf z rdzeniem energetycznym
 constexpr const char* SLOWER_TOWER_LVL1 = "/assets/textures/blue/turret_02_mk1.png";

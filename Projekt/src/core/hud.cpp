@@ -4,6 +4,7 @@
 #include "wavemanager.h"
 #include "map.h"
 #include "Gameobject.h"
+#include "resourcemanager.h"
 #include "tower.h"
 #include <string>
 
@@ -49,21 +50,58 @@ void HUD::draw(sf::RenderWindow& window,
     topBar.setOutlineColor(sf::Color(80, 80, 80));
     window.draw(topBar);
 
+    // --- ŻYCIE (Serce) ---
+    sf::Sprite heartSpr(ResourceManager::getTexture(Config::Assets::ICON_HEART));
+    heartSpr.setScale(30.f / heartSpr.getTexture()->getSize().x, 30.f / heartSpr.getTexture()->getSize().y);
+    heartSpr.setPosition(20.f, 10.f);
+    window.draw(heartSpr);
+    /*
+    sf::Text livesText(std::to_string(player.getLives()), *font, 24);
+    livesText.setPosition(60.f, 10.f);
+    livesText.setFillColor(sf::Color(255, 80, 80));
+    livesText.setStyle(sf::Text::Bold);
+    window.draw(livesText);*/
+
     sf::Text livesText("ZYCIA: " + std::to_string(player.getLives()), *font, 24);
-    livesText.setPosition(20.f, 10.f);
+    livesText.setPosition(60.f, 10.f);
     livesText.setFillColor(sf::Color(255, 80, 80));
     livesText.setStyle(sf::Text::Bold);
 
+    // --- PIENIĄDZE (Moneta) ---
+    sf::Sprite coinSpr(ResourceManager::getTexture(Config::Assets::ICON_COIN));
+    coinSpr.setScale(30.f / coinSpr.getTexture()->getSize().x, 30.f / coinSpr.getTexture()->getSize().y);
+    coinSpr.setPosition(260.f, 10.f);
+    window.draw(coinSpr);
+    /*
+    sf::Text moneyText(std::to_string(player.getMoney()), *font, 24);
+    moneyText.setPosition(200.f, 10.f);
+    moneyText.setFillColor(sf::Color(255, 215, 0));
+    moneyText.setStyle(sf::Text::Bold);
+    window.draw(moneyText);*/
+
     sf::Text moneyText("KASA: $" + std::to_string(player.getMoney()), *font, 24);
-    moneyText.setPosition(250.f, 10.f);
+    moneyText.setPosition(300.f, 10.f);
     moneyText.setFillColor(sf::Color(255, 215, 0));
     moneyText.setStyle(sf::Text::Bold);
 
-    sf::Text scoreText("PUNKTY: " + std::to_string(player.getScore()), *font, 24);
-    scoreText.setPosition(500.f, 10.f);
+    // --- PUNKTY (Zielona Gwiazdka) ---
+    sf::Sprite starSpr(ResourceManager::getTexture(Config::Assets::ICON_STAR));
+    starSpr.setScale(30.f / starSpr.getTexture()->getSize().x, 30.f / starSpr.getTexture()->getSize().y);
+    starSpr.setPosition(530.f, 10.f);
+    window.draw(starSpr);
+    /*
+    sf::Text scoreText(std::to_string(player.getScore()), *font, 24);
+    scoreText.setPosition(380.f, 10.f);
     scoreText.setFillColor(sf::Color::White);
     scoreText.setStyle(sf::Text::Bold);
+    window.draw(scoreText);*/
 
+    sf::Text scoreText("PUNKTY: " + std::to_string(player.getScore()), *font, 24);
+    scoreText.setPosition(570.f, 10.f);
+    scoreText.setFillColor(sf::Color::Green);
+    scoreText.setStyle(sf::Text::Bold);
+
+    // --- FALA ---
     std::string waveStr = wave.isWaveInProgress() ?
         "FALA: " + std::to_string(wave.getCurrentWaveNumber()) + " (W TOKU...)" :
         "FALA: " + std::to_string(wave.getCurrentWaveNumber()) + " [Wcisnij SPACJE]";
@@ -150,17 +188,6 @@ void HUD::draw(sf::RenderWindow& window,
             }
         }
     }
-
-    // ==========================================
-    // 3. NAPIS STREFY ZRZUTU (DROP ZONE -> "H")
-    // ==========================================
-    /*
-    sf::Text dzText("H", *font, 87);
-    dzText.setFillColor(sf::Color(0, 255, 0, 150));
-    sf::Vector2f dzPos = map.getDropZonePos();
-    dzText.setPosition(dzPos.x - 25.f, dzPos.y - 45.f);
-    window.draw(dzText);
-*/
 }
 
 HudClick HUD::handleClick(sf::Vector2f mouse, bool occupied) const {
