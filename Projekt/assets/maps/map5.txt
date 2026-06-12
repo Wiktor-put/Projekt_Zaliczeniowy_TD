@@ -1,0 +1,26 @@
+# Mapa 5 "Fabryka" — rozdzielczość okna docelowego: 1280x720
+# Ścieżka w kształcie podkowy (U) — centralna kieszeń idealna pod wieże AoE.
+
+# === TŁO MAPY ===
+B /assets/textures/background_miasto.png
+
+# === WAYPOINTY (ŚCIEŻKA ZOMBIE) — podkowa ===
+W 0 200
+W 500 200
+W 500 520
+W 780 520
+W 780 200
+W 1280 200
+
+# === SLOTY NA WIEŻE ===
+S 250 300
+S 380 350
+S 640 400
+S 900 300
+S 1080 300
+S 250 100
+S 1050 100
+S 640 620
+
+# === DROP ZONE ===
+D 1150 550

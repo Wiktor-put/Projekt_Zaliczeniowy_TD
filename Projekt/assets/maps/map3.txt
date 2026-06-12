@@ -1,0 +1,26 @@
+# Mapa 3 "Autostrada" — rozdzielczość okna docelowego: 1280x720
+# Ścieżka w kształcie serpentyny (3 poziome pasy) — długa trasa, dużo czasu na ostrzał.
+
+# === TŁO MAPY ===
+B /assets/textures/background1.png
+
+# === WAYPOINTY (ŚCIEŻKA ZOMBIE) — serpentyna ===
+W 0 130
+W 1150 130
+W 1150 360
+W 130 360
+W 130 590
+W 1280 590
+
+# === SLOTY NA WIEŻE — w przerwach między pasami ===
+S 300 245
+S 600 245
+S 900 245
+S 1050 245
+S 250 475
+S 550 475
+S 850 475
+S 1100 475
+
+# === DROP ZONE ===
+D 640 660

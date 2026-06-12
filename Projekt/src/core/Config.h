@@ -104,16 +104,22 @@ constexpr float TOWER_AIM_TOLERANCE = 15.f;
 // Aby dodać kolejną planszę: stwórz plik w assets/maps/, dopisz jego ścieżkę
 // i nazwę poniżej oraz zwiększ COUNT. Reszta (wybór, ładowanie) działa sama.
 namespace Maps {
-constexpr int COUNT = 2;
+constexpr int COUNT = 5;
 // Ścieżki względem katalogu projektu (ASSETS_DIR doklejany przy ładowaniu).
 constexpr const char* PATHS[COUNT] = {
     "/assets/maps/map1.txt",
-    "/assets/maps/map2.txt"
+    "/assets/maps/map2.txt",
+    "/assets/maps/map3.txt",
+    "/assets/maps/map4.txt",
+    "/assets/maps/map5.txt"
 };
 // Nazwy wyświetlane w menu wyboru mapy.
 constexpr const char* NAMES[COUNT] = {
     "Las",
-    "Miasto"
+    "Miasto",
+    "Autostrada",
+    "Cmentarz",
+    "Fabryka"
 };
 }
 

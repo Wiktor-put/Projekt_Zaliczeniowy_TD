@@ -1,0 +1,26 @@
+# Mapa 4 "Cmentarz" — rozdzielczość okna docelowego: 1280x720
+# Ścieżka w kształcie zygzaka (góra-dół) — zombie krążą blisko wielu slotów.
+
+# === TŁO MAPY ===
+B /assets/textures/background_las.png
+
+# === WAYPOINTY (ŚCIEŻKA ZOMBIE) — zygzak ===
+W 0 360
+W 256 120
+W 512 360
+W 768 120
+W 1024 360
+W 1280 220
+
+# === SLOTY NA WIEŻE — przy szczytach i dolinach zygzaka ===
+S 256 260
+S 512 440
+S 768 260
+S 1024 280
+S 130 150
+S 640 150
+S 896 380
+S 384 380
+
+# === DROP ZONE ===
+D 1150 600
