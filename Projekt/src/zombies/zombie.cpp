@@ -1,5 +1,7 @@
 #include "zombie.h"
 #include "resourcemanager.h"
+#include "audiomanager.h"
+#include "Config.h"
 #include <cmath>
 
 Zombie::Zombie(const std::vector<sf::Vector2f>& waypoints)
@@ -72,10 +74,13 @@ void Zombie::render(sf::RenderWindow& window) {
 }
 
 void Zombie::takeDamage(int dmg, DamageType type) {
+    if (!alive) return;
     (void)type;
     hp -= dmg;
-    if (hp <= 0)
+    if (hp <= 0){
         destroy();
+        AudioManager::playSound(Config::Assets::SOUND_ZOMBIE_DEATH, 15.f);
+    }
 }
 
 void Zombie::applySlow(float duration) {

@@ -2,6 +2,7 @@
 #include "snowball.h"
 #include "resourcemanager.h"
 #include "Config.h"
+#include "audiomanager.h"
 
 SlowerTower::SlowerTower(sf::Vector2f pos) : Tower(pos) {
     cost = Config::SlowerTower::COST;
@@ -18,9 +19,10 @@ SlowerTower::SlowerTower(sf::Vector2f pos) : Tower(pos) {
 }
 
 void SlowerTower::shoot(std::vector<std::unique_ptr<GameObject>>& objects) {
+
     if (currentTarget) {
         objects.push_back(std::make_unique<Snowball>(position, currentTarget->getPosition(), slowDuration));
-
+        AudioManager::playSound(Config::Assets::SOUND_EXPLOSION, 10.f);
 
     }
 }

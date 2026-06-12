@@ -2,6 +2,7 @@
 #include "rocket.h"
 #include "Config.h"
 #include "resourcemanager.h"
+#include "audiomanager.h"
 
 RocketTower::RocketTower(sf::Vector2f pos) : Tower(pos) {
     // Pobranie statystyk dla wyrzutni rakiet
@@ -21,6 +22,8 @@ RocketTower::RocketTower(sf::Vector2f pos) : Tower(pos) {
 
 void RocketTower::shoot(std::vector<std::unique_ptr<GameObject>>& objects) {
     if (!currentTarget) return;
+
+    AudioManager::playSound(Config::Assets::SOUND_EXPLOSION, 10.f);
 
     // Zamiast standardowego "Bullet", tworzymy naszą Rakietę!
     auto rocket = std::make_unique<Rocket>(position, currentTarget->getPosition(), damage, aoeRadius);

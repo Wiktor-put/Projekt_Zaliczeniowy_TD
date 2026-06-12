@@ -14,10 +14,11 @@ constexpr int FPS_LIMIT = 60;
 namespace Assets {
 // --- AUDIO ---
 constexpr const char* MUSIC_BG       = "/assets/audio/bg_music.ogg";
-constexpr const char* SOUND_SHOOT    = "/assets/audio/shoot.wav";
-constexpr const char* SOUND_EXPLOSION= "/assets/audio/explosion.wav";
+constexpr const char* SOUND_SHOOT    = "/assets/audio/SHOOT012.mp3";
+constexpr const char* SOUND_EXPLOSION= "/assets/audio/Single_SciFi Pack Vol 1_Heavy Plasma Shot_01.wav";
 constexpr const char* SOUND_BONUS    = "/assets/audio/Single_SciFi Pack Vol 1_PickUp_03.wav";
 constexpr const char* SOUND_CLICK    = "/assets/audio/Single_SciFi Pack Vol 1_PickUp_03.wav";
+constexpr const char* SOUND_ZOMBIE_DEATH = "/assets/audio/zombie-8.wav";
 
 // Tekstura ekranu początkowego
 constexpr const char* MAIN_MENU_BG = "/assets/textures/main_menu.png";
