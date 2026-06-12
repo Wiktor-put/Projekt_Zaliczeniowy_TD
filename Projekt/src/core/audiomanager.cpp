@@ -1,5 +1,4 @@
 #include "audiomanager.h"
-#include <iostream>
 
 #ifndef ASSETS_DIR
 #define ASSETS_DIR "."
@@ -14,8 +13,6 @@ void AudioManager::playMusic(const std::string& path, float volume) {
         bgMusic.setLoop(true);
         bgMusic.setVolume(volume);
         bgMusic.play();
-    } else {
-        std::cerr << "Nie udalo sie wczytac muzyki: " << path << std::endl;
     }
 }
 
@@ -26,8 +23,7 @@ void AudioManager::playSound(const std::string& path, float volume) {
         if (buffer.loadFromFile(std::string(ASSETS_DIR) + path)) {
             buffers[path] = buffer;
         } else {
-            std::cerr << "Nie udalo sie wczytac dzwieku: " << path << std::endl;
-            return;
+            return;  // nie udało się wczytać dźwięku — pomijamy odtwarzanie
         }
     }
 

@@ -28,9 +28,8 @@
 
 Game::Game() : window(sf::VideoMode(Config::WINDOW_WIDTH, Config::WINDOW_HEIGHT), "DEAD ZONE"), state(GameState::MENU), currentMapPath(Config::Maps::PATHS[0]), menuSelectedOption(0) {
     window.setFramerateLimit(Config::FPS_LIMIT);
-    if (!font.loadFromFile(std::string(ASSETS_DIR) + "/assets/fonts/arial.ttf")) {
-        std::cerr << "Nie udalo sie zaladowac fontu!" << std::endl;
-    }
+    // Brak czcionki nie przerywa gry — ekrany sprawdzają to przed rysowaniem tekstu.
+    font.loadFromFile(std::string(ASSETS_DIR) + "/assets/fonts/arial.ttf");
     initButtons();   // przyciski ekranów wymagają wczytanej czcionki
     hud.init(font);  // interfejs gracza (pasek + panel wież)
     AudioManager::playMusic(Config::Assets::MUSIC_BG, 40.f); // 35.f to głośność
@@ -271,11 +270,9 @@ void Game::processEvents() {
             case GameState::PAUSED:
                 if (event.key.code == sf::Keyboard::Escape) {
                     state = GameState::PLAYING;
-                    std::cout << "Wznowiono\n";
                 } else if (event.key.code == sf::Keyboard::M) {
                     state = GameState::MENU;
                     menuSelectedOption = 0;
-                    std::cout << "Powrot do menu\n";
                 }
                 break;
 
@@ -293,11 +290,9 @@ void Game::processEvents() {
                 switch (event.key.code) {
                 case sf::Keyboard::Escape:
                     if (selectedSlotIndex != -1) {
-                        selectedSlotIndex = -1;
-                        std::cout << "Anulowano wybor slotu\n";
+                        selectedSlotIndex = -1;   // odznacz slot
                     } else {
                         state = GameState::PAUSED;
-                        std::cout << "PAUZA\n";
                     }
                     break;
                 case sf::Keyboard::Num1: tryBuyTower(1); break;
@@ -488,7 +483,6 @@ void Game::updatePlaying(float dt){
         state = GameState::GAME_OVER;
         nicknameInput.clear();   // przygotuj puste pole na nick gracza
         scoreSaved = false;      // wynik tej przegranej jeszcze nie zapisany
-        std::cout << "GAME OVER! Wynik: " << player.getScore() << std::endl;
     }
 
     removeDeadObjects();
@@ -1029,16 +1023,13 @@ void Game::saveScore() {
 
     std::ofstream file("highscores.txt", std::ios::app);
     if (!file.is_open()) {
-        std::cerr << "Nie udalo sie otworzyc highscores.txt do zapisu!" << std::endl;
-        return;
+        return;  // nie udało się otworzyć pliku wyników — pomijamy zapis
     }
 
     file << nick << ";" << currentMapName() << ";" << player.getScore() << "\n";
     file.close();
 
     scoreSaved = true;
-    std::cout << "Zapisano wynik: " << nick << " (" << currentMapName()
-              << ") - " << player.getScore() << " pkt" << std::endl;
 }
 
 std::vector<ScoreEntry> Game::loadHighscores() const {

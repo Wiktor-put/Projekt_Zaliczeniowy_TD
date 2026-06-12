@@ -16,8 +16,7 @@ void WaveManager::loadFromFile(const std::string& path) {
 
     std::ifstream file(path);
     if (!file.is_open()) {
-        std::cerr << "Nie udalo sie otworzyc " << path << std::endl;
-        return;
+        return;  // brak pliku z falami — lista fal pozostaje pusta
     }
 
     std::string line;
@@ -100,9 +99,6 @@ void WaveManager::startNextWave() {
     spawnedCount = 0;
     spawnTimer = 0.f;
     waveInProgress = true;
-
-    std::cout << "Fala " << (currentWaveIndex + 1) << " - "
-              << spawnQueue.size() << " zombi" << std::endl;
 }
 
 void WaveManager::update(float dt,
@@ -117,7 +113,6 @@ void WaveManager::update(float dt,
     // Czy są jeszcze zombi do zespawnowania?
     if (spawnedCount >= static_cast<int>(spawnQueue.size())) {
         waveInProgress = false;
-        std::cout << "Fala " << (currentWaveIndex + 1) << " zespawnowana" << std::endl;
         return;
     }
 

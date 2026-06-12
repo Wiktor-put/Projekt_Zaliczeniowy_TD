@@ -11,16 +11,12 @@ void Map::loadFromFile(const std::string& path) {
 
     std::ifstream file(path);
     if (!file.is_open()) {
-        std::cerr << "Nie udalo sie otworzyc pliku: " << path << std::endl;
-        return;
+        return;  // brak pliku mapy — nic nie wczytujemy
     }
 
     std::string line;
-    int lineNumber = 0;
 
     while (std::getline(file, line)) {
-        lineNumber++;
-
         if (line.empty() || line[0] == '#') continue;
 
         std::istringstream iss(line);
@@ -50,16 +46,11 @@ void Map::loadFromFile(const std::string& path) {
                 towerSlots.push_back({sf::Vector2f(x, y), false});
             } else if (type == 'D') {
                 dropZonePos = sf::Vector2f(x, y);
-            } else {
-                std::cerr << "Nieznany typ '" << type << "' w linii " << lineNumber << std::endl;
             }
-        } else {
-            std::cerr << "Bledna linia " << lineNumber << ": " << line << std::endl;
+            // Nieznane typy linii po prostu pomijamy.
         }
+        // Linie bez poprawnych współrzędnych ignorujemy.
     }
-
-    std::cout << "Wczytano " << waypoints.size() << " waypointow i "
-              << towerSlots.size() << " slotow z " << path << std::endl;
 
     // Cała kosztowna praca (ładowanie tekstur, budowa geometrii) — raz, tutaj.
     buildVisuals();
