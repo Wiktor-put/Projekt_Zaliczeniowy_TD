@@ -2,6 +2,7 @@
 #include "Bullet.h"
 #include "Config.h"
 #include "resourcemanager.h"
+#include "audiomanager.h"
 
 MachineGunTower::MachineGunTower(sf::Vector2f pos): Tower(pos) {
     cost = Config::MachineGunTower::COST;
@@ -19,6 +20,7 @@ MachineGunTower::MachineGunTower(sf::Vector2f pos): Tower(pos) {
 
 void MachineGunTower::shoot(std::vector<std::unique_ptr<GameObject>>& objects){
     if (!currentTarget) return;
+    AudioManager::playSound(Config::Assets::SOUND_SHOOT, 5.f);
     auto bullet = std::make_unique<Bullet>(position, currentTarget->getPosition(), damage);
     objects.push_back(std::move(bullet));
 }

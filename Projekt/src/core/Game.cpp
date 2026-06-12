@@ -15,6 +15,7 @@
 #include "slowertower.h"
 #include "Random.h"
 #include "resourcemanager.h"
+#include "audiomanager.h"
 #include <cmath>
 #include <fstream>
 #include <algorithm>
@@ -32,6 +33,7 @@ Game::Game() : window(sf::VideoMode(Config::WINDOW_WIDTH, Config::WINDOW_HEIGHT)
     }
     initButtons();   // przyciski ekranów wymagają wczytanej czcionki
     hud.init(font);  // interfejs gracza (pasek + panel wież)
+    AudioManager::playMusic(Config::Assets::MUSIC_BG, 40.f); // 35.f to głośność
 }
 
 void Game::initButtons() {
@@ -922,10 +924,12 @@ void Game::run() {
         sf::Time dt = clock.restart();
         update(dt.asSeconds());
         render();
+        AudioManager::update();
     }
 }
 
 void Game::applyBonus(BonusType type, sf::Vector2f startPos) {
+    AudioManager::playSound(Config::Assets::SOUND_BONUS, 40.f);
     if (type == BonusType::AMMO) {
         player.addMoney(Config::AMMO_BONUS_VALUE); // +30 dolarów
         // Tworzy monetę, która leci do ikonki "Kasa"
