@@ -22,7 +22,7 @@ void SlowerTower::shoot(std::vector<std::unique_ptr<GameObject>>& objects) {
 
     if (currentTarget) {
         objects.push_back(std::make_unique<Snowball>(position, currentTarget->getPosition(), slowDuration));
-        AudioManager::playSound(Config::Assets::SOUND_EXPLOSION, 10.f);
+        AudioManager::playSound(Config::Assets::SOUND_EXPLOSION, 15.f);
 
     }
 }

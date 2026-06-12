@@ -15,6 +15,7 @@ namespace Assets {
 // --- AUDIO ---
 constexpr const char* MUSIC_BG       = "/assets/audio/bg_music.ogg";
 constexpr const char* SOUND_SHOOT    = "/assets/audio/SHOOT012.mp3";
+constexpr const char* SOUND_FLAME    = "/assets/audio/FlameThrower.wav";
 constexpr const char* SOUND_EXPLOSION= "/assets/audio/Single_SciFi Pack Vol 1_Heavy Plasma Shot_01.wav";
 constexpr const char* SOUND_BONUS    = "/assets/audio/Single_SciFi Pack Vol 1_PickUp_03.wav";
 constexpr const char* SOUND_CLICK    = "/assets/audio/Single_SciFi Pack Vol 1_PickUp_03.wav";

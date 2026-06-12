@@ -20,7 +20,7 @@ SniperTower::SniperTower(sf::Vector2f pos) : Tower(pos) {
 void SniperTower::shoot(std::vector<std::unique_ptr<GameObject>>& objects) {
     if (!currentTarget) return;
 
-    AudioManager::playSound(Config::Assets::SOUND_SHOOT, 5.f);
+    AudioManager::playSound(Config::Assets::SOUND_SHOOT, 7.f);
 
     // Tworzymy pocisk i celujemy w zombiaka, dokładnie jak w MachineGunTower
     auto bullet = std::make_unique<Bullet>(position, currentTarget->getPosition(), damage);
