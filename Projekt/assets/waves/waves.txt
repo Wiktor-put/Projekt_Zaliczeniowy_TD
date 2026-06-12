@@ -11,3 +11,13 @@ wave 7: walker:10 runner:10 armored:5 tank:1
 wave 8: runner:15 armored:8 tank:2
 wave 9: walker:20 runner:15 armored:10 tank:3
 wave 10: walker:30 runner:20 armored:15 tank:5
+wave 11: walker:25 runner:20 armored:12 tank:4
+wave 12: runner:30 armored:15 tank:5
+wave 13: walker:35 runner:25 armored:18 tank:6
+wave 14: runner:35 armored:20 tank:8
+wave 15: walker:40 runner:30 armored:25 tank:10
+wave 16: armored:35 tank:12
+wave 17: walker:50 runner:40 armored:30 tank:12
+wave 18: runner:50 armored:35 tank:15
+wave 19: walker:60 runner:45 armored:40 tank:18
+wave 20: walker:70 runner:60 armored:50 tank:25

@@ -54,13 +54,41 @@ void WaveManager::loadFromFile(const std::string& path) {
     }
 }
 
+std::vector<WaveEntry> WaveManager::generateRandomWave(int waveNumber) const {
+    // Liczebność każdego typu skalujemy numerem fali, by trudność dalej rosła,
+    // a losowe widełki dają zmienność (każda fala inna). Wartości dobrane tak,
+    // by płynnie kontynuować trudność po ostatniej fali z pliku (fala 20).
+    std::vector<WaveEntry> wave;
+
+    int walkers = Random::intInRange(waveNumber * 3, waveNumber * 4);
+    int runners = Random::intInRange(waveNumber * 2, waveNumber * 3);
+    int armored = Random::intInRange(waveNumber * 3 / 2, waveNumber * 2);
+    int tanks   = Random::intInRange(waveNumber, waveNumber * 3 / 2);
+
+    // Dodajemy tylko niepuste wpisy (zerowa liczebność nie ma sensu).
+    if (walkers > 0) wave.push_back({ZombieType::WALKER, walkers});
+    if (runners > 0) wave.push_back({ZombieType::RUNNER, runners});
+    if (armored > 0) wave.push_back({ZombieType::ARMORED, armored});
+    if (tanks   > 0) wave.push_back({ZombieType::TANK,    tanks});
+
+    return wave;
+}
+
 void WaveManager::startNextWave() {
     currentWaveIndex++;
-    if (currentWaveIndex >= static_cast<int>(waves.size())) return;
+
+    // Pierwsze fale czytamy z pliku; po ich wyczerpaniu przechodzimy w tryb
+    // nieskończony i generujemy kolejne fale losowo (gra trwa, aż gracz przegra).
+    std::vector<WaveEntry> wave;
+    if (currentWaveIndex < static_cast<int>(waves.size())) {
+        wave = waves[currentWaveIndex];
+    } else {
+        wave = generateRandomWave(currentWaveIndex + 1);
+    }
 
     // Rozwiń WaveEntry na pełną listę typów
     spawnQueue.clear();
-    for (const auto& entry : waves[currentWaveIndex]) {
+    for (const auto& entry : wave) {
         for (int i = 0; i < entry.count; ++i) {
             spawnQueue.push_back(entry.type);
         }

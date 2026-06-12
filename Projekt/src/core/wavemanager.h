@@ -36,6 +36,11 @@ private:
     std::vector<ZombieType> spawnQueue;
     int spawnedCount;            // ile już zespawnowano
 
+    // Tworzy losową falę dla trybu nieskończonego (po wyczerpaniu fal z pliku).
+    // Liczebność każdego typu rośnie z numerem fali, a losowe widełki sprawiają,
+    // że każda wygenerowana fala wygląda inaczej. Korzysta z generatora z Random.h.
+    std::vector<WaveEntry> generateRandomWave(int waveNumber) const;
+
 public:
     WaveManager();
 
