@@ -14,7 +14,7 @@ private:
 
 public:
     static void playMusic(const std::string& path, float volume = 30.f);
-    static void playSound(const std::string& path, float volume = 100.f);
+    static void playSound(const std::string& path, float volume = 100.f, float pitch = 1.0f);
     static void update(); // Usuwa z pamięci dźwięki, które skończyły grać
 };
 

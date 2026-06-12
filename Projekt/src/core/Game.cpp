@@ -415,8 +415,6 @@ void Game::updatePlaying(float dt){
     waveManager.update(dt, objects, map.getWaypoints());
 
     // Ruch wszystkich obiektów PRZED sprawdzeniem kolizji.
-    // Używamy indeksu (nie range-for) bo Tower::shoot() może dodać nowe obiekty
-    // do wektora - push_back może realokować pamięć i unieważnić iteratory range-for.
     const size_t updateCount = objects.size();
     for (size_t i = 0; i < updateCount; ++i) {
         objects[i]->update(dt, objects);
@@ -426,14 +424,17 @@ void Game::updatePlaying(float dt){
 
     std::vector<std::unique_ptr<GameObject>> newBonuses; // Tymczasowa lista chroniąca pamięć
 
-    // W Game::update, po checkCollisions, przed usunięciem martwych
+    // po checkCollisions, przed usunięciem martwych
     for (auto& obj : objects) {
-        if (obj->isAlive()) continue;  // tylko martwe
+        if (obj->isAlive()) continue;  // interesują nas tylko martwe
 
         Zombie* zombie = dynamic_cast<Zombie*>(obj.get());
         if (zombie && !zombie->reachedEnd()) {  // zginął OD pocisku, nie doszedł do bazy
             player.addMoney(zombie->getReward());
             player.addScore(zombie->getReward());
+
+            // rozprysk krwi
+            spawnBlood(zombie->getPosition());
 
             // SZANSA NA DROP BONUSU
             if (Random::chance(Config::BONUS_DROP_CHANCE)) {
@@ -479,6 +480,35 @@ void Game::updatePlaying(float dt){
             // Animacja płynnego przemieszczania
             sf::Vector2f diff = it->targetPos - it->startPos;
             it->sprite.setPosition(it->startPos + diff * it->progress);
+            ++it;
+        }
+    }
+
+    // Obsługa animacji krwi
+    for (auto it = bloodEffects.begin(); it != bloodEffects.end(); ) {
+        it->timer += dt;
+
+        // Zmieniamy klatkę co 0.05 sekundy (bardzo szybki, dynamiczny rozprysk)
+        int expectedFrame = 1 + static_cast<int>(it->timer / 0.05f);
+
+        if (expectedFrame != it->currentFrame && expectedFrame <= 5) {
+            it->currentFrame = expectedFrame;
+            if (expectedFrame == 2) it->sprite.setTexture(ResourceManager::getTexture(Config::Assets::BLOOD_2), true);
+            else if (expectedFrame == 3) it->sprite.setTexture(ResourceManager::getTexture(Config::Assets::BLOOD_3), true);
+            else if (expectedFrame == 4) it->sprite.setTexture(ResourceManager::getTexture(Config::Assets::BLOOD_4), true);
+            else if (expectedFrame == 5) it->sprite.setTexture(ResourceManager::getTexture(Config::Assets::BLOOD_5), true);
+        }
+
+        // Krew zostaje na mapie jako plama przez 3 sekundy, potem znika
+        if (it->timer > 2.5f) {
+            it = bloodEffects.erase(it);
+        } else {
+            // Efekt powolnego blaknięcia (wsiąkania w ziemię) przez ostatnią sekundę
+            if (it->timer > 2.0f) {
+                sf::Color c = it->sprite.getColor();
+                c.a = static_cast<sf::Uint8>(255.f * (3.0f - it->timer));
+                it->sprite.setColor(c);
+            }
             ++it;
         }
     }
@@ -615,7 +645,7 @@ void Game::renderGameOver() {
         // Migający kursor "_" — własny, nieresetowany zegar (clock jest restartowany co klatkę).
         static sf::Clock caretClock;
         bool caret = static_cast<int>(caretClock.getElapsedTime().asSeconds() * 2.f) % 2 == 0;
-        infoText.setString("Wpisz nick: " + nicknameInput + (caret ? "_" : " ") +
+        infoText.setString("WPISZ NICK: " + nicknameInput + (caret ? "_" : " ") +
                            "\n(Enter aby zapisac wynik)");
     } else {
         infoText.setString("Wynik zapisany!\nR - zagraj ponownie   M - menu");
@@ -799,6 +829,10 @@ void Game::renderPlaying() {
     // dwa razy i powodował miganie (stary bufor menu vs. świeża gra).
     map.draw(window);
 
+    // --- RYSOWANIE KRWI NA ZIEMI ---
+    for (auto& blood : bloodEffects) {
+        window.draw(blood.sprite);
+    }
 
     for (auto& o : objects) {
         o->render(window);
@@ -1009,6 +1043,20 @@ void Game::trySellTower() {
             break;
         }
     }
+}
+
+void Game::spawnBlood(sf::Vector2f pos) {
+    BloodEffect blood;
+    blood.sprite.setTexture(ResourceManager::getTexture(Config::Assets::BLOOD_1), true);
+
+    // Ustawiamy środek obrazka i pozycję
+    blood.sprite.setOrigin(blood.sprite.getTexture()->getSize().x / 2.f, blood.sprite.getTexture()->getSize().y / 2.f);
+    blood.sprite.setPosition(pos);
+
+    // Losowy obrót (0-360 stopni), żeby każdy rozprysk wyglądał inaczej
+    blood.sprite.setRotation(static_cast<float>(rand() % 360));
+
+    bloodEffects.push_back(blood);
 }
 
 // Zwraca czytelną nazwę mapy z Config::Maps pasującą do bieżącej ścieżki.

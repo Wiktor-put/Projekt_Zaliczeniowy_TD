@@ -40,7 +40,14 @@ constexpr const char* ICON_COIN  = "/assets/textures/bonus/coin.png";
 constexpr const char* ICON_STAR  = "/assets/textures/bonus/Green Star.png";
 constexpr const char* ICON_ICE   = "/assets/textures/bonus/ice.png";
 
-// Nowe ścieżki dla Walkera
+// --- EFEKTY KRWI ---/blood
+constexpr const char* BLOOD_1 = "/assets/textures/blood/bloodfx001_01.png";
+constexpr const char* BLOOD_2 = "/assets/textures/blood/bloodfx001_02.png";
+constexpr const char* BLOOD_3 = "/assets/textures/blood/bloodfx001_03.png";
+constexpr const char* BLOOD_4 = "/assets/textures/blood/bloodfx001_04.png";
+constexpr const char* BLOOD_5 = "/assets/textures/blood/bloodfx001_05.png";
+
+// Scieżki dla Walkera
 constexpr const char* WALKER_DOWN = "/assets/textures/walker walk/Zombie_Small_Down_walk-Sheet6.png";
 constexpr const char* WALKER_UP = "/assets/textures/walker walk/Zombie_Small_Up_Walk-Sheet6.png";
 constexpr const char* WALKER_RIGHT = "/assets/textures/walker walk/Zombie_Small_Side_Walk-Sheet6.png";

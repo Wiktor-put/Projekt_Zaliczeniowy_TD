@@ -33,6 +33,12 @@ struct FlyingIcon {
     float progress = 0.f;  // od 0.0 (start) do 1.0 (koniec lotu)
 };
 
+struct BloodEffect {
+    sf::Sprite sprite;
+    float timer = 0.f;
+    int currentFrame = 1;
+};
+
 // Pojedynczy wpis tablicy wyników wczytany z highscores.txt.
 struct ScoreEntry {
     std::string nick;     // nick gracza
@@ -72,6 +78,8 @@ private:
     std::vector<FlyingIcon> flyingIcons; // Lista animowanych ikon lecących do HUD
     std::vector<ScoreEntry> highscores;  // top 10 wyników wczytane na ekranie WYNIKI
     float freezeTintTimer = 0.f;         // Czas trwania błękitnego błysku
+    std::vector<BloodEffect> bloodEffects;
+    void spawnBlood(sf::Vector2f pos);
 
     // Tworzy i pozycjonuje przyciski ekranów (menu/pauza/itp.). Wołane w konstruktorze.
     void initButtons();
