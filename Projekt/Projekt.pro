@@ -4,6 +4,7 @@ CONFIG -= app_bundle
 CONFIG -= qt
 
 SOURCES += \
+            src/core/audiomanager.cpp \
             src/core/main.cpp \
             src/core/Game.cpp \
             src/core/map.cpp \
@@ -33,6 +34,7 @@ SOURCES += \
 
 HEADERS += \
             src/core/Game.h \
+            src/core/audiomanager.h \
             src/core/map.h \
             src/core/resourcemanager.h \
             src/core/button.h \

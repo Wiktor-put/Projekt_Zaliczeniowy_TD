@@ -12,6 +12,13 @@ constexpr int FPS_LIMIT = 60;
 
 // ===== ASSETS (SCIEZKI DO PLIKOW) =====
 namespace Assets {
+// --- AUDIO ---
+constexpr const char* MUSIC_BG       = "/assets/audio/bg_music.ogg";
+constexpr const char* SOUND_SHOOT    = "/assets/audio/shoot.wav";
+constexpr const char* SOUND_EXPLOSION= "/assets/audio/explosion.wav";
+constexpr const char* SOUND_BONUS    = "/assets/audio/Single_SciFi Pack Vol 1_PickUp_03.wav";
+constexpr const char* SOUND_CLICK    = "/assets/audio/Single_SciFi Pack Vol 1_PickUp_03.wav";
+
 // Tekstura ekranu początkowego
 constexpr const char* MAIN_MENU_BG = "/assets/textures/main_menu.png";
 
@@ -78,16 +85,7 @@ constexpr const char* FLAME_TOWER_LVL3 = "/assets/textures/red/turret_04_mk3.png
 constexpr const char* SLOWER_TOWER_LVL1 = "/assets/textures/blue/turret_02_mk1.png";
 constexpr const char* SLOWER_TOWER_LVL2 = "/assets/textures/blue/turret_02_mk2.png";
 constexpr const char* SLOWER_TOWER_LVL3 = "/assets/textures/blue/turret_02_mk3.png";
-/*
-// Tekstury wieży karabinu maszynowego (folder wg nazwy nadanej przez użytkownika).
-// Wieża ma tylko 2 poziomy grafiki — poziom 3 używa tekstury poziomu 2.
-constexpr const char* MG_TOWER_LVL1 = "/assets/textures/machingunTower/Poziom_1.png";
-constexpr const char* MG_TOWER_LVL2 = "/assets/textures/machingunTower/Poziom_2.png";
 
-// Tekstury wyrzutni rakiet (3 poziomy) + tekstura pocisku-rakiety.
-constexpr const char* ROCKET_TOWER_LVL1 = "/assets/textures/rocketTower/Poziom_1.png";
-constexpr const char* ROCKET_TOWER_LVL2 = "/assets/textures/rocketTower/Poziom_2.png";
-constexpr const char* ROCKET_TOWER_LVL3 = "/assets/textures/rocketTower/Poziom_3.png";*/
 constexpr const char* ROCKET_PROJECTILE = "/assets/textures/rocketTower/Rakieta.png";
 
 }
@@ -208,8 +206,8 @@ constexpr float SNOWBALL_SPEED = 500.f;
 constexpr float HIT_RADIUS = 25.f;              // promień kolizji
 
 // ===== BONUSY =====
-constexpr float BONUS_DROP_CHANCE = 0.08f;      // 8%
-constexpr float BONUS_LIFETIME = 6.f;           // sekund
+constexpr float BONUS_DROP_CHANCE = 0.2f;      // 20%
+constexpr float BONUS_LIFETIME = 3.f;           // sekundy
 constexpr int AMMO_BONUS_VALUE = 30;            // dodatkowa waluta
 constexpr int MEDKIT_BONUS_VALUE = 1;           // dodatkowe życie
 constexpr float EMP_STUN_DURATION = 3.f;        // sekund
