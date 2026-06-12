@@ -34,6 +34,13 @@ struct FlyingIcon {
     float progress = 0.f;  // od 0.0 (start) do 1.0 (koniec lotu)
 };
 
+// Pojedynczy wpis tablicy wyników wczytany z highscores.txt.
+struct ScoreEntry {
+    std::string nick;     // nick gracza
+    std::string mapName;  // nazwa mapy, na której uzyskano wynik
+    int score = 0;        // liczba punktów
+};
+
 // Odpowiada za okno, pętlę gry oraz integrację wszystkich podsystemów
 // (mapa, obiekty, kolizje). Jeden egzemplarz na całą aplikację.
 class Game
@@ -64,6 +71,7 @@ private:
     HUD hud;                          // interfejs gracza (pasek statystyk + panel wież)
 
     std::vector<FlyingIcon> flyingIcons; // Lista animowanych ikon lecących do HUD
+    std::vector<ScoreEntry> highscores;  // top 10 wyników wczytane na ekranie WYNIKI
     float freezeTintTimer = 0.f;         // Czas trwania błękitnego błysku
 
     // Tworzy i pozycjonuje przyciski ekranów (menu/pauza/itp.). Wołane w konstruktorze.
@@ -114,6 +122,10 @@ public:
 
     // Zwraca czytelną nazwę aktualnej mapy (z Config::Maps) na podstawie currentMapPath.
     std::string currentMapName() const;
+
+    // Wczytuje highscores.txt, sortuje malejąco po wyniku i zwraca najlepsze 10 wpisów.
+    // Wołane przy wejściu na ekran WYNIKI.
+    std::vector<ScoreEntry> loadHighscores() const;
 
     // Zeruje martwe targety wież i usuwa martwe obiekty z kontenera.
     // Wywoływane na końcu update() — po update i kolizjach.

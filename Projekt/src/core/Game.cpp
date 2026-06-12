@@ -17,6 +17,7 @@
 #include "resourcemanager.h"
 #include <cmath>
 #include <fstream>
+#include <algorithm>
 
 // ASSETS_DIR definiowane przez qmake jako $$PWD (katalog projektu).
 // Fallback na "." gdy kompilowane bez qmake.
@@ -335,6 +336,7 @@ void Game::handleMenuChoice(int option) {
         break;
 
     case 2:  // Wyniki
+        highscores = loadHighscores();  // odśwież listę z pliku przy każdym wejściu
         state = GameState::HIGHSCORES;
         break;
 
@@ -690,13 +692,52 @@ void Game::renderHighscores(){
     title.setPosition(Config::WINDOW_WIDTH / 2.f, 150.f);
     window.draw(title);
 
-    // Tablica wynikow zostanie uzupelniona w MS4 — na razie placeholder.
-    sf::Text placeholder("Tablica wynikow - wkrotce (MS4)", font, 26);
-    placeholder.setFillColor(sf::Color(200, 200, 200));
-    sf::FloatRect phBounds = placeholder.getLocalBounds();
-    placeholder.setOrigin(phBounds.width / 2.f, phBounds.height / 2.f);
-    placeholder.setPosition(Config::WINDOW_WIDTH / 2.f, Config::WINDOW_HEIGHT / 2.f);
-    window.draw(placeholder);
+    if (highscores.empty()) {
+        // Brak zapisanych wyników — komunikat zamiast tabeli.
+        sf::Text empty("Brak wynikow - rozegraj partie!", font, 26);
+        empty.setFillColor(sf::Color(200, 200, 200));
+        sf::FloatRect eb = empty.getLocalBounds();
+        empty.setOrigin(eb.width / 2.f, eb.height / 2.f);
+        empty.setPosition(Config::WINDOW_WIDTH / 2.f, Config::WINDOW_HEIGHT / 2.f);
+        window.draw(empty);
+    } else {
+        // Tabela top 10: pozycja + nick po lewej, mapa na środku, punkty po prawej.
+        const float startY = 240.f;     // Y pierwszego wiersza
+        const float rowH   = 38.f;      // odstęp między wierszami
+        const float colNick = Config::WINDOW_WIDTH / 2.f - 320.f;  // lewa krawędź kolumny nick
+        const float colMap  = Config::WINDOW_WIDTH / 2.f + 40.f;   // kolumna nazwy mapy
+        const float colScore = Config::WINDOW_WIDTH / 2.f + 320.f; // prawa krawędź punktów
+
+        for (std::size_t i = 0; i < highscores.size(); ++i) {
+            const ScoreEntry& e = highscores[i];
+            float y = startY + i * rowH;
+            // Podium (1-3 miejsce) wyróżnione kolorem, reszta biała.
+            sf::Color rowColor = sf::Color::White;
+            if (i == 0)      rowColor = sf::Color(255, 215, 0);    // złoto
+            else if (i == 1) rowColor = sf::Color(200, 200, 200);  // srebro
+            else if (i == 2) rowColor = sf::Color(205, 127, 50);   // brąz
+
+            // Pozycja + nick (wyrównane do lewej).
+            sf::Text left(std::to_string(i + 1) + ". " + e.nick, font, 24);
+            left.setFillColor(rowColor);
+            left.setPosition(colNick, y);
+            window.draw(left);
+
+            // Nazwa mapy (wyrównana do lewej, środkowa kolumna).
+            sf::Text mapText(e.mapName, font, 22);
+            mapText.setFillColor(rowColor);
+            mapText.setPosition(colMap, y + 1.f);
+            window.draw(mapText);
+
+            // Punkty (wyrównane do prawej — origin na prawej krawędzi tekstu).
+            sf::Text scoreText(std::to_string(e.score), font, 24);
+            scoreText.setFillColor(rowColor);
+            sf::FloatRect sb = scoreText.getLocalBounds();
+            scoreText.setOrigin(sb.left + sb.width, 0.f);
+            scoreText.setPosition(colScore, y);
+            window.draw(scoreText);
+        }
+    }
 
     // Przycisk powrotu (klasa Button) — działa też ESC/M.
     sf::Vector2f m = window.mapPixelToCoords(sf::Mouse::getPosition(window));
@@ -1007,4 +1048,36 @@ void Game::saveScore() {
     scoreSaved = true;
     std::cout << "Zapisano wynik: " << nick << " (" << currentMapName()
               << ") - " << player.getScore() << " pkt" << std::endl;
+}
+
+std::vector<ScoreEntry> Game::loadHighscores() const {
+    std::vector<ScoreEntry> entries;
+    std::ifstream file("highscores.txt");
+    if (!file.is_open()) return entries;  // brak pliku = pusta tablica wyników
+
+    std::string line;
+    while (std::getline(file, line)) {
+        if (line.empty()) continue;
+        // Format wiersza: nick;mapa;punkty (nick i mapa nie zawierają ';').
+        std::size_t p1 = line.find(';');
+        std::size_t p2 = line.rfind(';');
+        if (p1 == std::string::npos || p2 == p1) continue;  // pomijamy uszkodzone wiersze
+
+        ScoreEntry e;
+        e.nick    = line.substr(0, p1);
+        e.mapName = line.substr(p1 + 1, p2 - p1 - 1);
+        try {
+            e.score = std::stoi(line.substr(p2 + 1));
+        } catch (...) {
+            continue;  // pomijamy wiersz z niepoprawną liczbą punktów
+        }
+        entries.push_back(e);
+    }
+    file.close();
+
+    // Sortujemy malejąco po wyniku i zostawiamy maksymalnie 10 najlepszych.
+    std::sort(entries.begin(), entries.end(),
+              [](const ScoreEntry& a, const ScoreEntry& b) { return a.score > b.score; });
+    if (entries.size() > 10) entries.resize(10);
+    return entries;
 }
