@@ -88,13 +88,19 @@ public:
     // Rysuje mapę i wszystkie obiekty sceny.
     void render();
 
+    // Ekran menu głównego (tło, tytuł i przyciski opcji).
     void renderMenu();
     // Ekran wyboru mapy (lista plansz z Config::Maps).
     void renderMapSelect();
+    // Rysuje rozgrywkę: mapę, obiekty sceny, HUD i podświetlenie wybranego slotu.
     void renderPlaying();
+    // Nakładka pauzy z przyciskami wznowienia i powrotu do menu.
     void renderPaused();
+    // Nakładka końca gry: wynik, pole na nick i przyciski.
     void renderGameOver();
+    // Ekran tablicy wyników (top 10 wczytane z highscores.txt).
     void renderHighscores();
+    // Ekran z zasadami gry / instrukcją sterowania.
     void renderHelp();
 
     // Ogolna aktualizacja stanu dla wszystkich stanow gry
@@ -109,15 +115,17 @@ public:
     void checkCollisions();
 
     // Próbuje kupić wieżę danego typu w zaznaczonym slocie.
-    // type: 1=MachineGun (kolejne typy dojdą w MS3).
+    // type: 1=MachineGun, 2=Sniper, 3=Rocket, 4=Flamethrower, 5=Slower.
     // Odejmuje koszt od gracza i zajmuje slot. Czyści selectedSlotIndex po zakupie.
     void tryBuyTower(int type);
 
+    // Ulepsza wieżę w zaznaczonym slocie, jeśli gracz ma kasę i nie osiągnięto max poziomu.
     void tryUpgradeTower();
+    // Sprzedaje wieżę w zaznaczonym slocie, zwracając graczowi część kosztu i zwalniając slot.
     void trySellTower();
 
     // Dopisuje wynik bieżącej rozgrywki (nick, nazwa mapy, punkty) do highscores.txt.
-    // Wołane z ekranu GAME OVER po wpisaniu nicku. Top 10 odczytamy w kolejnym kroku.
+    // Wołane z ekranu GAME OVER po wpisaniu nicku.
     void saveScore();
 
     // Zwraca czytelną nazwę aktualnej mapy (z Config::Maps) na podstawie currentMapPath.
@@ -131,9 +139,11 @@ public:
     // Wywoływane na końcu update() — po update i kolizjach.
     void removeDeadObjects();
 
+    // Stosuje efekt zebranego bonusu (amunicja/apteczka/EMP) i uruchamia animację ikony lecącej do HUD.
     void applyBonus(BonusType type, sf::Vector2f startPos);
 
     int menuSelectedOption;  // ktora opcja menu jest podswietlona (0-3: Nowa gra/Wyniki/Wyjdz/Zasady)
+    // Wykonuje akcję wybranej opcji menu głównego (nowa gra/wyniki/wyjście/zasady).
     void handleMenuChoice(int option);
 };
 

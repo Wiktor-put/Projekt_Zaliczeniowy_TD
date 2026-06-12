@@ -504,13 +504,6 @@ void Game::renderMenu() {
 
     // Rysujemy tło
     window.draw(menuSprite);
-    /*// Tlo - ciemny gradient (na razie zwykly kolor)
-    sf::RectangleShape bg(sf::Vector2f(
-        static_cast<float>(Config::WINDOW_WIDTH),
-        static_cast<float>(Config::WINDOW_HEIGHT)
-        ));
-    bg.setFillColor(sf::Color(20, 30, 20));  // ciemny zielony
-    window.draw(bg);*/
 
     if (font.getInfo().family.empty()) return;
 
@@ -1024,7 +1017,6 @@ std::string Game::currentMapName() const {
 
 // Dopisuje jeden wiersz wyniku do highscores.txt w formacie: nick;mapa;punkty
 // Plik otwierany w trybie dopisywania (app), więc kolejne wyniki się kumulują.
-// Odczyt i ranking top 10 dodamy w kolejnym kroku.
 void Game::saveScore() {
     if (scoreSaved) return;  // zabezpieczenie przed podwójnym zapisem tej samej przegranej
 

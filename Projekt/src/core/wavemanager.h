@@ -50,16 +50,13 @@ public:
                 const std::vector<sf::Vector2f>& waypoints);
 
     bool isWaveInProgress() const { return waveInProgress; }
+    // Zwraca true, gdy wszystkie fale zostały zespawnowane (koniec planszy).
     bool allWavesFinished() const;
     int getCurrentWaveNumber() const { return currentWaveIndex + 1; }
     int getTotalWaves() const { return static_cast<int>(waves.size()); }
 
     // Reset do nowej gry
     void reset();
-
-    //do zapisu
-    void setCurrentWaveIndex(int index) { currentWaveIndex = index; }
-    int getCurrentWaveIndex() const { return currentWaveIndex; }
 };
 
 #endif

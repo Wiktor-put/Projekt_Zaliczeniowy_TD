@@ -19,22 +19,22 @@ enum class DamageType {
 class Zombie : public GameObject
 {
 protected:
-    int hp;
-    int maxHp;
-    int reward;
-    float baseSpeed;
-    float currentSpeed;
-    const std::vector<sf::Vector2f>& path;
-    int currentWaypointIndex = 1;
-    int lifeCost;
+    int hp;                                   // bieżące punkty życia
+    int maxHp;                                // maksymalne HP (do paska życia)
+    int reward;                               // waluta przyznawana graczowi za zabicie
+    float baseSpeed;                          // bazowa prędkość ruchu (px/s)
+    float currentSpeed;                       // aktualna prędkość (może być zmniejszona przez slow)
+    const std::vector<sf::Vector2f>& path;    // trasa zombie (waypointy mapy)
+    int currentWaypointIndex = 1;             // indeks waypointa, do którego zombie zmierza
+    int lifeCost;                             // ile żyć traci gracz, gdy zombie dojdzie do bazy
 
-    // Efekty
-    float slowTimer = 0.f;
-    int snowDamage = 0;
-    float burnTimer = 0.f;
-    int burnDamage = 0;
-    float burnAccumulator = 0.f;
-    float stunTimer = 0.f;
+    // Efekty czasowe nakładane przez pociski (spowolnienie, podpalenie, ogłuszenie)
+    float slowTimer = 0.f;        // pozostały czas spowolnienia (s)
+    int snowDamage = 0;           // obrażenia kuli śnieżnej (niewykorzystywane do DOT, pomocnicze)
+    float burnTimer = 0.f;        // pozostały czas podpalenia (s)
+    int burnDamage = 0;           // obrażenia podpalenia na sekundę
+    float burnAccumulator = 0.f;  // akumulator czasu, by zadawać obrażenia ognia co 1 s
+    float stunTimer = 0.f;        // pozostały czas ogłuszenia (EMP) — zombie stoi
 
     // --- WSPÓLNY SYSTEM SPRITE'ÓW I ANIMACJI (dla wszystkich typów zombie) ---
     // Cztery kierunkowe paski klatek. To obserwatorzy — właścicielem tekstur
@@ -75,10 +75,12 @@ public:
     // Podpala zombie: zadaje dps obrażeń na sekundę przez duration sekund.
     void applyBurn(int dps, float duration);
 
+    // Ogłusza zombie na podany czas (bonus EMP) — przez ten czas stoi w miejscu.
     void applyStun(float duration) { stunTimer = duration; }
 
     int getReward() const { return reward; }
     int getLifeCost() const {return lifeCost;}
+    // Zwraca true, gdy zombie dotarło do ostatniego waypointa (bazy gracza).
     bool reachedEnd() const;
 };
 

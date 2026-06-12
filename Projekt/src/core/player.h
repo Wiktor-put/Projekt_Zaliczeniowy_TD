@@ -27,6 +27,7 @@ public:
     // Wywołujący musi sprawdzić zwracaną wartość przed założeniem że zakup się powiódł.
     bool spendMoney(int cost);
 
+    // Dodaje walutę graczowi (nagroda za zabicie zombie lub bonus amunicji).
     void addMoney(int amount);
 
     // Odejmuje życia gracza, klamruje wynik do zera (nigdy nie zejdzie poniżej).
@@ -44,11 +45,6 @@ public:
     int getScore() const { return score; }
     // za bonusy dostajemy zycie
     void addLives(int amount) { lives += amount; }
-
-    //settery
-    void setMoney(int m) { money = m; }
-    void setLives(int l) { lives = l; }
-    void setScore(int s) { score = s; }
 };
 
 #endif // PLAYER_H

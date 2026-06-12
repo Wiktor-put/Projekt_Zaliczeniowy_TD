@@ -14,7 +14,7 @@ void HUD::init(const sf::Font& f) {
     // Panel budowy/ulepszeń w lewym górnym rogu — środek panelu na x=150.
     const float panelCx = 150.f;
     const sf::Vector2f hudSize(260.f, 28.f);
-    // Koszty pobierane z Config — brak "magic numbers", zmiana balansu w jednym miejscu.
+    // Koszty pobieramy z Config, więc etykiety zawsze pokazują aktualny balans.
     const std::string buildLabels[5] = {
         "1: Karabin ($"      + std::to_string(Config::MachineGunTower::COST)   + ")",
         "2: Snajper ($"      + std::to_string(Config::SniperTower::COST)       + ")",

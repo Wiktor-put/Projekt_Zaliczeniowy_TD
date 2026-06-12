@@ -6,7 +6,7 @@
 // Rakieta - leci do celu, a przy trafieniu wybucha zadając obrażenia obszarowe
 class Rocket : public Projectile {
 private:
-    float aoeRadius;
+    float aoeRadius;    // promień obszarowych obrażeń wybuchu (px)
     sf::Sprite sprite;  // tekstura rakiety (obracana zgodnie z kierunkiem lotu)
 
 public:
@@ -18,6 +18,7 @@ public:
     // Nadpisujemy rendering, by narysować obróconą teksturę zamiast kółka.
     void render(sf::RenderWindow& window) override;
 
+    // Zadaje obrażenia obszarowe wszystkim zombie w promieniu aoeRadius od miejsca wybuchu.
     void explosion(std::vector<std::unique_ptr<GameObject>>& objects);
 };
 

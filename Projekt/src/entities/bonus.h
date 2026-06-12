@@ -4,23 +4,28 @@
 #include "Gameobject.h"
 #include <SFML/Graphics.hpp>
 
-// 3 rodzaje bonusów
+// bonus.h — klikalny bonus spadający nad strefą zrzutu (drop zone).
+// 3 rodzaje: AMMO (kasa), MEDKIT (życie), EMP (ogłuszenie wszystkich zombie).
 enum class BonusType { AMMO, MEDKIT, EMP };
 
+// Obiekt bonusu: spada z góry ekranu do wyznaczonej wysokości, po czym czeka na
+// kliknięcie gracza. Efekt po zebraniu rozstrzyga Game::applyBonus.
 class Bonus : public GameObject {
 private:
-    BonusType type;
-    float lifetime;
-    sf::Sprite sprite;
+    BonusType type;      // rodzaj bonusu (AMMO/MEDKIT/EMP)
+    float lifetime;      // pozostały czas, zanim bonus zniknie sam
+    sf::Sprite sprite;   // grafika bonusu (ikona zależna od typu)
     // Zmienne do spadania
-    float targetY;
-    bool isFalling;
+    float targetY;       // docelowa wysokość, na której bonus się zatrzymuje
+    bool isFalling;      // true gdy bonus jeszcze spada w dół
 
 public:
-    // Zmieniony konstruktor (przyjmuje pozycję startową u góry ekranu i docelową na ziemi)
+    // Konstruktor przyjmuje pozycję startową u góry ekranu i docelową wysokość lądowania.
     Bonus(sf::Vector2f startPos, float targetY, BonusType type);
 
+    // Animuje spadanie, odlicza lifetime i niszczy bonus po jego upływie.
     void update(float dt, std::vector<std::unique_ptr<GameObject>>& objects) override;
+    // Rysuje ikonę bonusu.
     void render(sf::RenderWindow& window) override;
 
     BonusType getType() const { return type; }

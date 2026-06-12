@@ -66,7 +66,7 @@ void WaveManager::startNextWave() {
         }
     }
 
-    // LOSOWA kolejność (wymóg punktacji - losowość)
+    // Losowo tasujemy kolejność spawnu, by każda fala przebiegała inaczej.
     std::shuffle(spawnQueue.begin(), spawnQueue.end(), Random::engine());
 
     spawnedCount = 0;
