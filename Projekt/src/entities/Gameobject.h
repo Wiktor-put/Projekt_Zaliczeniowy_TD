@@ -5,7 +5,6 @@
 
 #include <iostream>
 #include <memory>
-#include <SFML/Window.hpp>
 #include <SFML/Graphics.hpp>
 
 // Wspólny interfejs dla wszystkich bytów na scenie (zombie, wieże, pociski).

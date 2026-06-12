@@ -8,7 +8,6 @@
 #include <string>
 #include <fstream>
 #include <sstream>
-#include <SFML/Window.hpp>
 #include <SFML/Graphics.hpp>
 #include "Config.h"
 
