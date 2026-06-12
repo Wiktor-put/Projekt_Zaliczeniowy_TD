@@ -63,7 +63,7 @@ private:
     WaveManager waveManager;    // potrzebny do napisu GAME OVER
 
     // --- PRZYCISKI UI (klasa Button) ---
-    Button menuButtons[5];            // Nowa gra / Wczytaj / Wyniki / Wyjdz / Zasady gry
+    Button menuButtons[4];            // Nowa gra / Wyniki / Wyjdz / Zasady gry
     std::vector<Button> mapButtons;   // jeden przycisk na mapę z Config::Maps
     Button pauseButtons[2];           // 0 = wznow, 1 = menu
     Button gameOverButtons[2];        // 0 = zagraj ponownie, 1 = menu
@@ -133,7 +133,7 @@ public:
 
     void applyBonus(BonusType type, sf::Vector2f startPos);
 
-    int menuSelectedOption;  // ktora opcja menu jest podswietlona (0-3)
+    int menuSelectedOption;  // ktora opcja menu jest podswietlona (0-3: Nowa gra/Wyniki/Wyjdz/Zasady)
     void handleMenuChoice(int option);
 };
 

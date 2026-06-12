@@ -39,9 +39,9 @@ void Game::initButtons() {
     const sf::Vector2f bigSize(360.f, 50.f);      // standardowy rozmiar przycisku menu
 
     // --- MENU GŁÓWNE ---
-    const char* menuLabels[5] = { "Nowa gra", "Wczytaj gre", "Wyniki", "Wyjdz", "Zasady Gry" };
+    const char* menuLabels[4] = { "Nowa gra", "Wyniki", "Wyjdz", "Zasady Gry" };
     float y = 360.f;
-    for (int i = 0; i < 5; ++i) {
+    for (int i = 0; i < 4; ++i) {
         menuButtons[i].setup(font, menuLabels[i], {cx, y}, bigSize, 30);
         y += 65.f;
     }
@@ -99,7 +99,7 @@ void Game::processEvents() {
                            static_cast<float>(event.mouseMove.y));
             // W menu i wyborze mapy mysz współdzieli zaznaczenie z klawiaturą.
             if (state == GameState::MENU) {
-                for (int i = 0; i < 5; ++i)
+                for (int i = 0; i < 4; ++i)
                     if (menuButtons[i].contains(m)) menuSelectedOption = i;
             } else if (state == GameState::MAP_SELECT) {
                 for (int i = 0; i < Config::Maps::COUNT; ++i)
@@ -117,7 +117,7 @@ void Game::processEvents() {
             switch (state) {
             case GameState::MENU:
                 if (left)
-                    for (int i = 0; i < 5; ++i)
+                    for (int i = 0; i < 4; ++i)
                         if (menuButtons[i].contains(mouse)) { handleMenuChoice(i); break; }
                 break;
 
@@ -222,9 +222,9 @@ void Game::processEvents() {
             switch (state) {
             case GameState::MENU:
                 if (event.key.code == sf::Keyboard::Up) {
-                    menuSelectedOption = (menuSelectedOption > 0) ? menuSelectedOption - 1 : 4;
+                    menuSelectedOption = (menuSelectedOption > 0) ? menuSelectedOption - 1 : 3;
                 } else if (event.key.code == sf::Keyboard::Down) {
-                    menuSelectedOption = (menuSelectedOption < 4) ? menuSelectedOption + 1 : 0;
+                    menuSelectedOption = (menuSelectedOption < 3) ? menuSelectedOption + 1 : 0;
                 } else if (event.key.code == sf::Keyboard::Enter || event.key.code == sf::Keyboard::Return) {
                     handleMenuChoice(menuSelectedOption);
                 }
@@ -330,21 +330,16 @@ void Game::handleMenuChoice(int option) {
         state = GameState::MAP_SELECT;
         break;
 
-    case 1:  // Wczytaj gre
-        // Implementacja w MS4 fazie 3
-        std::cout << "Wczytywanie - dostepne w MS4 fazie 3" << std::endl;
-        break;
-
-    case 2:  // Wyniki
+    case 1:  // Wyniki
         highscores = loadHighscores();  // odśwież listę z pliku przy każdym wejściu
         state = GameState::HIGHSCORES;
         break;
 
-    case 3:  // Wyjdz
+    case 2:  // Wyjdz
         window.close();
         break;
 
-    case 4:  // Pomoc
+    case 3:  // Pomoc (Zasady Gry)
         previousState = state;     // Zapisujemy, gdzie byliśmy
         state = GameState::HELP;
         break;
@@ -539,7 +534,7 @@ void Game::renderMenu() {
 
     // Opcje menu jako przyciski (klasa Button). Podświetlenie steruje wspólnym
     // indeksem menuSelectedOption — ustawianym i przez klawiaturę, i przez mysz.
-    for (int i = 0; i < 5; ++i)
+    for (int i = 0; i < 4; ++i)
         menuButtons[i].draw(window, i == menuSelectedOption);
 
     // Instrukcja na dole
