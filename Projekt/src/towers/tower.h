@@ -57,6 +57,10 @@ public:
     // Zwraca true jeśli currentTarget nadal istnieje i jest w zasięgu.
     bool isTargetValid() const;
 
+    // Zwraca true jeśli lufa jest wycelowana w cel z dokładnością do
+    // Config::TOWER_AIM_TOLERANCE stopni — warunek konieczny do oddania strzału.
+    bool isAimedAtTarget() const;
+
     // Zwiększa poziom wieży; skaluje damage i range wg Config.
     void upgrade();
 

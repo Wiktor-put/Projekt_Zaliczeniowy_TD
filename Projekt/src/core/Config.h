@@ -96,6 +96,10 @@ constexpr const char* ROCKET_PROJECTILE = "/assets/textures/rocketTower/Rakieta.
 // atan2 (0° = w prawo), więc sprite obracamy o ten offset, by lufa celowała w cel.
 constexpr float TOWER_TEXTURE_FORWARD = 90.f;
 
+// Maksymalny dopuszczalny błąd kąta (w stopniach) między lufą a celem, przy którym
+// wieża może wystrzelić. Powyżej tej tolerancji wieża najpierw musi się doobrócić.
+constexpr float TOWER_AIM_TOLERANCE = 15.f;
+
 // ===== DOSTĘPNE MAPY (do wyboru z menu) =====
 // Aby dodać kolejną planszę: stwórz plik w assets/maps/, dopisz jego ścieżkę
 // i nazwę poniżej oraz zwiększ COUNT. Reszta (wybór, ładowanie) działa sama.

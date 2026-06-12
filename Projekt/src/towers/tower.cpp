@@ -105,6 +105,20 @@ bool Tower::isTargetValid() const{
 
 
 
+bool Tower::isAimedAtTarget() const {
+    if (!currentTarget) return false;
+
+    sf::Vector2f diff = currentTarget->getPosition() - position;
+    float targetAngle = std::atan2(diff.y, diff.x) * 180.f / 3.14159f;
+
+    // Różnica kątowa znormalizowana do zakresu [-180, 180].
+    float diff_angle = targetAngle - rotation;
+    while (diff_angle > 180.f) diff_angle -= 360.f;
+    while (diff_angle < -180.f) diff_angle += 360.f;
+
+    return std::abs(diff_angle) <= Config::TOWER_AIM_TOLERANCE;
+}
+
 void Tower::clearDeadTarget() {
     if (currentTarget && !currentTarget->isAlive())
         currentTarget = nullptr;
@@ -118,7 +132,9 @@ void Tower::update(float dt, std::vector<std::unique_ptr<GameObject>>& objects){
         rotateToward(currentTarget->getPosition(), dt);
 
         cooldown -= dt;
-        if (cooldown <= 0.f) {
+        // Strzelamy tylko gdy lufa jest faktycznie wycelowana w cel — wieża
+        // dopiero co kupiona lub szybko poruszający się cel mogą być poza tolerancją.
+        if (cooldown <= 0.f && isAimedAtTarget()) {
             shoot(objects);
             cooldown = 1.f / fireRate;
         }
