@@ -32,7 +32,7 @@ Game::Game() : window(sf::VideoMode(Config::WINDOW_WIDTH, Config::WINDOW_HEIGHT)
     font.loadFromFile(std::string(ASSETS_DIR) + "/assets/fonts/arial.ttf");
     initButtons();   // przyciski ekranów wymagają wczytanej czcionki
     hud.init(font);  // interfejs gracza (pasek + panel wież)
-    AudioManager::playMusic(Config::Assets::MUSIC_BG, 40.f); // 35.f to głośność
+    AudioManager::playMusic(Config::Assets::MUSIC_BG, 35.f); // 35.f to głośność
 }
 
 void Game::initButtons() {

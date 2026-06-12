@@ -79,7 +79,7 @@ void Zombie::takeDamage(int dmg, DamageType type) {
     hp -= dmg;
     if (hp <= 0){
         destroy();
-        AudioManager::playSound(Config::Assets::SOUND_ZOMBIE_DEATH, 15.f);
+        AudioManager::playSound(Config::Assets::SOUND_ZOMBIE_DEATH, 18.f);
     }
 }
 

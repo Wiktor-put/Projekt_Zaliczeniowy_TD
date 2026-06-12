@@ -20,7 +20,7 @@ MachineGunTower::MachineGunTower(sf::Vector2f pos): Tower(pos) {
 
 void MachineGunTower::shoot(std::vector<std::unique_ptr<GameObject>>& objects){
     if (!currentTarget) return;
-    AudioManager::playSound(Config::Assets::SOUND_SHOOT, 5.f);
+    AudioManager::playSound(Config::Assets::SOUND_SHOOT, 7.f);
     auto bullet = std::make_unique<Bullet>(position, currentTarget->getPosition(), damage);
     objects.push_back(std::move(bullet));
 }
