@@ -80,7 +80,7 @@ void Game::startNewGame() {
     nicknameInput.clear();     // wyczyść pole nicku z poprzedniej przegranej
     scoreSaved = false;
     waveManager.reset();
-    waveManager.loadFromFile(std::string(ASSETS_DIR) + "/assets/waves/waves_testowe.txt");
+    waveManager.loadFromFile(std::string(ASSETS_DIR) + "/assets/waves/waves.txt");
 }
 
 void Game::processEvents() {
