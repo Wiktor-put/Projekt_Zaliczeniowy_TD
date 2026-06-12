@@ -60,8 +60,8 @@ void Game::initButtons() {
     pauseButtons[1].setup(font, "Menu glowne (M)", {cx, Config::WINDOW_HEIGHT / 2.f + 105.f}, bigSize, 28);
 
     // --- GAME OVER ---
-    gameOverButtons[0].setup(font, "Zagraj ponownie (R)", {cx, Config::WINDOW_HEIGHT / 2.f + 80.f}, bigSize, 28);
-    gameOverButtons[1].setup(font, "Menu glowne (M)", {cx, Config::WINDOW_HEIGHT / 2.f + 145.f}, bigSize, 28);
+    gameOverButtons[0].setup(font, "Zagraj ponownie (R)", {cx, Config::WINDOW_HEIGHT / 2.f + 150.f}, bigSize, 28);
+    gameOverButtons[1].setup(font, "Menu glowne (M)", {cx, Config::WINDOW_HEIGHT / 2.f + 215.f}, bigSize, 28);
 
     // --- EKRAN WYNIKÓW ---
     hsBackButton.setup(font, "Powrot do menu (ESC)", {cx, Config::WINDOW_HEIGHT - 60.f}, {320.f, 46.f}, 22);
@@ -76,6 +76,8 @@ void Game::startNewGame() {
     spawnTimer = 0.f;
     selectedSlotIndex = -1;    // anuluj wybór slotu jeśli był
     state = GameState::PLAYING;
+    nicknameInput.clear();     // wyczyść pole nicku z poprzedniej przegranej
+    scoreSaved = false;
     waveManager.reset();
     waveManager.loadFromFile(std::string(ASSETS_DIR) + "/assets/waves/waves_testowe.txt");
 }
@@ -137,8 +139,9 @@ void Game::processEvents() {
 
             case GameState::GAME_OVER:
                 if (left) {
-                    if (gameOverButtons[0].contains(mouse)) startNewGame();
-                    else if (gameOverButtons[1].contains(mouse)) { state = GameState::MENU; menuSelectedOption = 0; }
+                    // Opuszczając ekran zapisujemy wynik, jeśli gracz tego nie zrobił Enterem.
+                    if (gameOverButtons[0].contains(mouse)) { if (!scoreSaved) saveScore(); startNewGame(); }
+                    else if (gameOverButtons[1].contains(mouse)) { if (!scoreSaved) saveScore(); state = GameState::MENU; menuSelectedOption = 0; }
                 }
                 break;
 
@@ -197,6 +200,21 @@ void Game::processEvents() {
             break;
         }
 
+        // 2c. WPISYWANIE NICKU NA EKRANIE GAME OVER
+        case sf::Event::TextEntered:
+            // Tylko gdy gracz przegrał i jeszcze nie zapisał wyniku.
+            if (state == GameState::GAME_OVER && !scoreSaved) {
+                sf::Uint32 c = event.text.unicode;
+                if (c == 8) {                         // Backspace — usuń ostatni znak
+                    if (!nicknameInput.empty()) nicknameInput.pop_back();
+                } else if (c >= 32 && c < 127 && c != ';') {
+                    // Akceptujemy drukowalne znaki ASCII; ';' jest separatorem w pliku.
+                    if (nicknameInput.size() < 12)    // limit długości nicku
+                        nicknameInput += static_cast<char>(c);
+                }
+            }
+            break;
+
         // 3. OBSŁUGA KLAWIATURY
         case sf::Event::KeyPressed:
             // Dzielimy logikę klawiszy w zależności od obecnego stanu gry
@@ -225,7 +243,13 @@ void Game::processEvents() {
                 break;
 
             case GameState::GAME_OVER:
-                if (event.key.code == sf::Keyboard::R) {
+                if (!scoreSaved) {
+                    // Faza wpisywania nicku — Enter zatwierdza i zapisuje wynik.
+                    // R/M są zablokowane, by litery z nicku nie restartowały gry.
+                    if (event.key.code == sf::Keyboard::Enter || event.key.code == sf::Keyboard::Return) {
+                        saveScore();
+                    }
+                } else if (event.key.code == sf::Keyboard::R) {
                     startNewGame();  // R — zagraj ponownie na tej samej mapie
                 } else if (event.key.code == sf::Keyboard::M) {
                     state = GameState::MENU;  // M — powrot do menu glownego
@@ -280,8 +304,6 @@ void Game::processEvents() {
                 case sf::Keyboard::Num5: tryBuyTower(5); break;
                 case sf::Keyboard::U:    tryUpgradeTower(); break;
                 case sf::Keyboard::S:    trySellTower(); break;
-                case sf::Keyboard::F5:   saveGame(); break;
-                case sf::Keyboard::F9:   loadGame(); break;
                 case sf::Keyboard::Space:
                     if (!waveManager.isWaveInProgress()) {
                         waveManager.startNextWave();
@@ -465,6 +487,8 @@ void Game::updatePlaying(float dt){
 
     if (!player.isAlive()) {
         state = GameState::GAME_OVER;
+        nicknameInput.clear();   // przygotuj puste pole na nick gracza
+        scoreSaved = false;      // wynik tej przegranej jeszcze nie zapisany
         std::cout << "GAME OVER! Wynik: " << player.getScore() << std::endl;
     }
 
@@ -591,7 +615,26 @@ void Game::renderGameOver() {
         );
     window.draw(scoreText);
 
-    // Przyciski (klasa Button) — klawisze R/M nadal działają, mysz podświetla.
+    // --- POLE NICKU / POTWIERDZENIE ZAPISU ---
+    // Przed zapisem prosimy o nick (z migającym kursorem), po zapisie pokazujemy potwierdzenie.
+    sf::Text infoText("", font, 24);
+    infoText.setFillColor(sf::Color(220, 220, 220));
+    if (!scoreSaved) {
+        // Migający kursor "_" — własny, nieresetowany zegar (clock jest restartowany co klatkę).
+        static sf::Clock caretClock;
+        bool caret = static_cast<int>(caretClock.getElapsedTime().asSeconds() * 2.f) % 2 == 0;
+        infoText.setString("Wpisz nick: " + nicknameInput + (caret ? "_" : " ") +
+                           "\n(Enter aby zapisac wynik)");
+    } else {
+        infoText.setString("Wynik zapisany!\nR - zagraj ponownie   M - menu");
+    }
+    infoText.setPosition(0.f, 0.f);
+    sf::FloatRect ib = infoText.getLocalBounds();
+    infoText.setOrigin(ib.left + ib.width / 2.f, ib.top + ib.height / 2.f);
+    infoText.setPosition(Config::WINDOW_WIDTH / 2.f, Config::WINDOW_HEIGHT / 2.f + 75.f);
+    window.draw(infoText);
+
+    // Przyciski (klasa Button) — klawisze R/M działają po zapisaniu wyniku, mysz podświetla.
     sf::Vector2f m = window.mapPixelToCoords(sf::Mouse::getPosition(window));
     gameOverButtons[0].draw(window, gameOverButtons[0].contains(m));
     gameOverButtons[1].draw(window, gameOverButtons[1].contains(m));
@@ -698,7 +741,6 @@ void Game::renderHelp() {
         "- Kliknij na zbudowana wieze, aby ja ULEPSZYC lub SPRZEDAC.\n"
         "- ESC / PRAWY przycisk myszy - odznacza wybrany slot.\n"
         "- ESC (gdy slot nie jest zaznaczony) - PAUZUJE GRE.\n"
-        "- F5 / F9 - Szybki zapis (Quicksave) oraz wczytanie (Quickload) gry.\n"
         "- SPACJA - wypuszcza kolejna fale zombie.\n\n"
 
         "ZOMBIE:\n"
@@ -936,104 +978,33 @@ void Game::trySellTower() {
     }
 }
 
-// ZAPIS I ODCZYT GRY
-void Game::saveGame() {
-    std::ofstream file("save.txt");
-    if (!file.is_open()) {
-        std::cerr << "Nie udalo sie otworzyc pliku do zapisu!" << std::endl;
-        return;
-    }
-
-    // 0. Zapisujemy ścieżkę mapy (osobna linia — może zawierać spacje).
-    file << currentMapPath << "\n";
-
-    // 1. Zapisujemy Gracza i aktualną falę z WaveManager
-    file << player.getMoney() << " " << player.getLives() << " "
-         << player.getScore() << " " << waveManager.getCurrentWaveIndex() << "\n";
-
-    // 2. Szukamy wszystkich wież na mapie
-    std::vector<Tower*> towersToSave;
-    for (auto& obj : objects) {
-        if (Tower* t = dynamic_cast<Tower*>(obj.get())) {
-            towersToSave.push_back(t);
-        }
-    }
-
-    // 3. Zapisujemy liczbę wież, a potem ich dane (Typ, X, Y, Poziom)
-    file << towersToSave.size() << "\n";
-    for (Tower* t : towersToSave) {
-        int type = 0;
-        if (dynamic_cast<MachineGunTower*>(t)) type = 1;
-        else if (dynamic_cast<SniperTower*>(t)) type = 2;
-        else if (dynamic_cast<RocketTower*>(t)) type = 3;
-        else if (dynamic_cast<FlamethrowerTower*>(t)) type = 4;
-        else if (dynamic_cast<SlowerTower*>(t)) type = 5;
-
-        file << type << " " << t->getPosition().x << " " << t->getPosition().y << " " << t->getLevel() << "\n";
-    }
-
-    file.close();
-    std::cout << "Zapisano gre pomyslnie! (Klawisz F5)" << std::endl;
+// Zwraca czytelną nazwę mapy z Config::Maps pasującą do bieżącej ścieżki.
+std::string Game::currentMapName() const {
+    for (int i = 0; i < Config::Maps::COUNT; ++i)
+        if (currentMapPath == Config::Maps::PATHS[i])
+            return Config::Maps::NAMES[i];
+    return "Nieznana";
 }
 
-void Game::loadGame() {
-    std::ifstream file("save.txt");
+// Dopisuje jeden wiersz wyniku do highscores.txt w formacie: nick;mapa;punkty
+// Plik otwierany w trybie dopisywania (app), więc kolejne wyniki się kumulują.
+// Odczyt i ranking top 10 dodamy w kolejnym kroku.
+void Game::saveScore() {
+    if (scoreSaved) return;  // zabezpieczenie przed podwójnym zapisem tej samej przegranej
+
+    // Pusty nick zastępujemy domyślnym, by w pliku nie powstał wiersz bez nazwy.
+    std::string nick = nicknameInput.empty() ? "Gracz" : nicknameInput;
+
+    std::ofstream file("highscores.txt", std::ios::app);
     if (!file.is_open()) {
-        std::cerr << "Brak pliku zapisu!" << std::endl;
+        std::cerr << "Nie udalo sie otworzyc highscores.txt do zapisu!" << std::endl;
         return;
     }
 
-    // 1. Czyścimy obecny stan gry
-    objects.clear();
-
-    // Wczytujemy ścieżkę mapy (pierwsza linia zapisu) i ładujemy tę planszę.
-    std::getline(file, currentMapPath);
-    map.loadFromFile(std::string(ASSETS_DIR) + currentMapPath); // Reset slotów do stanu "puste"
-    selectedSlotIndex = -1;
-    state = GameState::PLAYING;
-
-    // 2. Wczytujemy gracza i numer fali
-    int money, lives, score, waveIndex, towerCount;
-    file >> money >> lives >> score >> waveIndex;
-
-    player.setMoney(money);
-    player.setLives(lives);
-    player.setScore(score);
-    waveManager.setCurrentWaveIndex(waveIndex);
-
-    // 3. Wczytujemy wieże
-    file >> towerCount;
-    for (int i = 0; i < towerCount; ++i) {
-        int type, level;
-        float px, py;
-        file >> type >> px >> py >> level;
-
-        sf::Vector2f pos(px, py);
-        Tower* newTower = nullptr;
-
-        // Tworzymy odpowiedni obiekt
-        if (type == 1) { auto t = std::make_unique<MachineGunTower>(pos); newTower = t.get(); objects.push_back(std::move(t)); }
-        else if (type == 2) { auto t = std::make_unique<SniperTower>(pos); newTower = t.get(); objects.push_back(std::move(t)); }
-        else if (type == 3) { auto t = std::make_unique<RocketTower>(pos); newTower = t.get(); objects.push_back(std::move(t)); }
-        else if (type == 4) { auto t = std::make_unique<FlamethrowerTower>(pos); newTower = t.get(); objects.push_back(std::move(t)); }
-        else if (type == 5) { auto t = std::make_unique<SlowerTower>(pos); newTower = t.get(); objects.push_back(std::move(t)); }
-
-        // Zajmujemy odpowiedni slot na mapie
-        for (auto& slot : map.getSlots()) {
-            if (slot.position == pos) {
-                slot.occupied = true;
-                break;
-            }
-        }
-
-        // Ulepszamy wczytaną wieżę do odpowiedniego poziomu
-        if (newTower) {
-            for (int lvl = 1; lvl < level; ++lvl) {
-                newTower->upgrade();
-            }
-        }
-    }
-
+    file << nick << ";" << currentMapName() << ";" << player.getScore() << "\n";
     file.close();
-    std::cout << "Wczytano gre pomyslnie! (Klawisz F9)" << std::endl;
+
+    scoreSaved = true;
+    std::cout << "Zapisano wynik: " << nick << " (" << currentMapName()
+              << ") - " << player.getScore() << " pkt" << std::endl;
 }

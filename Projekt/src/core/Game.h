@@ -49,6 +49,8 @@ private:
     GameState state;                                  // stan gry
     GameState previousState;                          // Zapamiętuje, skąd weszliśmy w Pomoc
     std::string currentMapPath;                       // ścieżka aktualnie wybranej mapy (względna)
+    std::string nicknameInput;                        // nick wpisywany na ekranie GAME OVER
+    bool scoreSaved = false;                          // czy wynik bieżącej przegranej zapisano do pliku
     int mapSelectedOption = 0;                        // podświetlona mapa na ekranie wyboru
     sf::Font font;
     WaveManager waveManager;    // potrzebny do napisu GAME OVER
@@ -106,9 +108,12 @@ public:
     void tryUpgradeTower();
     void trySellTower();
 
-    //zapisywanie gry
-    void saveGame();
-    void loadGame();
+    // Dopisuje wynik bieżącej rozgrywki (nick, nazwa mapy, punkty) do highscores.txt.
+    // Wołane z ekranu GAME OVER po wpisaniu nicku. Top 10 odczytamy w kolejnym kroku.
+    void saveScore();
+
+    // Zwraca czytelną nazwę aktualnej mapy (z Config::Maps) na podstawie currentMapPath.
+    std::string currentMapName() const;
 
     // Zeruje martwe targety wież i usuwa martwe obiekty z kontenera.
     // Wywoływane na końcu update() — po update i kolizjach.
