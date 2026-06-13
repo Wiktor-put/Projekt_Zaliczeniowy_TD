@@ -16,7 +16,7 @@ void AudioManager::playMusic(const std::string& path, float volume) {
     }
 }
 
-void AudioManager::playSound(const std::string& path, float volume) {
+void AudioManager::playSound(const std::string& path, float volume, float pitch) {
     // 1. Sprawdzamy czy ten dźwięk był już kiedyś wczytany
     if (buffers.find(path) == buffers.end()) {
         sf::SoundBuffer buffer;
@@ -30,6 +30,7 @@ void AudioManager::playSound(const std::string& path, float volume) {
     // 2. Dodajemy "Odtwarzacz" na koniec listy i puszczamy dźwięk
     sounds.emplace_back(buffers[path]);
     sounds.back().setVolume(volume);
+    sounds.back().setPitch(pitch);
     sounds.back().play();
 }
 

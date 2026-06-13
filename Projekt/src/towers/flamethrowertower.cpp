@@ -21,6 +21,6 @@ FlamethrowerTower::FlamethrowerTower(sf::Vector2f pos) : Tower(pos) {
 void FlamethrowerTower::shoot(std::vector<std::unique_ptr<GameObject>>& objects) {
     if (currentTarget) {
         objects.push_back(std::make_unique<Flame>(position, currentTarget->getPosition(), dps, burnDuration));
-        AudioManager::playSound(Config::Assets::SOUND_FLAME, 17.f);
+        AudioManager::playSound(Config::Assets::SOUND_FLAME, 8.f, 1.9f);
     }
 }
