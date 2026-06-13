@@ -6,16 +6,15 @@ do bazy. Projekt zaliczeniowy z programowania obiektowego w C++ / SFML.
 
 ## Status projektu
 
-Projekt w **fazie końcowej** — rozgrywka jest kompletna i w pełni grywalna.
+Projekt **ukończony** — rozgrywka jest kompletna i w pełni grywalna.
 Zaimplementowane:
 
 - pełna mechanika (ruch zombie po waypointach, budowa/ulepszanie/sprzedaż wież, kolizje, fale),
 - 4 typy zombie i 5 typów wież, każdy z własnym zachowaniem,
 - 5 map do wyboru, system fal wczytywany z plików,
-- bonusy (amunicja / apteczka / EMP), animacje zombie i część wież teksturowych,
+- bonusy (amunicja / apteczka / EMP), animacje zombie i wież teksturowych,
 - menu, pauza, ekran końca gry z zapisem wyniku oraz tablica najlepszych wyników (top 10).
-
-**Do dodania pozostają jedynie dźwięki i muzyka.**
+- pełne udźwiękowienie rozgrywki, w tym muzyka w tle oraz immersyjne efekty dźwiękowe dla walki i interfejsu.
 
 ## Autorzy
 
